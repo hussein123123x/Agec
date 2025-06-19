@@ -2,12 +2,12 @@
   <c-col sm="6" xl="3">
     <c-widget-stat-a
       color="primary"
-      [title]="'Users'"
+      [title]="'الانتاج'"
     >
       <ng-template cTemplateId="widgetValueTemplate" ngPreserveWhitespaces>
-        26K
+        160
         <span class="fw-normal" style="font-size: 12px;">
-          (-12.4% <svg cIcon name="cilArrowBottom" size="sm"></svg>)
+          (12.4% <svg cIcon name="cilArrowTop" size="sm"></svg>)
         </span>
       </ng-template>
       <ng-template cTemplateId="widgetActionTemplate">
@@ -16,15 +16,9 @@
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><a [routerLink]="[]" cDropdownItem>Action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Another action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Something else here</a></li>
-            <li>
-              <hr cDropdownDivider>
-            </li>
-            <li>
-              <button cDropdownItem>Separated link</button>
-            </li>
+            <li><a [routerLink]="[]" cDropdownItem>يومى</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>شهرى</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>ثانوى</a></li>
           </ul>
         </c-dropdown>
       </ng-template>
@@ -35,7 +29,7 @@
   </c-col>
   <c-col sm="6" xl="3">
     <c-widget-stat-a
-      [title]="'Income'"
+      [title]="'الربح'"
       color="info"
     >
       <ng-template cTemplateId="widgetValueTemplate" ngPreserveWhitespaces>
@@ -50,10 +44,9 @@
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><a [routerLink]="[]" cDropdownItem>Action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Another action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Something else here</a></li>
-            <li><a [disabled]="true" [routerLink]="[]" cDropdownItem>Disabled</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>يومى</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>شهرى</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>ثانوى</a></li>
           </ul>
         </c-dropdown>
       </ng-template>
@@ -64,13 +57,13 @@
   </c-col>
   <c-col sm="6" xl="3">
     <c-widget-stat-a
-      [title]="'Conversion Rate'"
-      color="warning"
+      [title]="'نسبة التشغيل'"
+      color="danger"
     >
       <ng-template cTemplateId="widgetValueTemplate" ngPreserveWhitespaces>
-        <span>2.49</span>
+        <span>70%</span>
         <span class="fw-normal" style="font-size: 12px;">
-          (84.7% <svg cIcon name="cilArrowTop" size="sm"></svg>)
+          (-9 % <svg cIcon name="cilArrowBottom" size="sm"></svg>)
         </span>
       </ng-template>
       <ng-template cTemplateId="widgetActionTemplate">
@@ -79,10 +72,7 @@
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><a [routerLink]="[]" cDropdownItem>Action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Another action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Something else here</a></li>
-            <li><a [disabled]="true" [routerLink]="[]" cDropdownItem>Disabled</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>عرض تفصيلى</a></li>
           </ul>
         </c-dropdown>
       </ng-template>
@@ -93,13 +83,12 @@
   </c-col>
   <c-col sm="6" xl="3">
     <c-widget-stat-a
-      [title]="'Sessions'"
-      color="danger"
+      [title]="'الطلبات النشطة'"
+      color="warning"
     >
       <ng-template cTemplateId="widgetValueTemplate" ngPreserveWhitespaces>
-        <span>44K</span>
+        <span>6</span>
         <span class="fw-normal" style="font-size: 12px;">
-          (-23.6% <svg cIcon name="cilArrowBottom" size="sm"></svg>)
         </span>
       </ng-template>
       <ng-template cTemplateId="widgetActionTemplate">
@@ -108,10 +97,7 @@
             <svg cIcon name="cilOptions"></svg>
           </button>
           <ul cDropdownMenu>
-            <li><a [routerLink]="[]" cDropdownItem>Action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Another action</a></li>
-            <li><a [routerLink]="[]" cDropdownItem>Something else here</a></li>
-            <li><a [disabled]="true" [routerLink]="[]" cDropdownItem>Disabled</a></li>
+            <li><a [routerLink]="[]" cDropdownItem>متابعة الطلبات</a></li>
           </ul>
         </c-dropdown>
       </ng-template>

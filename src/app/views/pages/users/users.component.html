@@ -1,0 +1,216 @@
+<!-- الموظفون: الصفحة الكاملة للواجهة الأمامية -->
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">إدارة الموظفين</h5>
+    <div class="d-flex gap-2">
+      <div class="input-group me-2">
+        <input type="text" class="form-control" placeholder="بحث باسم الموظف أو الرقم الوظيفي">
+        <button class="btn btn-primary">بحث</button>
+      </div>
+      <button class="btn btn-success" (click)="openForm()">إضافة موظف</button>
+      <button class="btn btn-secondary">استيراد</button>
+      <button class="btn btn-info">تصدير</button>
+      <button class="btn btn-light">تحديث</button>
+    </div>
+  </c-card-header>
+
+  <!-- إحصائيات موجزة -->
+  <c-card-body>
+    <c-row class="mb-4 text-center">
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="primary" value="120" [title]="'إجمالي الموظفين'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-people" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="success" value="96" [title]="'نشطون'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-check-circle" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="danger" value="24" [title]="'موقوفون'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-ban" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="warning" value="6" [title]="'أقسام'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-building" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+    </c-row>
+
+    <!-- جدول الموظفين -->
+    <div class="table-responsive border">
+  <table class="table table-hover table-striped align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        <th class="d-none d-md-table-cell">الصورة</th>
+        <th>الاسم</th>
+        <th>الرقم الوظيفي</th>
+        <th class="d-none d-md-table-cell">القسم</th>
+        <th class="d-none d-md-table-cell">الوظيفة</th>
+        <th class="d-none d-md-table-cell">تاريخ التعيين</th>
+        <th>الغياب </th>
+        <th>التقيم</th>
+        <th class="d-none d-md-table-cell">الحالة</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let employee of employees">
+        <td class="d-none d-md-table-cell"><c-avatar [src]="employee.image" size="md" /></td>
+        <td>{{ employee.name }}</td>
+        <td>{{ employee.code }}</td>
+        <td class="d-none d-md-table-cell">{{ employee.department }}</td>
+        <td class="d-none d-md-table-cell">{{ employee.jobTitle }}</td>
+        <td class="d-none d-md-table-cell">{{ employee.hireDate }}</td>
+        <td>{{ employee.absenceDays }}</td>
+        <td>{{ employee.kpi }} %</td>
+        <td class="d-none d-md-table-cell">
+          <c-badge [color]="employee.status === 'نشط' ? 'success' : 'warning'">
+            {{ employee.status }}
+          </c-badge>
+        </td>
+        <td>
+            <div class="d-flex flex-wrap gap-1 justify-content-center">
+                <button class="btn btn-light btn-sm" title="عرض" (click)="showDetails(employee)">
+                <svg cIcon name="cil-magnifying-glass" size="sm"></svg>
+                </button>
+                <button class="btn btn-light btn-sm" title="تعديل" (click)="editEmployee(employee)">
+                <svg cIcon name="cil-pencil" size="sm"></svg>
+                </button>
+                <button class="btn btn-light btn-sm" title="حذف" (click)="deleteEmployee(employee)">
+                <svg cIcon name="cil-trash" size="sm"></svg>
+                </button>
+            </div>
+            </td>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+  </c-card-body>
+</c-card>
+
+<c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)">
+  <c-modal-header>
+    <strong>{{ editMode ? 'تعديل موظف' : 'إضافة موظف' }}</strong>
+  </c-modal-header>
+
+  <c-modal-body>
+    <form [formGroup]="employeeForm">
+      <c-row class="g-3">
+        <c-col xs="12" md="6">
+          <label>الاسم الكامل</label>
+          <input type="text" class="form-control" formControlName="name" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>البريد الإلكتروني</label>
+          <input type="email" class="form-control" formControlName="email" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>رقم الهاتف</label>
+          <input type="text" class="form-control" formControlName="phone" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>الرقم الوظيفي</label>
+          <input type="text" class="form-control" formControlName="code" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>القسم</label>
+          <select class="form-select" formControlName="department">
+            <option>الإنتاج</option>
+            <option>المحاسبة</option>
+            <option>الدعم الفني</option>
+          </select>
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>الوظيفة</label>
+          <input type="text" class="form-control" formControlName="jobTitle" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>الحالة</label>
+          <select class="form-select" formControlName="status">
+            <option value="نشط">نشط</option>
+            <option value="موقوف">موقوف</option>
+          </select>
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>تحميل صورة</label>
+          <input type="file" class="form-control" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>الراتب</label>
+          <input type="number" class="form-control" formControlName="salary" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>مؤشر الأداء KPI (%)</label>
+          <input type="number" class="form-control" formControlName="kpi" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>عدد أيام الغياب</label>
+          <input type="number" class="form-control" formControlName="absenceDays" />
+        </c-col>
+
+        <c-col xs="12" md="6">
+          <label>العنوان</label>
+          <input type="text" class="form-control" formControlName="address" />
+        </c-col>
+      </c-row>
+    </form>
+  </c-modal-body>
+
+  <c-modal-footer>
+    <button class="btn btn-secondary" (click)="showModal.set(false)">إلغاء</button>
+    <button class="btn btn-primary" (click)="save()">حفظ</button>
+  </c-modal-footer>
+</c-modal>
+
+
+<c-modal [visible]="showModal()" (visibleChange)="showModal.set($event)">
+  <c-modal-header>
+    <strong *ngIf="!selectedEmployee">إضافة / تعديل موظف</strong>
+    <strong *ngIf="selectedEmployee">تفاصيل الموظف</strong>
+    <c-avatar [src]="selectedEmployee?.image" size="md" />
+  </c-modal-header>
+
+  <c-modal-body *ngIf="selectedEmployee">
+
+    <ul class="list-group">
+    <li class="list-group-item"><strong>الاسم:</strong> {{ selectedEmployee.name }}</li>
+    <li class="list-group-item"><strong>الرقم الوظيفي:</strong> {{ selectedEmployee.code }}</li>
+    <li class="list-group-item"><strong>البريد الإلكتروني:</strong> {{ selectedEmployee.email }}</li>
+    <li class="list-group-item"><strong>الهاتف:</strong> {{ selectedEmployee.phone }}</li>
+    <li class="list-group-item"><strong>العنوان:</strong> {{ selectedEmployee.address }}</li>
+    <li class="list-group-item"><strong>العمر:</strong> {{ selectedEmployee.age }}</li>
+    <li class="list-group-item"><strong>القسم:</strong> {{ selectedEmployee.department }}</li>
+    <li class="list-group-item"><strong>الوظيفة:</strong> {{ selectedEmployee.jobTitle }}</li>
+    <li class="list-group-item"><strong>تاريخ التعيين:</strong> {{ selectedEmployee.hireDate }}</li>
+    <li class="list-group-item"><strong>الحالة:</strong> {{ selectedEmployee.status }}</li>
+    <li class="list-group-item"><strong>الراتب:</strong> {{ selectedEmployee.salary | currency:'EGP' }}</li>
+    <li class="list-group-item"><strong>مؤشر الأداء (KPI):</strong> {{ selectedEmployee.kpi }}%</li>
+    <li class="list-group-item"><strong>عدد أيام الغياب:</strong> {{ selectedEmployee.absenceDays }}</li>
+    <li *ngIf="selectedEmployee.takingMoney" class="list-group-item"><strong>سلفة:</strong> {{ selectedEmployee.takingMoney | currency:'EGP' }}</li>
+    <li *ngIf="selectedEmployee.notes" class="list-group-item"><strong>ملاحظات</strong> {{ selectedEmployee.notes }}</li>
+    </ul>
+  </c-modal-body>
+</c-modal>

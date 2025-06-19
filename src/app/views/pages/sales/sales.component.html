@@ -1,0 +1,56 @@
+<!-- شريط الأدوات -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4>لوحة الطلبات والمبيعات</h4>
+  <div class="d-flex gap-2">
+    <input type="text" class="form-control" placeholder="بحث بالعميل أو رقم الطلب" />
+    <select class="form-select">
+      <option>كل الحالات</option>
+      <option>جديدة</option>
+      <option>قيد التنفيذ</option>
+      <option>مكتملة</option>
+      <option>ملغاة</option>
+    </select>
+    <button class="btn btn-primary">طلب جديد</button>
+  </div>
+</div>
+
+<!-- الإحصائيات -->
+<c-row class="mb-4 text-center">
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="info" [value]="orders.length" title="إجمالي الطلبات" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="success" [value]="totalSales" title="إجمالي المبيعات" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="primary" [value]="todayOrders" title="طلبات اليوم" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="danger" [value]="canceledOrders" title="الملغاة" inverse></c-widget-stat-c>
+  </c-col>
+</c-row>
+
+<!-- شبكة البطاقات -->
+<div class="row">
+  <div class="col-md-4 mb-3" *ngFor="let order of filteredOrders">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5>طلب #{{ order.id }}</h5>
+        <p><strong>العميل:</strong> {{ order.customer }}</p>
+        <p><strong>السعر:</strong> {{ order.total }} EGP</p>
+        <p><strong>التاريخ:</strong> {{ order.createdAt }}</p>
+        <p><strong>موعد التسليم:</strong> {{ order.dueDate }}</p>
+        <p><strong>المسؤول:</strong> {{ order.supervisor }}</p>
+        <p><strong>ملاحظات:</strong> {{ order.notes }}</p>
+        <c-badge [color]="getStatusColor(order.status)">{{ order.status }}</c-badge>
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <button class="btn btn-sm btn-light" (click)="showOrderDetails(order)">عرض</button>
+        <button class="btn btn-sm btn-outline-primary">تعديل</button>
+        <button class="btn btn-sm btn-outline-danger">إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+

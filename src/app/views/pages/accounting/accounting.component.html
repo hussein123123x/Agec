@@ -1,0 +1,208 @@
+<!-- عنوان رئيسي -->
+<h3 class="mb-4">📊 برنامج الأستاذ – إدارة الحسابات والتكاليف</h3>
+
+<!-- إحصائيات عليا -->
+<c-row class="mb-4 text-center">
+  <c-col sm="6" md="4">
+    <c-widget-stat-c color="success" [value]="totalRevenue" title="إجمالي الإيرادات" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="4">
+    <c-widget-stat-c color="danger" [value]="totalExpenses" title="إجمالي المصروفات" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="4">
+    <c-widget-stat-c [color]="netProfit >= 0 ? 'primary' : 'warning'" [value]="netProfit" title="صافي الربح / الخسارة" inverse></c-widget-stat-c>
+  </c-col>
+</c-row>
+
+<c-row class="mb-4 text-center">
+  <c-col sm="6" md="4">
+    <c-widget-stat-c color="info" [value]="cashBalance" title="الرصيد النقدي الحالي" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="4">
+    <c-widget-stat-c color="secondary" [value]="debtAccounts" title="الحسابات المدينة" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="4">
+    <c-widget-stat-c color="dark" [value]="creditAccounts" title="الحسابات الدائنة" inverse></c-widget-stat-c>
+  </c-col>
+</c-row>
+
+
+<c-card-body>
+    <c-row>
+      <c-col sm="5">
+        <h4 class="card-title mb-0" id="traffic">ملخص مالى</h4>
+        <div class="small text-body-secondary">January - December 2025</div>
+      </c-col>
+      <c-col class="d-none d-md-block" sm="7">
+        <button cButton class="float-end" color="primary" aria-label="Download">
+          <svg cIcon name="cilCloudDownload"></svg>
+        </button>
+        <form [formGroup]="trafficRadioGroup">
+          <c-button-group class="float-end me-3" role="group">
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Day"
+              id="dayRadio"
+            />
+            <label
+              (click)="setTrafficPeriod('week')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="dayRadio"
+            >
+              اسبوعى
+            </label>
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Month"
+              id="radioMonth"
+            />
+            <label
+              (click)="setTrafficPeriod('Month')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="radioMonth"
+            >
+              شهرى
+            </label>
+            <input
+              class="btn-check"
+              formControlName="trafficRadio"
+              type="radio"
+              value="Year"
+              id="radioYear"
+            />
+            <label
+              (click)="setTrafficPeriod('Year')"
+              cButton
+              cFormCheckLabel
+              color="secondary"
+              variant="outline"
+              for="radioYear"
+            >
+              ثانوى
+            </label>
+          </c-button-group>
+        </form>
+      </c-col>
+    </c-row>
+    <c-chart
+      [data]="mainChart.data"
+      [height]="300"
+      [ngStyle]="{ 'marginTop.px': 40 }"
+      [options]="mainChart.options"
+      [type]="mainChart.type"
+      (chartRef)="handleChartRef($event)"
+    >
+      Main chart
+    </c-chart>
+  </c-card-body>
+
+
+<!-- ملخص الميزانية برسوم بيانية -->
+<c-card class="mb-4">
+  <c-card-header>
+    <strong>📈 ملخص الميزانية</strong>
+  </c-card-header>
+  <c-card-body>
+  <c-row>
+    <!-- الرسم البياني -->
+    <c-col md="6" class="mb-3">
+      <div class="card h-100 border-0 shadow-sm">
+        <div class="card-header bg-transparent border-bottom-0 pb-0">
+          <h6 class="mb-0">نسبة توزيع الميزانية</h6>
+          <div class="small text-body-secondary">الأصول مقابل الخصوم ورأس المال</div>
+        </div>
+        <div class="card-body">
+          <canvas #budgetChart style="max-height: 300px;"></canvas>
+        </div>
+      </div>
+    </c-col>
+
+    <!-- تفاصيل الأرقام -->
+    <c-col md="6">
+      <div class="card h-90 border-0 shadow-sm" >
+        <div class="card-header bg-transparent border-bottom-0 pb-0">
+          <h6 class="mb-0">الملخص المالي</h6>
+          <div class="small text-body-secondary">الوضع العام للميزانية</div>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>الأصول</strong>
+                <div class="small text-body-secondary">إجمالي ممتلكات الشركة</div>
+              </div>
+              <span class="fw-bold text-success">{{ assets | currency:'EGP' }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>الخصوم</strong>
+                <div class="small text-body-secondary">الديون والمطلوبات</div>
+              </div>
+              <span class="fw-bold text-danger">{{ liabilities | currency:'EGP' }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>رأس المال</strong>
+                <div class="small text-body-secondary">صافي الأصول</div>
+              </div>
+              <span class="fw-bold text-primary">{{ equity | currency:'EGP' }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </c-col>
+  </c-row>
+</c-card-body>
+
+</c-card>
+
+<!-- أقسام إدارة المحاسبة -->
+<c-card class="mb-4">
+  <c-card-header>
+    <strong>🧾 الأقسام المحاسبية</strong>
+  </c-card-header>
+  <c-card-body>
+    <div class="row">
+      <div class="col-md-3 mb-3" *ngFor="let section of accountingSections">
+        <div class="card shadow-sm h-100 border">
+          <div class="card-body text-center">
+            <div class="mb-2 fs-2">📌</div>
+            <h6>{{ section.name }}</h6>
+            <p class="text-muted small">{{ section.description }}</p>
+            <button class="btn btn-outline-primary btn-sm">الدخول</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>
+
+<!-- تقارير جاهزة للمحاسب -->
+<c-card>
+  <c-card-header>
+    <strong>📑 التقارير المحاسبية</strong>
+  </c-card-header>
+  <c-card-body>
+    <div class="row">
+      <div class="col-md-4 mb-3" *ngFor="let report of accountingReports">
+        <div class="card border h-100">
+          <div class="card-body">
+            <h6>{{ report.name }}</h6>
+            <p class="text-muted">{{ report.description }}</p>
+            <button class="btn btn-sm btn-success">عرض التقرير</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>

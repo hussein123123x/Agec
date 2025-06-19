@@ -35,7 +35,7 @@ export class DashboardChartsData {
     const brandDanger = getStyle('--cui-danger') ?? '#f86c6b';
 
     // mainChart
-    this.mainChart['elements'] = period === 'Month' ? 12 : 27;
+    this.mainChart['elements'] = period === 'Month' ? 29 : 27;
     this.mainChart['Data1'] = [];
     this.mainChart['Data2'] = [];
     this.mainChart['Data3'] = [];
@@ -49,32 +49,40 @@ export class DashboardChartsData {
 
     let labels: string[] = [];
     if (period === 'Month') {
+  const week = [
+    'الاحد',
+    'الاثنين',
+    'الثلاثاء',
+    'الاربعاء',
+    'الخميس',
+    'السبت',
+  ];
+  labels = week.concat(week, week, week, week);
+    } else if (period === 'Year') {
       labels = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
+        'يناير',
+        'فبراير',
+        'مارس',
+        'ابريل',
+        'مايو',
+        'يونيو',
+        'يوليو',
+        'اغسطس',
+        'سبتمبر',
+        'اكتوبر',
+        'نوفمبر',
+        'ديسمبر'
       ];
     } else {
-      /* tslint:disable:max-line-length */
       const week = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
+        'الاحد',
+        'الاثنين',
+        'الثلاثاء',
+        'الاربعاء',
+        'الخميس',
+        'السبت',
       ];
-      labels = week.concat(week, week, week);
+      labels = week.concat(week);
     }
 
     const colors = [
@@ -105,17 +113,17 @@ export class DashboardChartsData {
     const datasets: ChartDataset[] = [
       {
         data: this.mainChart['Data1'],
-        label: 'Current',
+        label: 'الربح',
         ...colors[0]
       },
       {
         data: this.mainChart['Data2'],
-        label: 'Previous',
+        label: 'المصروفات',
         ...colors[1]
       },
       {
         data: this.mainChart['Data3'],
-        label: 'BEP',
+        label: 'الايرادات',
         ...colors[2]
       }
     ];

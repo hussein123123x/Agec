@@ -1,0 +1,122 @@
+<!-- إدارة خطوط الإنتاج -->
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">إدارة خطوط الإنتاج</h5>
+    <div class="d-flex gap-2">
+      <div class="input-group me-2">
+        <input type="text" class="form-control" placeholder="بحث باسم الخط أو المشرف">
+        <button class="btn btn-primary">بحث</button>
+      </div>
+      <button class="btn btn-success" (click)="openForm()">إضافة خط</button>
+      <select class="form-select" [(ngModel)]="statusFilter">
+        <option value="">كل الحالات</option>
+        <option value="نشط">نشط</option>
+        <option value="متوقف">متوقف</option>
+        <option value="صيانة">صيانة</option>
+      </select>
+    </div>
+  </c-card-header>
+
+  <c-card-body>
+    <!-- الإحصائيات -->
+    <c-row class="mb-4 text-center">
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="primary" [value]="lines.length" [title]="'إجمالي الخطوط'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-factory" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="success" [value]="activeCount" [title]="'الخطوط العاملة'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-check-circle" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="danger" [value]="stoppedCount" [title]="'متوقفة'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-ban" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="warning" [value]="maintenanceCount" [title]="'صيانة'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-settings" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+    </c-row>
+
+    <!-- الرسوم البيانية -->
+    <div class="mb-4">
+    <canvas id="lineChartCanvas"></canvas>
+    </div>
+
+    <!-- جدول خطوط الإنتاج -->
+    <div class="table-responsive border">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>الاسم</th>
+            <th>المشرف</th>
+            <th>عدد العمال</th>
+            <th>الطاقة الإنتاجية</th>
+            <th>الإنتاج الفعلي</th>
+            <th>الحالة</th>
+            <th>آخر صيانة</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let line of filteredLines()">
+            <td>{{ line.name }}</td>
+            <td>{{ line.supervisor }}</td>
+            <td>{{ line.workers }}</td>
+            <td>{{ line.capacity }}</td>
+            <td>{{ line.actual }}</td>
+            <td>
+              <c-badge [color]="line.status === 'نشط' ? 'success' : line.status === 'متوقف' ? 'danger' : 'warning'">{{ line.status }}</c-badge>
+            </td>
+            <td>{{ line.lastMaintenance }}</td>
+            <td>
+              <button class="btn btn-light btn-sm" (click)="showDetailsModal(line)"  title="عرض">
+                <svg cIcon name="cil-magnifying-glass" size="sm"></svg>
+              </button>
+              <button class="btn btn-light btn-sm" (click)="editLine(line)" title="تعديل">
+                <svg cIcon name="cil-pencil" size="sm"></svg>
+              </button>
+              <button class="btn btn-light btn-sm" (click)="deleteLine(line)" title="حذف">
+                <svg cIcon name="cil-trash" size="sm"></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </c-card-body>
+</c-card>
+
+<!-- Modal تفاصيل -->
+<c-modal [visible]="detailsVisible()" (visibleChange)="detailsVisible.set($event)">
+  <c-modal-header>
+    <strong>تفاصيل خط الإنتاج</strong>
+  </c-modal-header>
+  <c-modal-body *ngIf="selectedLine">
+    <ul class="list-group">
+      <li class="list-group-item"><strong>الاسم:</strong> {{ selectedLine.name }}</li>
+      <li class="list-group-item"><strong>المشرف:</strong> {{ selectedLine.supervisor }}</li>
+      <li class="list-group-item"><strong>عدد العمال:</strong> {{ selectedLine.workers }}</li>
+      <li class="list-group-item"><strong>الطاقة الإنتاجية:</strong> {{ selectedLine.capacity }}</li>
+      <li class="list-group-item"><strong>الإنتاج الفعلي:</strong> {{ selectedLine.actual }}</li>
+      <li class="list-group-item"><strong>الحالة:</strong> {{ selectedLine.status }}</li>
+      <li class="list-group-item"><strong>آخر صيانة:</strong> {{ selectedLine.lastMaintenance }}</li>
+      <li class="list-group-item"><strong>ملاحظات:</strong> {{ selectedLine.notes }}</li>
+    </ul>
+  </c-modal-body>
+  <c-modal-footer>
+    <button class="btn btn-secondary" (click)="closeDetailsModal()">إغلاق</button>
+  </c-modal-footer>
+</c-modal>

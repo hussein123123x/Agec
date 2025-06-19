@@ -18,6 +18,38 @@ export const routes: Routes = [
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
       },
       {
+        path: 'users',
+        loadChildren: () => import('../app/views/pages/users/routes').then((m) => m.routes)
+      },
+      {
+        path: 'accounting',
+        loadChildren: () => import('./views/pages/accounting/routes').then((m) => m.routes)
+      },
+      {
+        path: 'maintenance',
+        loadChildren: () => import('./views/pages/maintenance/routes').then((m) => m.routes)
+      },
+      {
+        path: 'inventory',
+        loadChildren: () => import('./views/pages/inventory/routes').then((m) => m.routes)
+      },
+      {
+        path: 'sales',
+        loadChildren: () => import('./views/pages/sales/routes').then((m) => m.routes)
+      },
+      {
+        path: 'statistics',
+        loadChildren: () => import('./views/pages/statistics/routes').then((m) => m.routes)
+      },
+      {
+        path: 'production',
+        loadChildren: () => import('./views/pages/production/routes').then((m) => m.routes)
+      },
+      {
+        path: 'docs',
+        loadChildren: () => import('./views/pages/docs/routes').then((m) => m.routes)
+      },
+      {
         path: 'theme',
         loadChildren: () => import('./views/theme/routes').then((m) => m.routes)
       },

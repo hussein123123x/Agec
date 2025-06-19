@@ -20,7 +20,7 @@ import {
   selector: 'app-widgets-dropdown',
   templateUrl: './widgets-dropdown.component.html',
   styleUrls: ['./widgets-dropdown.component.scss'],
-  imports: [RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, IconDirective, DropdownComponent, ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, DropdownItemDirective, RouterLink, DropdownDividerDirective, ChartjsComponent]
+  imports: [RowComponent, ColComponent, WidgetStatAComponent, TemplateIdDirective, IconDirective, DropdownComponent, ButtonDirective, DropdownToggleDirective, DropdownMenuDirective, DropdownItemDirective, RouterLink, ChartjsComponent]
 })
 export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   private changeDetectorRef = inject(ChangeDetectorRef);
@@ -28,22 +28,18 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
   data: any[] = [];
   options: any[] = [];
   labels = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-    'January',
-    'February',
-    'March',
-    'April'
+    'يناير',
+    'فبراير',
+    'مارس',
+    'ابريل',
+    'مايو',
+    'يونيو',
+    'يوليو',
+    'اغسطس',
+    'سبتمبر',
+    'اكتوبر',
+    'نوفمبر',
+    'ديسمبر'
   ];
   datasets = [
     [{
@@ -52,7 +48,7 @@ export class WidgetsDropdownComponent implements OnInit, AfterContentInit {
       borderColor: 'rgba(255,255,255,.55)',
       pointBackgroundColor: getStyle('--cui-primary'),
       pointHoverBorderColor: getStyle('--cui-primary'),
-      data: [65, 59, 84, 84, 51, 55, 40]
+      data: [65, 59, 51, 55, 84, 84,  99]
     }], [{
       label: 'My Second dataset',
       backgroundColor: 'transparent',

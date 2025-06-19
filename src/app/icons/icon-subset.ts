@@ -93,7 +93,8 @@ import {
   cilUser,
   cilUserFemale,
   cilUserFollow,
-  cilUserUnfollow
+  cilUserUnfollow,
+  cilFactory, cilStorage, cilGroup, cilTruck, cilCog, cilWarning, cilBan, cibInstagram
 } from '@coreui/icons';
 
 import { signet } from './signet';
@@ -101,10 +102,18 @@ import { logo } from './logo';
 
 export const iconSubset = {
   cibCcAmex,
+  cilCog,
+  cibInstagram,
+  cilFactory,
+  cilStorage,
+  cilWarning,
+  cilBan,
+  cilGroup,
   cibCcApplePay,
   cibCcMastercard,
   cibCcPaypal,
   cibCcStripe,
+  cilTruck,
   cibCcVisa,
   cibFacebook,
   cibGoogle,

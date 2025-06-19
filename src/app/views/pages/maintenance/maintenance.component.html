@@ -1,0 +1,133 @@
+<!-- عنوان الصفحة -->
+<h3 class="mb-4">📟 إدارة الصيانة والدعم الفني</h3>
+
+<!-- الإحصائيات -->
+<c-row class="mb-4 text-center">
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="primary" [value]="totalTickets" title="إجمالي البلاغات" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="warning" [value]="inProgressTickets" title="قيد المعالجة" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="success" [value]="closedTickets" title="مغلقة" inverse></c-widget-stat-c>
+  </c-col>
+  <c-col sm="6" md="3">
+    <c-widget-stat-c color="danger" [value]="urgentTickets" title="بلاغات عاجلة" inverse></c-widget-stat-c>
+  </c-col>
+</c-row>
+
+<!-- نموذج تقديم بلاغ جديد -->
+<c-card class="mb-4">
+  <c-card-header>
+    <strong>📨 تقديم بلاغ جديد</strong>
+  </c-card-header>
+  <c-card-body>
+    <form [formGroup]="reportForm" (ngSubmit)="submitReport()">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>العنوان</label>
+          <input formControlName="title" class="form-control" placeholder="مثال: توقف الطابعة" />
+        </div>
+        <div class="col-md-6">
+          <label>نوع المشكلة</label>
+          <select formControlName="type" class="form-select">
+            <option>برمجية</option>
+            <option>عتاد</option>
+            <option>أخرى</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>الأولوية</label>
+          <select formControlName="priority" class="form-select">
+            <option>عالية</option>
+            <option>متوسطة</option>
+            <option>منخفضة</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label>القسم المتضرر</label>
+          <input formControlName="department" class="form-control" placeholder="مثال: قسم الإنتاج" />
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>الوصف</label>
+        <textarea formControlName="description" class="form-control" rows="3"></textarea>
+      </div>
+
+      <button class="btn btn-primary" type="submit">إرسال البلاغ</button>
+    </form>
+  </c-card-body>
+</c-card>
+
+<!-- فلترة -->
+<div class="d-flex justify-content-end mb-3">
+  <select class="form-select w-auto" [(ngModel)]="statusFilter">
+    <option value="">كل الحالات</option>
+    <option value="open">مفتوحة</option>
+    <option value="in_progress">قيد المعالجة</option>
+    <option value="closed">مغلقة</option>
+  </select>
+</div>
+
+<!-- قائمة التذاكر على شكل بطاقات -->
+<c-row>
+  <c-col md="4" *ngFor="let ticket of filteredTickets()">
+    <c-card class="mb-3 shadow-sm">
+      <c-card-body>
+        <h5 class="card-title mb-2">🔧 {{ ticket.title }}</h5>
+        <p class="mb-1"><strong>القسم:</strong> {{ ticket.department }}</p>
+        <p class="mb-1"><strong>الحالة:</strong> <c-badge [color]="getStatusColor(ticket.status)">{{ ticket.status }}</c-badge></p>
+        <p class="mb-1"><strong>الأولوية:</strong> {{ ticket.priority }}</p>
+        <p class="mb-1"><strong>الفني المسؤول:</strong> {{ ticket.technician || 'غير معين' }}</p>
+        <p class="small text-muted">📅 تاريخ الإبلاغ: {{ ticket.createdAt }}</p>
+        <button class="btn btn-sm btn-outline-primary" (click)="viewTicket(ticket)">عرض التفاصيل</button>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</c-row>
+
+<!-- تقارير مرئية -->
+<c-card class="mt-4 mb-4">
+  <c-card-header>
+    <strong>📊 تقارير الأعطال والصيانة</strong>
+  </c-card-header>
+  <c-card-body>
+    <div class="row">
+      <div class="col-md-6">
+        <canvas #reportChart style="max-height: 300px;"></canvas>
+      </div>
+      <div class="col-md-6">
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between">
+            <span>أكثر نوع عطل</span> <strong>{{ mostCommonIssue }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>أكثر قسم تضررًا</span> <strong>{{ mostAffectedDept }}</strong>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span>متوسط وقت الحل</span> <strong>{{ avgResolutionTime }} ساعة</strong>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </c-card-body>
+</c-card>
+
+<!-- Timeline بسيط -->
+<c-card>
+  <c-card-header>
+    <strong>🕒 سجل الأحداث الفنية</strong>
+  </c-card-header>
+  <c-card-body>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item" *ngFor="let event of ticketHistory">
+        {{ event.time }} - {{ event.action }}
+      </li>
+    </ul>
+  </c-card-body>
+</c-card>

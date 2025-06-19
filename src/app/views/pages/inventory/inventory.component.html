@@ -1,0 +1,88 @@
+<!-- صفحة إدارة المخزون -->
+<c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">إدارة المخزون</h5>
+    <div class="d-flex gap-2">
+      <div class="input-group me-2">
+        <input type="text" class="form-control" placeholder="بحث باسم المنتج أو الكود">
+        <button class="btn btn-primary">بحث</button>
+      </div>
+      <button class="btn btn-success">إضافة منتج</button>
+      <button class="btn btn-secondary">استيراد</button>
+      <button class="btn btn-info">تصدير</button>
+      <button class="btn btn-light">تحديث</button>
+    </div>
+  </c-card-header>
+
+  <c-card-body>
+    <!-- الإحصائيات -->
+    <c-row class="mb-4 text-center">
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="primary" value="150" [title]="'إجمالي الأصناف'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-layers" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="danger" value="12" [title]="'أصناف ناقصة'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-warning" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="success" value="30" [title]="'عدد المخازن'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-home" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+      <c-col sm="6" md="3">
+        <c-widget-stat-c color="info" value="500" [title]="'إجمالي الحركات'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-transfer" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+      </c-col>
+    </c-row>
+
+    <!-- جدول المنتجات -->
+    <div class="table-responsive border">
+      <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>الصورة</th>
+            <th>الاسم</th>
+            <th>الكود</th>
+            <th>التصنيف</th>
+            <th>الوحدة</th>
+            <th>الكمية</th>
+            <th>الحد الأدنى</th>
+            <th>السعر</th>
+            <th>الموقع</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of inventory">
+            <td><img [src]="item.image" alt="" width="50" /></td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.code }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.min }}</td>
+            <td>{{ item.price | currency:'EGP' }}</td>
+            <td>{{ item.location }}</td>
+            <td>
+              <button class="btn btn-light btn-sm" title="عرض"><svg cIcon name="cil-magnifying-glass" size="sm"></svg></button>
+              <button class="btn btn-light btn-sm" title="تعديل"><svg cIcon name="cil-pencil" size="sm"></svg></button>
+              <button class="btn btn-light btn-sm" title="حذف"><svg cIcon name="cil-trash" size="sm"></svg></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </c-card-body>
+</c-card>
