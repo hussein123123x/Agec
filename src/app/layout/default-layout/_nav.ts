@@ -11,9 +11,18 @@ export const navItems: INavData[] = [
     }
   },
   {
+    name: 'إدارة المشاريع',
+    url: '/projects',
+    iconComponent: { name: 'cil-handshake' },
+  },
+  {
     name: 'إدارة الموظفين',
     url: '/users',
     iconComponent: { name: 'cil-user' },
+    badge: {
+      color: 'info',
+      text: 'Admin'
+    }
   },
   {
     name: 'إدارة خط الأنتاج',
@@ -23,22 +32,28 @@ export const navItems: INavData[] = [
   {
     name: 'إدارة المخزون',
     url: '/inventory',
-    iconComponent: { name: 'cil-truck' }
+    iconComponent: { name: 'cil-truck' },
+    badge: {
+      color: 'warning',
+      text: 'user'
+    }
   },
   {
-    name: 'إدارة الطلبات والمبيعات',
+    name: 'الموردين',
     url: '/sales',
     iconComponent: { name: 'cil-group' }
   },
   {
     name: 'المحاسبة والتكاليف',
     url: '/accounting',
-    iconComponent: { name: 'cil-dollar' }
+    iconComponent: { name: 'cil-dollar' },
+
   },
   {
     name: ' الصاينة و الدعم الفنى ',
     url: '/maintenance',
-    iconComponent: { name: 'cil-settings' }
+    iconComponent: { name: 'cil-settings' },
+
   },
   // {
   //   name: ' التقارير و الاحصائيات ',

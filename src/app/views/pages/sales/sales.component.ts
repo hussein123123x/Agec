@@ -11,11 +11,6 @@ import { Chart } from 'chart.js';
     CommonModule, ReactiveFormsModule,
     RowComponent, ColComponent,
     WidgetStatCComponent, BadgeComponent, FormsModule,
-    ModalComponent,
-    ModalHeaderComponent,
-    ModalBodyComponent,
-    ModalFooterComponent
-
 ],
   templateUrl: './sales.component.html',
   styleUrl: './sales.component.scss'
@@ -24,6 +19,9 @@ export class SalesComponent {
   statusFilter: string = '';
   selectedOrder: any = null;
   orderDetailsVisible = false;
+  selectedSupplier: any = null;
+
+
   orders = [
   {
     id: 1001,
@@ -93,6 +91,18 @@ export class SalesComponent {
   }
   ];
 
+  approvedSuppliers = [
+  {
+    name: 'السويدى للكابلات',
+    image: 'assets/images/c1.png',
+  },
+  {
+    name: 'المخزن الذهبي',
+    image: 'assets/images/c2.png',
+  },
+  // Add 3 more as needed
+];
+
   @ViewChild('detailsChart', { static: false }) chartRef!: ElementRef;
 chartInstance: any;
 
@@ -119,6 +129,10 @@ renderOrderChart() {
   });
 }
 
+showSupplierDetails(supplier: any) {
+  this.selectedSupplier = supplier;
+}
+
 
 showOrderDetails(order: any) {
   this.selectedOrder = order;
@@ -143,8 +157,9 @@ getOrderProgress(status: string): number {
 }
 
 get todayOrders() {
-  const today = new Date().toISOString().slice(0, 10);
-  return this.orders.filter(o => o.date === today).length;
+  // const today = new Date().toISOString().slice(0, 10);
+  // return this.orders.filter(o => o.date === today).length;
+  return 1
 }
 
 get canceledOrders() {

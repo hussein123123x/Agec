@@ -12,13 +12,13 @@
       <svg cIcon name="cilMenu" size="lg"></svg>
     </button>
 
-    <a routerLink="/" class="d-flex align-items-center justify-content-center me-3 my-1">
+    <a routerLink="/" class="d-flex align-items-center justify-content-center me-3">
     <img
-      src="../../../../assets/images/logo small.svg"
+      src="../../../../assets/images/dark-2.svg"
       alt="Logo"
-      height="40"
-      style="width: 60px; height: 60px;"
-      class="d-inline-block align-middle my-2"
+      height="10"
+      style="width: 150px; height: 150px;margin-top: -27px; margin-bottom: -27px;"
+      class="d-inline-block align-middle"
     />
   </a>
     <c-header-nav class="d-none d-md-flex">
@@ -28,6 +28,7 @@
     <c-header-nav class="d-none d-md-flex ms-auto">
     <a cNavLink class="position-relative d-inline-block">
       <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
+      <svg cIcon class="my-1 mx-2" name="cilLockUnlocked" size="lg"></svg>
       <span
         class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger"
         style="font-size: 10px;
@@ -38,6 +39,7 @@
       </span>
     </a>
   </c-header-nav>
+  
 
 
     <c-header-nav class="ms-auto ms-md-0">
@@ -67,7 +69,7 @@
       <c-avatar
         shape="rounded-1"
         [size]="'md'"
-        src="./assets/images/avatars/9.jpg"
+        src="../../../../assets/images/user.jpg"
         status="success"
         textColor="primary"
         alt="User avatar"
@@ -75,15 +77,21 @@
     </button>
     <ul cDropdownMenu class="pt-0 w-auto">
       <li>
-        <a cDropdownItem routerLink="">
+        <a cDropdownItem routerLink="/profile">
           <svg cIcon class="me-2" name="cilUser"></svg>
-          Profile
+          الصفحة الشخصية
+        </a>
+      </li>
+      <li>
+        <a cDropdownItem routerLink="">
+          <svg cIcon class="me-2" name="cilCalendar"></svg>
+          طلب اجازة
         </a>
       </li>
       <li>
         <a cDropdownItem routerLink="">
           <svg cIcon class="me-2" name="cilSettings"></svg>
-          Settings
+          الاعدادات
         </a>
       </li>
 

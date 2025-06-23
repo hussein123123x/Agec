@@ -1,0 +1,177 @@
+<div class="container my-4">
+
+  <!-- رأس الصفحة -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary fw-bold">الملف الشخصي</h4>
+    <div class="d-flex gap-4">
+        <button class="btn btn-outline-primary" (click)="requestLeave()"> طلب إجازة</button>
+        <button class="btn btn-outline-success" (click)="requestLoan()"> طلب سلفة</button>
+    </div>
+  </div>
+
+
+  <!-- صورة واسم -->
+  <div class="text-center mb-4">
+    <img [src]="profile.image || 'assets/images/user.png'" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
+    <h5 class="mt-2 fw-bold">{{ profile.name }}</h5>
+    <p class="text-muted">{{ profile.role }}</p>
+  </div>
+
+  <!-- بيانات أساسية -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary fw-bold mb-3">البيانات الأساسية</h6>
+        <p><strong>الهاتف:</strong> {{ profile.phone }}</p>
+        <p><strong>البريد:</strong> {{ profile.email }}</p>
+        <p><strong>العنوان:</strong> {{ profile.address }}</p>
+        <p><strong>تاريخ الانضمام:</strong> {{ profile.joinDate }}</p>
+      </div>
+    </div>
+
+    <!-- الحضور والانصراف -->
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary fw-bold mb-3">الحضور والانصراف</h6>
+        <p><strong>أيام الحضور:</strong> {{ profile.attendanceDays }}</p>
+        <p><strong>أيام الغياب:</strong> {{ profile.absenceDays }}</p>
+        <p><strong>أيام التأخير:</strong> {{ profile.delays }}</p>
+        <p><strong>ساعات العمل على النظام:</strong> {{ profile.totalWorkHours }} ساعة</p>
+      </div>
+    </div>
+  </div>
+
+    <h5 class="text-primary fw-bold mt-4 mb-3">تقيم الاداء</h5>
+
+  <!-- الإحصاءات والرسوم -->
+  <div class="row mb-4">
+
+    <!-- التقييم الشهري -->
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3 text-center">
+        <h6 class="text-secondary mb-3">تقييم الشهر الحالي</h6>
+        <div style="width: 200px; height: 200px; margin: auto;">
+          <canvas #ratingChart style="width: 100% !important; height: 100% !important;"></canvas>
+        </div>
+        <p class="text-muted mt-3">{{ profile.feedback }}</p>
+      </div>
+    </div>
+
+    <!-- التقييم التراكمي -->
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary mb-3">التقييم التراكمي خلال الشهور</h6>
+        <canvas #monthlyRatingChart style="width: 100%; height: 250px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <h5 class="text-primary fw-bold mt-4 mb-3">الاجازات</h5>
+  <div class="row mb-4">
+    
+    <!-- الإجازات -->
+    <div class="col-md-6">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary fw-bold mb-3">الإجازات</h6>
+        <p><strong>رصيد الإجازات:</strong> {{ profile.leaveBalance }} يوم</p>
+        <div *ngIf="profile.upcomingLeaves.length">
+          <h6 class="text-muted small">إجازات قادمة:</h6>
+          <ul class="list-unstyled">
+            <li *ngFor="let leave of profile.upcomingLeaves">
+              📅 {{ leave.date }} - {{ leave.reason }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    
+
+  </div>
+
+  <h5 class="text-primary fw-bold mt-4 mb-3"> الراتب والحوافز</h5>
+
+<div class="row">
+
+  <!-- السلف -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="text-secondary fw-bold mb-3">السلف من الراتب</h6>
+
+      <p><strong>الراتب الشهري:</strong> {{ profile.salary }} جنيه</p>
+      <p><strong>إجمالي السلف:</strong> {{ getTotalLoans() }} جنيه</p>
+      <p><strong>المتبقي من الراتب:</strong> 
+        {{ profile.salary - getTotalLoans() }} جنيه
+      </p>
+
+      <!-- شريط يوضح المتبقي كنسبة -->
+      <div class="progress mb-3" style="height: 20px;">
+        <div class="progress-bar bg-success" 
+             role="progressbar" 
+             [style.width.%]="getRemainingSalaryPercentage()"
+             aria-valuemin="0" 
+             aria-valuemax="100">
+          {{ getRemainingSalaryPercentage() }}%
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- جدول السلف -->
+      <table class="table table-sm table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th>التاريخ</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let loan of profile.loans">
+            <td>{{ loan.date }}</td>
+            <td>{{ loan.amount }} جنيه</td>
+            <td>
+              <span [ngClass]="{
+                'text-success': loan.status === 'مدفوعة',
+                'text-danger': loan.status !== 'مدفوعة'
+              }">{{ loan.status }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- الحوافز -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="text-secondary fw-bold mb-3">سجل الحوافز والمكافآت</h6>
+
+      <!-- مجموع الحوافز -->
+      <p><strong>إجمالي الحوافز:</strong> 
+        {{ getTotalBonuses() }} جنيه
+      </p>
+
+      <table class="table table-sm table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>التاريخ</th>
+            <th>الوصف</th>
+            <th>القيمة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bonus of profile.bonuses">
+            <td>{{ bonus.date }}</td>
+            <td>{{ bonus.title }}</td>
+            <td>{{ bonus.amount }} جنيه</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+</div>

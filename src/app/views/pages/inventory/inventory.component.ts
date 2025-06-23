@@ -30,6 +30,47 @@ import {
   styleUrls: ['./inventory.component.scss']
 })
 export class InventoryComponent {
+  totalProducts = 150;
+totalProductsList = [
+  { name: 'كمبيوتر محمول HP', code: 'HP123', quantity: 25, price: 18500, location: 'الفرع الرئيسي', image: 'assets/images/products/laptop.png' },
+  { name: 'طابعة ليزر', code: 'PR456', quantity: 12, price: 3500, location: 'فرع الغربية', image: 'assets/images/products/printer.png' },
+  { name: 'ماسح ضوئي', code: 'SC789', quantity: 7, price: 2700, location: 'فرع الشرقية', image: 'assets/images/products/scanner.png' },
+  { name: 'شاشة سامسونج', code: 'SM241', quantity: 18, price: 2200, location: 'الفرع الرئيسي', image: 'assets/images/products/monitor.png' },
+  { name: 'قرص صلب', code: 'HD321', quantity: 50, price: 950, location: 'فرع الجنوب', image: 'assets/images/products/hdd.png' },
+  { name: 'فأرة لاسلكية', code: 'MS654', quantity: 33, price: 180, location: 'فرع الغربية', image: 'assets/images/products/mouse.png' },
+  { name: 'لوحة مفاتيح', code: 'KB987', quantity: 40, price: 220, location: 'فرع الشرقية', image: 'assets/images/products/keyboard.png' },
+  { name: 'كاميرا ويب', code: 'WB741', quantity: 15, price: 500, location: 'الفرع الرئيسي', image: 'assets/images/products/webcam.png' },
+  { name: 'سماعات رأس', code: 'HP852', quantity: 22, price: 320, location: 'فرع الجنوب', image: 'assets/images/products/headphones.png' },
+  { name: 'UPS', code: 'UP963', quantity: 5, price: 1450, location: 'فرع الشرقية', image: 'assets/images/products/ups.png' },
+];
+
+
+lowStockItems = [
+  { name: 'طابعة ليزر', code: 'PR456', quantity: 3, min: 5, image: 'https://cdn-icons-png.flaticon.com/512/809/809957.png' },
+  { name: 'فأرة لاسلكية', code: 'MS123', quantity: 2, min: 10, image: 'https://cdn-icons-png.flaticon.com/512/149/149995.png' },
+  { name: 'قرص صلب', code: 'HD321', quantity: 1, min: 6, image: 'https://cdn-icons-png.flaticon.com/512/4149/4149654.png' },
+  { name: 'شاشة عرض', code: 'SM888', quantity: 4, min: 7, image: 'https://cdn-icons-png.flaticon.com/512/168/168882.png' },
+  { name: 'كاميرا ويب', code: 'WB741', quantity: 0, min: 3, image: 'https://cdn-icons-png.flaticon.com/512/747/747376.png' },
+  { name: 'لوحة مفاتيح', code: 'KB963', quantity: 2, min: 5, image: 'https://cdn-icons-png.flaticon.com/512/777/777197.png' },
+  { name: 'سماعات رأس', code: 'HP852', quantity: 1, min: 4, image: 'https://cdn-icons-png.flaticon.com/512/1828/1828961.png' },
+  { name: 'UPS', code: 'UP741', quantity: 0, min: 2, image: 'https://cdn-icons-png.flaticon.com/512/1042/1042267.png' },
+  // أضف المزيد حسب الحاجة
+];
+
+lowStockCount = this.lowStockItems.length;
+
+
+transactionsHistory = [
+  { date: new Date('2025-06-18T09:00:00'), type: 'إضافة', product: 'كمبيوتر محمول HP', quantity: 25, store: 'المخزن الرئيسي', user: 'أحمد علي', project: 'مشروع التحديث التقني' },
+  { date: new Date('2025-06-18T10:30:00'), type: 'سحب', product: 'طابعة ليزر', quantity: 5, store: 'مخزن الفرع الغربي', user: 'منى صالح', project: 'مشروع الطباعة المؤسسية' },
+  { date: new Date('2025-06-17T14:15:00'), type: 'تحويل', product: 'ماسح ضوئي', quantity: 3, store: 'من الرئيسي إلى الفرع الشرقي', user: 'علي خالد', project: 'مشروع التحول الرقمي' },
+  { date: new Date('2025-06-17T08:20:00'), type: 'إضافة', product: 'أحبار طابعة', quantity: 40, store: 'المخزن الرئيسي', user: 'نورا محمد', project: 'مشروع الطباعة المؤسسية' },
+  { date: new Date('2025-06-16T11:00:00'), type: 'سحب', product: 'كابل HDMI', quantity: 12, store: 'مخزن فرعي', user: 'خالد إبراهيم', project: 'مشروع المؤتمرات' },
+  { date: new Date('2025-06-16T13:45:00'), type: 'إضافة', product: 'شاشة سامسونج 24 بوصة', quantity: 15, store: 'مخزن الأجهزة', user: 'ليلى محمود', project: 'مشروع التعليم الإلكتروني' },
+  { date: new Date('2025-06-15T16:10:00'), type: 'تحويل', product: 'جهاز راوتر', quantity: 6, store: 'من الفرع الغربي إلى الرئيسي', user: 'طارق سمير', project: 'مشروع الشبكات' }
+];
+
+
 
   inventory = [
     {

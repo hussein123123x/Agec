@@ -14,10 +14,11 @@ import {
   CardFooterComponent,
   GutterDirective,
   ProgressComponent,
-  TableDirective
+  TableDirective,
+  BadgeComponent
 } from '@coreui/angular';
 import { Chart } from 'chart.js/auto';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @Component({
@@ -34,20 +35,17 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
     ColComponent,
     ButtonGroupComponent,
     FormCheckLabelDirective,
-    AvatarComponent,
     ButtonDirective,
     ButtonGroupComponent,
     CardBodyComponent,
     CardComponent,
-    CardFooterComponent,
     CardHeaderComponent,
     ColComponent,
+    BadgeComponent,
     FormCheckLabelDirective,
-    GutterDirective,
-    ProgressComponent,
     RowComponent,
+    FormsModule,
     CommonModule,
-    TableDirective
   ],
   templateUrl: './accounting.component.html',
   styleUrls: ['./accounting.component.scss']
@@ -60,12 +58,108 @@ export class AccountingComponent implements AfterViewInit {
   cashBalance = 50000;
   debtAccounts = 30000;
   creditAccounts = 20000;
-
+  transactionTypeFilter: string = '';
+  searchText: string = '';
   assets = 150000;
   liabilities = 70000;
   equity = this.assets - this.liabilities;
   trafficRadioGroup!: FormGroup;
   chartInstance: any;
+
+  transactions = [
+  {
+    date: '2025-06-18',
+    type: 'مصروف',
+    category: 'شراء مكونات إلكترونية',
+    description: 'شراء لوحات تحكم ذكية (Smart Panels)',
+    amount: -15000,
+    balanceAfter: 435000,
+    user: 'خالد السيد'
+  },
+  {
+    date: '2025-06-18',
+    type: 'مصروف',
+    category: 'سلفة موظف',
+    description: 'سلفة مالية للموظف محمد حسين',
+    amount: -2000,
+    balanceAfter: 433000,
+    user: 'إدارة الموارد البشرية'
+  },
+  {
+    date: '2025-06-17',
+    type: 'إيراد',
+    category: 'بيع لوحة كهربائية',
+    description: 'بيع لوحة توزيع ذكية لعميل صناعي',
+    amount: 22000,
+    balanceAfter: 450000,
+    user: 'سارة عبد الله'
+  },
+  {
+    date: '2025-06-17',
+    type: 'مصروف',
+    category: 'إكرامية',
+    description: 'إكرامية لفريق التركيب بعد انتهاء المشروع',
+    amount: -1500,
+    balanceAfter: 448500,
+    user: 'ليلى عمر'
+  },
+  {
+    date: '2025-06-16',
+    type: 'مصروف',
+    category: 'فواتير مرافق',
+    description: 'دفع فاتورة كهرباء الورشة الرئيسية',
+    amount: -3200,
+    balanceAfter: 445300,
+    user: 'خدمة الحسابات'
+  },
+  {
+    date: '2025-06-15',
+    type: 'إيراد',
+    category: 'توريد مشاريع',
+    description: 'توريد 5 لوحات إلكترونية لمشروع بناء جديد',
+    amount: 48000,
+    balanceAfter: 431000,
+    user: 'ليلى عمر'
+  },
+  {
+    date: '2025-06-14',
+    type: 'مصروف',
+    category: 'شراء دوائر كهربائية',
+    description: 'شراء دوائر تحكم PLC للورشة',
+    amount: -18500,
+    balanceAfter: 383000,
+    user: 'عمرو فؤاد'
+  },
+  {
+    date: '2025-06-13',
+    type: 'إيراد',
+    category: 'صيانة خارجية',
+    description: 'صيانة لوحات تحكم صناعية لدى شركة إلكترونيات',
+    amount: 12500,
+    balanceAfter: 401500,
+    user: 'هبة طارق'
+  },
+  {
+    date: '2025-06-12',
+    type: 'مصروف',
+    category: 'مستلزمات مكتبية',
+    description: 'شراء ورق طباعة وأقلام ومحابر',
+    amount: -850,
+    balanceAfter: 400650,
+    user: 'فاطمة علوي'
+  },
+  {
+    date: '2025-06-12',
+    type: 'مصروف',
+    category: 'فواتير مرافق',
+    description: 'دفع فاتورة مياه للفرع الشرقي',
+    amount: -600,
+    balanceAfter: 400050,
+    user: 'خدمة الحسابات'
+  }
+];
+
+
 
   accountingSections = [
     { name: 'اليومية العامة', description: 'تسجيل قيود اليومية (مدين/دائن)' },
@@ -200,6 +294,25 @@ export class AccountingComponent implements AfterViewInit {
       }
     });
   }
+
+  get filteredTransactions() {
+  return this.transactions.filter(tx => {
+    const matchesType = this.transactionTypeFilter ? tx.type === this.transactionTypeFilter : true;
+    const matchesSearch =
+      this.searchText === '' ||
+      tx.description.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      tx.category.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      tx.user.toLowerCase().includes(this.searchText.toLowerCase());
+    return matchesType && matchesSearch;
+  });
+}
+ printTransactions() {
+   
+ }
+
+ addTransaction() {
+   
+ }
 
   setTrafficPeriod(period: 'week' | 'Month' | 'Year') {
     let labels: string[] = [];

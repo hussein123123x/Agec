@@ -36,10 +36,11 @@
       </c-col>
       <c-col sm="6" md="3">
         <c-widget-stat-c color="danger" [value]="stoppedCount" [title]="'متوقفة'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-ban" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
+        <ng-template cTemplateId="widgetIconTemplate">
+          <svg cIcon name="cil-ban" height="36"></svg>
+        </ng-template>
+      </c-widget-stat-c>
+
       </c-col>
       <c-col sm="6" md="3">
         <c-widget-stat-c color="warning" [value]="maintenanceCount" [title]="'صيانة'" inverse>
@@ -50,13 +51,7 @@
       </c-col>
     </c-row>
 
-    <!-- الرسوم البيانية -->
-    <div class="mb-4">
-    <canvas id="lineChartCanvas"></canvas>
-    </div>
-
-    <!-- جدول خطوط الإنتاج -->
-    <div class="table-responsive border">
+    <!-- <div class="table-responsive border">
       <table class="table table-hover table-striped align-middle mb-0">
         <thead class="table-light">
           <tr>
@@ -95,7 +90,73 @@
           </tr>
         </tbody>
       </table>
+    </div> -->
+    <div class="mb-4">
+    <canvas id="lineChartCanvas"></canvas>
     </div>
+
+    <div class="container my-4">
+
+  <!-- Main Card: خط ميكانيكي -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+      <span>خط ميكانيكي</span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-4 mb-3" *ngFor="let machine of mechanicalMachines">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ machine.name }}</h5>
+              <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
+              <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
+              <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
+            </div>
+            <div class="card-footer text-end">
+              <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
+              <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
+              <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card: خط كهربائي -->
+  <div class="card mb-4">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+      <span>خط كهربائي</span>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 mb-3" *ngFor="let machine of electricalMachines">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ machine.name }}</h5>
+              <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
+              <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
+              <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
+            </div>
+            <div class="card-footer text-end">
+              <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
+              <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
+              <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    </div>
+
+
+    <!-- الرسوم البيانية -->
+    
+
+    <!-- جدول خطوط الإنتاج -->
+    
   </c-card-body>
 </c-card>
 
@@ -108,7 +169,14 @@
     <ul class="list-group">
       <li class="list-group-item"><strong>الاسم:</strong> {{ selectedLine.name }}</li>
       <li class="list-group-item"><strong>المشرف:</strong> {{ selectedLine.supervisor }}</li>
-      <li class="list-group-item"><strong>عدد العمال:</strong> {{ selectedLine.workers }}</li>
+      <li class="list-group-item">
+        <strong>عدد العمال:</strong> {{ selectedLine.workers }}
+        <ng-container *ngIf="selectedLine.absentEmployees as absentList">
+          <span *ngIf="absentList.length > 0" class="text-danger">
+            ({{ absentList.join('، ') }} {{ absentList.length > 1 ? 'لم يحضروا اليوم' : 'لم يحضر اليوم' }})
+          </span>
+        </ng-container>
+      </li>
       <li class="list-group-item"><strong>الطاقة الإنتاجية:</strong> {{ selectedLine.capacity }}</li>
       <li class="list-group-item"><strong>الإنتاج الفعلي:</strong> {{ selectedLine.actual }}</li>
       <li class="list-group-item"><strong>الحالة:</strong> {{ selectedLine.status }}</li>

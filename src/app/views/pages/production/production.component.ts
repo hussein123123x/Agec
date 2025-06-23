@@ -25,7 +25,7 @@ import { IconDirective } from '@coreui/icons-angular';
     IconDirective, CardComponent, CardHeaderComponent,
     CardBodyComponent, RowComponent, ColComponent,
     ModalComponent, ModalHeaderComponent, ModalBodyComponent,
-    ModalFooterComponent, WidgetStatCComponent, BadgeComponent, FormsModule
+    ModalFooterComponent, WidgetStatCComponent, FormsModule
   ],
   templateUrl: './production.component.html',
   styleUrls: ['./production.component.scss']
@@ -33,7 +33,7 @@ import { IconDirective } from '@coreui/icons-angular';
 export class ProductionComponent {
   lines = [
     {
-      name: 'خط التجميع 1',
+      name: 'خط ميكانيكى',
       code: 'PL001',
       status: 'نشط',
       supervisor: 'أحمد سمير',
@@ -46,20 +46,20 @@ export class ProductionComponent {
       workers: 10
     },
     {
-      name: 'خط التعبئة',
+      name: 'خط احتياطى',
       code: 'PL002',
       status: 'متوقف',
-      supervisor: 'منى حسن',
-      startDate: '2022-06-15',
-      capacity: 80,
-      actual: 0,
-      usage: 0,
-      lastMaintenance: '2024-10-05',
-      notes: 'بانتظار صيانة',
-      workers: 8
+      supervisor: 'سعيد يوسف',
+      startDate: '2021-03-20',
+      capacity: 90,
+      actual: 30,
+      usage: 30,
+      lastMaintenance: '2025-01-15',
+      notes: 'تم تغيير قطع غيار',
+      workers: 9
     },
     {
-      name: 'خط التغليف',
+      name: 'خط كهربائى',
       code: 'PL003',
       status: 'صيانة',
       supervisor: 'سعيد يوسف',
@@ -72,6 +72,127 @@ export class ProductionComponent {
       workers: 9
     }
   ];
+
+  mechanicalMachines = [
+  {
+    name: 'مقص',
+    number: 'M1',
+    supervisor: 'سعيد يوسف',
+    employees: 4,
+    status: 'صيانة',
+    startDate: '2021-03-20',
+    capacity: 90,
+    actual: 30,
+    usage: 30,
+    lastMaintenance: '2025-01-15',
+    notes: 'تم تغيير قطع غيار',
+    workers: 9,
+    absentEmployees: ['أحمد السيد', 'محمد ابراهيم']
+  },
+  {
+    name: 'بانش',
+    number: 'M2',
+    supervisor: 'أحمد حسن',
+    employees: 3,
+    status: 'نشط',
+    startDate: '2020-07-11',
+    capacity: 80,
+    actual: 65,
+    usage: 81,
+    lastMaintenance: '2024-10-30',
+    notes: 'يعمل بكفاءة جيدة',
+    workers: 7
+  },
+  {
+    name: 'تناية',
+    number: 'M3',
+    supervisor: 'مروان',
+    employees: 2,
+    status: 'متوقف',
+    startDate: '2022-01-05',
+    capacity: 70,
+    actual: 0,
+    usage: 0,
+    lastMaintenance: '2023-12-10',
+    notes: 'بانتظار قطع الغيار',
+    workers: 2
+  },
+  {
+    name: 'لحام',
+    number: 'M4',
+    supervisor: 'ليلى',
+    employees: 3,
+    status: 'صيانة',
+    startDate: '2021-08-14',
+    capacity: 100,
+    actual: 50,
+    usage: 50,
+    lastMaintenance: '2025-03-01',
+    notes: 'تم تعديل الأقطاب',
+    workers: 5
+  },
+  {
+    name: 'دهان',
+    number: 'M5',
+    supervisor: 'فاطمة',
+    employees: 2,
+    status: 'نشط',
+    startDate: '2020-02-28',
+    capacity: 60,
+    actual: 55,
+    usage: 92,
+    lastMaintenance: '2025-04-10',
+    notes: 'جاهز للعمل',
+    workers: 3
+  },
+  {
+    name: 'لحام',
+    number: 'M6',
+    supervisor: 'زيد',
+    employees: 1,
+    status: 'نشط',
+    startDate: '2023-06-18',
+    capacity: 50,
+    actual: 40,
+    usage: 80,
+    lastMaintenance: '2025-05-20',
+    notes: 'تم صيانة بسيطة',
+    workers: 2
+  }
+];
+
+
+electricalMachines = [
+  {
+    name: 'ماكينة نحاس',
+    number: 'E1',
+    supervisor: 'مصطفى',
+    employees: 2,
+    status: 'نشط',
+    startDate: '2021-12-01',
+    capacity: 120,
+    actual: 110,
+    usage: 92,
+    lastMaintenance: '2025-01-30',
+    notes: 'أداء ممتاز',
+    workers: 4
+  },
+  {
+    name: 'تناية',
+    number: 'E2',
+    supervisor: 'أماني',
+    employees: 3,
+    status: 'متوقف',
+    startDate: '2022-09-15',
+    capacity: 85,
+    actual: 0,
+    usage: 0,
+    lastMaintenance: '2024-11-12',
+    notes: 'تحتاج إلى صيانة عاجلة',
+    workers: 3
+  }
+];
+
 
 
   chartInstance: any; 
@@ -114,28 +235,79 @@ export class ProductionComponent {
   const canvas = document.getElementById('lineChartCanvas') as HTMLCanvasElement;
   if (!canvas) return;
 
+  // Combine both machine types
+  const allMachines = [...this.mechanicalMachines, ...this.electricalMachines];
+
+  // Prepare labels (machine names with group type for clarity)
+  const labels = allMachines.map(machine => `${machine.name} (${machine.number})`);
+
+  // Extract usage and actual (productive) values
+  const usageData = allMachines.map(machine => machine.usage);
+  const productiveData = allMachines.map(machine => machine.actual);
+
+  // Create Chart
   this.chartInstance = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: this.lines.map(line => line.name),
-      datasets: [{
-        label: 'نسبة الاستخدام (%)',
-        data: this.lines.map(line => line.usage),
-        backgroundColor: '#39f'
-      }]
+      labels: labels,
+      datasets: [
+        {
+          label: 'نسبة الاستخدام (%)',
+          data: usageData,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        },
+        {
+          label: 'الإنتاج الفعلي',
+          data: productiveData,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)'
+        }
+      ]
     },
     options: {
       responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: 'مقارنة الاستخدام والإنتاج للماكينات'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      },
       scales: {
         y: {
           beginAtZero: true,
-          max: 100
+          title: {
+            display: true,
+            text: 'القيمة'
+          }
+        },
+        x: {
+          ticks: {
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 0
+          }
         }
       }
     }
   });
 }
 
+
+editMachine(machine: any) {
+  this.selectedLine = machine;
+  this.lineForm.patchValue(machine);
+  this.showModal.set(true);
+}
+
+  deleteMachine(machine: any) {
+    const index = this.lines.indexOf(machine);
+    if (index !== -1) {
+      this.lines.splice(index, 1);
+    }
+  }
 
   showDetailsModal(line: any) {
     this.selectedLine = line;

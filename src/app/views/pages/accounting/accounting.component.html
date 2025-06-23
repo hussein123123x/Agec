@@ -1,5 +1,5 @@
 <!-- عنوان رئيسي -->
-<h3 class="mb-4">📊 برنامج الأستاذ – إدارة الحسابات والتكاليف</h3>
+<h3 class="mb-4">📊  إدارة الحسابات والتكاليف</h3>
 
 <!-- إحصائيات عليا -->
 <c-row class="mb-4 text-center">
@@ -88,7 +88,7 @@
               variant="outline"
               for="radioYear"
             >
-              ثانوى
+              سنوى
             </label>
           </c-button-group>
         </form>
@@ -166,8 +166,83 @@
 
 </c-card>
 
-<!-- أقسام إدارة المحاسبة -->
+
 <c-card class="mb-4">
+  <c-card-header class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <strong>📋 سجل المعاملات المالية</strong>
+
+    <div class="d-flex  flex-nowrap gap-2 align-items-center">
+      
+
+      <!-- حقل البحث -->
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        placeholder="بحث..."
+        [(ngModel)]="searchText"
+        style="min-width: 180px;"
+      />
+
+      <!-- فلتر النوع -->
+      <select class="form-select form-select-sm" [(ngModel)]="transactionTypeFilter">
+        <option value="">الكل</option>
+        <option value="إيراد">إيراد</option>
+        <option value="مصروف">مصروف</option>
+      </select>
+
+      <!-- زر الإضافة -->
+      <button class="btn btn-sm btn-success" (click)="addTransaction()">
+        <svg cIcon name="cil-plus"></svg> 
+      </button>
+
+      <!-- زر الطباعة -->
+      <button class="btn btn-sm btn-outline-primary" (click)="printTransactions()">
+        <svg cIcon name="cil-print"></svg> 
+      </button>
+    </div>
+  </c-card-header>
+
+  <c-card-body>
+    <div class="table-responsive">
+      <table class="table table-striped table-bordered align-middle text-center">
+        <thead class="table-light">
+          <tr>
+            <th>التاريخ</th>
+            <th>الفئة</th>
+            <th>الوصف</th>
+            <th>النوع</th>
+            <th>المبلغ</th>
+            <th>الرصيد بعد العملية</th>
+            <th>المسؤول</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let tx of filteredTransactions">
+            <td>{{ tx.date }}</td>
+            <td>{{ tx.category }}</td>
+            <td class="text-start">{{ tx.description }}</td>
+            <td>
+              <c-badge [color]="tx.type === 'إيراد' ? 'success' : 'danger'">{{ tx.type }}</c-badge>
+            </td>
+            <td [ngClass]="{ 'text-success': tx.amount > 0, 'text-danger': tx.amount < 0 }">
+              {{ tx.amount | currency:'EGP' }}
+            </td>
+            <td>{{ tx.balanceAfter | currency:'EGP' }}</td>
+            <td>{{ tx.user }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </c-card-body>
+</c-card>
+
+
+
+
+
+
+<!-- TODO -->
+<!-- <c-card class="mb-4">
   <c-card-header>
     <strong>🧾 الأقسام المحاسبية</strong>
   </c-card-header>
@@ -187,7 +262,6 @@
   </c-card-body>
 </c-card>
 
-<!-- تقارير جاهزة للمحاسب -->
 <c-card>
   <c-card-header>
     <strong>📑 التقارير المحاسبية</strong>
@@ -205,4 +279,4 @@
       </div>
     </div>
   </c-card-body>
-</c-card>
+</c-card> -->

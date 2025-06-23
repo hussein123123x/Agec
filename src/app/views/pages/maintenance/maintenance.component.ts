@@ -17,7 +17,7 @@ import {
     ReactiveFormsModule,
     CardComponent, CardHeaderComponent, CardBodyComponent,
     RowComponent, ColComponent, WidgetStatCComponent, BadgeComponent,
-    FormCheckLabelDirective
+    
   ],
   templateUrl: './maintenance.component.html',
   styleUrls: ['./maintenance.component.scss']

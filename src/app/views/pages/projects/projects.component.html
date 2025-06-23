@@ -1,0 +1,249 @@
+<!-- ملخص المشاريع -->
+<div *ngIf="!showDetails">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <h4 class="mb-0">المشاريع</h4>
+    
+      <div class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-end">
+        <input type="text" class="form-control" placeholder="بحث باسم المشروع أو المالك"
+               [(ngModel)]="searchQuery" style="max-width: 250px;" />
+    
+        <!-- قائمة الفلترة -->
+            <select class="form-select" [(ngModel)]="statusFilter" style="max-width: 180px;">
+            <option value="">كل الحالات</option>
+            <option value="جاري">جاري</option>
+            <option value="مكتمل">مكتمل</option>
+            <option value="متأخر">متأخر</option> 
+            </select>
+    
+    
+        <button class="btn btn-primary">
+          + مشروع جديد
+        </button>
+      </div>
+    </div>
+    
+    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4 text-center">
+      <c-widget-stat-c color="primary" [value]="projects.length" title="إجمالي المشاريع" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="info" [value]="activeProjects" title="جارية" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="success" [value]="completedProjects" title="مكتملة" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="warning" [value]="nearProjects" title="اقتربت على التسليم" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="danger" [value]="delayedProjects" title="متأخرة" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+    </div>
+    
+    <!-- عرض المشاريع -->
+    <div class="row">
+      <div class="col-md-6 mb-4" *ngFor="let project of filteredProjects">
+        <div class="card h-100 shadow-sm" [ngClass]="getCardBorderClass(project.dueDate, project.status)">
+          <div class="card-body">
+            <h5 class="mb-3">
+            📁 {{ project.name }}
+            
+            <ng-container *ngIf="project.status !== 'مكتمل'">
+              - متبقي {{ getRemainingDays(project.dueDate) }} يوم
+            </ng-container>
+          </h5>
+
+            <p><strong>التقدم:</strong> {{ project.progress }}</p>
+            <p *ngIf="project.status !== 'مكتمل'">
+              <strong>تقدم المشروع:</strong>
+              <span [ngClass]="{
+                'text-success': getProjectPerformance(project.progress, project.dueDate, project.startDate) === 'ممتاز',
+                'text-primary': getProjectPerformance(project.progress, project.dueDate, project.startDate) === 'جيد جدًا',
+                'text-info': getProjectPerformance(project.progress, project.dueDate, project.startDate) === 'جيد',
+                'text-warning': getProjectPerformance(project.progress, project.dueDate, project.startDate) === 'متأخر',
+                'text-danger': getProjectPerformance(project.progress, project.dueDate, project.startDate) === 'متأخر جدًا'
+              }">
+                {{ getProjectPerformance(project.progress, project.dueDate, project.startDate) }}
+              </span>
+            </p>
+            <p><strong>المالك:</strong> {{ project.owner }}</p>
+            <p><strong>تاريخ البداية:</strong> {{ project.startDate }}</p>
+            <p><strong>تاريخ التسليم:</strong> {{ project.dueDate }}</p>
+           <p *ngIf="project.status !== 'مكتمل'"><strong>عدد الأيام المتبقية:</strong> {{ getRemainingDays(project.dueDate) }} يوم</p>
+            <p *ngIf="getDelayDays(project.dueDate, project.status) > 0" class="text-danger">
+            <strong>متأخر:</strong> {{ getDelayDays(project.dueDate, project.status) }} يوم
+            </p>
+            <p><strong>الحالة:</strong> 
+              <c-badge [color]="getStatusColor(project.status)" class="me-1 ms-2 px-2 py-2">
+                {{ project.status }}
+              </c-badge>
+            </p>
+          </div>
+          <div class="card-footer d-flex justify-content-end gap-2">
+            <button class="btn btn-sm btn-outline-info" (click)="viewProject(project)">عرض</button>
+            <button class="btn btn-sm btn-outline-primary">تعديل</button>
+            <button class="btn btn-sm btn-outline-danger">حذف</button>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div *ngIf="showDetails" class="project-details-container p-4 rounded shadow">
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+  <h4 class="mb-0 text-primary fw-bold">
+     تفاصيل المشروع: {{ selectedProject.name }}
+  </h4>
+
+  <button class="btn btn-outline-secondary btn-sm" (click)="closeDetails()">
+    <i class="bi bi-x-lg me-1"></i> الرجوع للمشاريع
+  </button>
+</div>
+
+  
+
+  <div class="row">
+
+    <!-- القسم الأيسر -->
+    <div class="col-md-12">
+
+      <!-- معلومات عامة -->
+      <div class="row mb-4">
+
+  <!-- المعلومات العامة -->
+  <div class="col-md-6">
+    <h6 class="text-secondary mb-3">المعلومات العامة</h6>
+    <p><strong>الحالة:</strong> 
+      <c-badge [color]="getStatusColor(selectedProject.status)">
+        {{ selectedProject.status }}
+      </c-badge>
+    </p>
+    <p><strong>تاريخ التسليم:</strong> {{ selectedProject.dueDate }}</p>
+    <p><strong>عدد الأيام المتبقية:</strong> {{ getRemainingDays(selectedProject.dueDate) }} يوم</p>
+    <p><strong>تقدم المشروع:</strong> 
+      {{ getProjectPerformance(selectedProject.progress, selectedProject.dueDate, selectedProject.startDate) }}
+    </p>
+    <p><strong>المالك:</strong> {{ selectedProject.owner }}</p>
+    <p><strong>الموقع:</strong> {{ selectedProject.location }}</p>
+    <p><strong>المهندس المسؤول:</strong> {{ selectedProject.engineerInCharge }}</p>
+    <p><strong>الجهد:</strong> {{ selectedProject.voltageLevel }}</p>
+  </div>
+
+  <!-- نسبة الإنجاز -->
+  <div class="col-md-6 text-center">
+    <h6 class="text-secondary mb-3">نسبة الإنجاز</h6>
+    <p><strong>{{ selectedProject.progress }}</strong></p>
+    <div style="width: 200px; height: 200px; margin: auto;">
+      <canvas #progressChart style="width: 100% !important; height: 100% !important;"></canvas>
+    </div>
+  </div>
+
+      </div>
+
+
+      <!-- المنتجات -->
+      <div class="mb-4">
+        <h6 class="text-secondary mb-2">المكونات والمنتجات المستخدمة</h6>
+        <ul class="list-group">
+          <li *ngFor="let product of selectedProject.products" class="list-group-item d-flex justify-content-between align-items-center">
+            {{ product.name }} 
+            <span class="ms-auto">
+              (الكمية المطلوبة: {{ product.quantityRequired }}) -
+              <span [class.text-success]="product.inStock" [class.text-danger]="!product.inStock">
+                {{ product.inStock ? 'متوفر' : 'غير متوفر' }}
+              </span>
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- مراحل المشروع -->
+      <div class="mb-4">
+  <h6 class="text-primary fw-bold mb-3">المراحل</h6>
+
+  <!-- المرحلة الرئيسية -->
+  <div *ngFor="let phase of selectedProject.phases" class="border-start border-4 ps-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+      <strong class="text-dark">{{ phase.name }}</strong>
+      <span class="badge" [ngClass]="getBadgeClass(phase.status)">
+        {{ phase.status }}
+      </span>
+    </div>
+
+    <!-- ملاحظات المرحلة -->
+    <div *ngIf="phase.notes?.length" class="text-muted small mb-2">
+      <ul class="mb-1 ps-3">
+        <li *ngFor="let note of phase.notes">
+          📌 {{ note.content }} – {{ note.author }} ({{ note.date }})
+        </li>
+      </ul>
+    </div>
+
+    <!-- المراحل الفرعية -->
+    <div *ngFor="let sub of phase.subPhases" class="ps-3 border-start border-2 ms-2 mb-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <span>{{ sub.name }}</span>
+        <span class="badge" [ngClass]="getBadgeClass(sub.status)">
+          {{ sub.status }}
+        </span>
+      </div>
+
+      <!-- ملاحظات subPhase -->
+      <div *ngIf="sub.notes?.length" class="text-muted small mt-1">
+        <ul class="mb-1 ps-3">
+          <li *ngFor="let note of sub.notes">
+            📌 {{ note.content }} – {{ note.author }} ({{ note.date }})
+          </li>
+        </ul>
+      </div>
+
+      <!-- المراحل داخل الفرعية -->
+      <div *ngFor="let subSub of sub.subPhases" class="ps-3 ms-2 mt-2 border-start border-1">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="text-muted small">{{ subSub.name }}</span>
+          <span class="badge" [ngClass]="getBadgeClass(subSub.status)">
+            {{ subSub.status }}
+          </span>
+        </div>
+
+         <!-- ملاحظات subSub -->
+        <div *ngIf="subSub.notes?.length" class="text-muted small mt-1 ps-3">
+          <ul class="mb-1">
+            <li *ngFor="let note of subSub.notes">
+              📌 {{ note.content }} – {{ note.author }} ({{ note.date }})
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+  </div>
+      </div>
+
+
+
+
+
+      <!-- المتطلبات -->
+      <div *ngIf="selectedProject.requirements?.length">
+        <p><strong>عدد المتطلبات:</strong> {{ selectedProject.requirements.length }}</p>
+        <p><strong>وصف:</strong> {{ selectedProject.description }}</p>
+        <div>
+          <strong>المتطلبات:</strong>
+          <ul class="mb-2">
+            <li *ngFor="let req of selectedProject.requirements">{{ req }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- الملاحظات الفنية -->
+      <div *ngIf="selectedProject.notes?.length" class="mt-4">
+        <h6 class="text-secondary mb-2">الملاحظات الفنية</h6>
+        <div *ngFor="let note of selectedProject.notes" class="border rounded p-3 mb-2 bg-light">
+          <div class="d-flex justify-content-between">
+            <strong>{{ note.author }}</strong>
+            <small class="text-muted">{{ note.date }}</small>
+          </div>
+          <p class="mb-0 mt-2">{{ note.content }}</p>
+        </div>
+      </div>
+
+
+
+    </div>
+
+  </div>
+
+</div>
+
