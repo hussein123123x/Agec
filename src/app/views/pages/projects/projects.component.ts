@@ -9,7 +9,7 @@ import Chart from 'chart.js/auto';
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
   imports: [
-    CommonModule, ReactiveFormsModule,
+    ReactiveFormsModule,
     WidgetStatCComponent, BadgeComponent, FormsModule,
     CommonModule,
     ReactiveFormsModule,
@@ -585,7 +585,7 @@ export class ProjectsComponent {
       }
     ]
   }
-];
+  ];
 
 
 

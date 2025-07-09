@@ -5,7 +5,7 @@ import { Chart } from 'chart.js/auto';
 
 import {
   CardComponent, CardHeaderComponent, CardBodyComponent, BadgeComponent,
-  RowComponent, ColComponent, WidgetStatCComponent, FormCheckLabelDirective
+  RowComponent, ColComponent, WidgetStatCComponent
 } from '@coreui/angular';
 
 @Component({

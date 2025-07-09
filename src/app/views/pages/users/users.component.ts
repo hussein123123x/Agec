@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
+import { NgSelectModule } from '@ng-select/ng-select';
+
 
 
 import {
@@ -18,6 +20,7 @@ import {
   ModalBodyComponent,
   ModalFooterComponent,
 } from '@coreui/angular';
+import { ToastrService } from 'ngx-toastr';
 
 
 
@@ -30,7 +33,6 @@ import {
     CardComponent,
     CardHeaderComponent,
     CardBodyComponent,
-    ReactiveFormsModule,
     RowComponent,
     ColComponent,
     BadgeComponent,
@@ -40,15 +42,27 @@ import {
     ModalHeaderComponent,
     ModalBodyComponent,
     ModalFooterComponent,
+    NgSelectModule,
+    ReactiveFormsModule,
+    FormsModule,
   ],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent {
+  activeTab: string = 'employees';
+  vacationForm: FormGroup;
+  selectedEmployees: number[] = [];
+  showVacationForm: boolean = false;
+
+  // تخزين الإجازات المضافة
+  officialVacations: any[] = [];
+
   // ✅ بيانات الموظفين التجريبية
   employees = [
     {
-      name: 'أحمد علي',
+      id: 1,
+      name: ' علي',
       image: 'assets/images/avatars/1.jpg',
       code: 'EMP001',
       department: 'الإنتاج',
@@ -66,7 +80,8 @@ export class UsersComponent {
       notes: 'العامل ده بيتأخر دايمًا في تسليم الشغل ومش ملتزم بالميعاد، وكمان تركيزه ضعيف وبيحتاج حد يتابعه باستمرار، ده غير إنه مش بيحس بالمسؤولية وده بيأثر على الفريق كله'
     },
     {
-      name: 'منى صالح',
+      id: 2,
+      name: ' صالح',
       image: 'assets/images/avatars/2.jpg',
       code: 'EMP002',
       department: 'المحاسبة',
@@ -82,7 +97,8 @@ export class UsersComponent {
     absenceDays: 5
     },
     {
-      name: 'أحمد علي',
+      id: 3,
+      name: 'أحمد ',
       image: 'assets/images/avatars/3.jpg',
       code: 'EMP003',
       department: 'الإنتاج',
@@ -99,7 +115,8 @@ export class UsersComponent {
 
     },
     {
-      name: 'منى صالح',
+      id: 4,
+      name: 'منى ',
       image: 'assets/images/avatars/7.jpg',
       code: 'EMP004',
       department: 'المحاسبة',
@@ -115,7 +132,8 @@ export class UsersComponent {
     absenceDays: 5
     },
     {
-      name: 'أحمد علي',
+      id: 5,
+      name: 'فتحى',
       image: 'assets/images/avatars/5.jpg',
       code: 'EMP005',
       department: 'الإنتاج',
@@ -132,7 +150,8 @@ export class UsersComponent {
 
     },
     {
-      name: 'منى صالح',
+      id: 6,
+      name: 'ابراهيم ',
       image: 'assets/images/avatars/6.jpg',
       code: 'EMP006',
       department: 'المحاسبة',
@@ -149,16 +168,20 @@ export class UsersComponent {
     }
   ];
 
+  applicants = [
+    { name: 'أحمد جمال', email: 'ahmed@example.com', phone: '01012345678', qualification: 'بكالوريوس تجارة', notes: 'تمت المقابلة ولم يتم القبول' },
+    { name: 'سارة علي', email: 'sara@example.com', phone: '01198765432', qualification: 'دبلوم صناعي', notes: 'غير مناسبة للوظيفة الحالية' }
+  ];
+
   // ✅ حالة عرض النافذة المنبثقة
   showModal = signal(false);
   selectedEmployee: any = null;
-
 
   // ✅ النموذج الخاص بالموظف
   employeeForm: FormGroup;
   editMode: boolean = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private toastr: ToastrService) {
     this.employeeForm = this.fb.group({
       name: ['', Validators.required],
       email: [''],
@@ -172,7 +195,102 @@ export class UsersComponent {
       absenceDays: [0],
       address: ['']
     });
+
+    this.vacationForm = this.fb.group({
+      fromDate: [''],
+      toDate: [''],
+      selectedEmployees: [[]],
+      reason: [''],        // سبب الإجازة
+      details: ['']   
+    });
+
+    this.officialVacations = [
+        {
+          fromDate: '2025-07-20',
+          toDate: '2025-07-23',
+          reason: 'عطلة عيد الأضحى',
+          details: 'إجازة رسمية بمناسبة عيد الأضحى المبارك وفقًا للتقويم الحكومي',
+          isAllSelected: true,
+          employees: [
+            { id: 1, name: 'علي', daysRemaining: 14 },
+            { id: 2, name: 'صالح', daysRemaining: 3 },
+            { id: 3, name: 'أحمد', daysRemaining: 4 },
+            { id: 4, name: 'منى', daysRemaining: 2 },
+            { id: 5, name: 'فتحى', daysRemaining: 1 },
+            { id: 6, name: 'ابراهيم', daysRemaining: 5 } 
+          ]
+        }
+    ];
+
   }
+
+  assignOfficialVacation() {
+  const data = this.vacationForm.value;
+  const fromDate = data.fromDate;
+  const toDate = data.toDate;
+  const daysRequested = this.getDateDiffInDays(fromDate, toDate);
+
+  const selectedIds = data.selectedEmployees.includes('all')
+    ? this.employees.map((e: any) => e.id)
+    : data.selectedEmployees;
+
+  const selectedEmployees = this.employees.filter(emp => selectedIds.includes(emp.id));
+
+  // تحقق من كل موظف
+  for (const emp of selectedEmployees) {
+    const found = this.officialVacations[0]?.employees.find((e: any) => e.id === emp.id);
+    const daysRemaining = found?.daysRemaining ?? 0;
+
+    if (daysRemaining < daysRequested) {
+      this.toastr.error(
+        `الموظف ${emp.name} ايام متبقية  ${daysRemaining} يومًا ولا يمكنه أخذ ${daysRequested} أيام.`,
+        'رصيد غير كافٍ'
+      );
+      return; // إلغاء التسجيل
+    }
+  }
+
+  // إذا مرّ التحقق، أضف الإجازة
+  this.officialVacations.push({
+    fromDate,
+    toDate,
+    reason: data.reason,
+    details: data.details,
+    isAllSelected: data.selectedEmployees.includes('all'),
+    employees: selectedEmployees
+  });
+
+  this.toastr.success('تم تسجيل الإجازة بنجاح', 'نجاح');
+  this.vacationForm.reset();
+  this.selectedEmployees = [];
+  this.showVacationForm = false;
+}
+
+
+
+  toggleEmployee(id: number): void {
+  const index = this.selectedEmployees.indexOf(id);
+  if (index === -1) {
+    this.selectedEmployees.push(id);
+  } else {
+    this.selectedEmployees.splice(index, 1);
+  }
+
+  // تحديث قيمة الفورم
+  this.vacationForm.get('selectedEmployees')?.setValue(this.selectedEmployees);
+}
+
+getDateDiffInDays(from: string, to: string): number {
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  const diffInMs = Math.abs(toDate.getTime() - fromDate.getTime());
+  return Math.ceil(diffInMs / (1000 * 60 * 60 * 24)) + 1;
+}
+
+selectAllEmployees(): void {
+  this.selectedEmployees = this.employees.map(e => e.id);
+  this.vacationForm.get('selectedEmployees')?.setValue(this.selectedEmployees);
+}
 
   showDetails(employee: any) {
     this.selectedEmployee = employee;

@@ -94,7 +94,7 @@ import {
   cilUserFemale,
   cilUserFollow,
   cilUserUnfollow,
-  cilFactory, cilStorage, cilGroup, cilTruck, cilCog, cilWarning, cilBan, cibInstagram, cilLockUnlocked, cilPlus, cilHandshake
+  cilFactory, cilStorage, cilGroup, cilTruck, cilCog, cilWarning, cilBan, cibInstagram, cilLockUnlocked, cilPlus, cilHandshake,
 } from '@coreui/icons';
 
 import { signet } from './signet';

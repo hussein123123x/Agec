@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'login',
     pathMatch: 'full'
   },
   {
@@ -36,6 +36,18 @@ export const routes: Routes = [
       {
         path: 'sales',
         loadChildren: () => import('./views/pages/sales/routes').then((m) => m.routes)
+      },
+      {
+        path: 'study',
+        loadChildren: () => import('./views/pages/study/routes').then((m) => m.routes)
+      },
+      {
+        path: 'customers',
+        loadChildren: () => import('./views/pages/customers/routes').then((m) => m.routes)
+      },
+      {
+        path: 'events',
+        loadChildren: () => import('./views/pages/events/routes').then((m) => m.routes)
       },
       {
         path: 'statistics',

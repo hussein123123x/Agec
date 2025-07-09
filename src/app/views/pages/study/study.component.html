@@ -1,0 +1,257 @@
+<div>
+  <div
+    class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3"
+  >
+    <h4 class="mb-0">مشاريع تحت الدراسة</h4>
+
+    <div
+      class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-end"
+    >
+      <input
+        type="text"
+        class="form-control  py-3 mb-3"
+        placeholder="بحث باسم المشروع أو المالك"
+        [(ngModel)]="searchQuery"
+        style="max-width: 250px"
+      />
+
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>تحديد مدة زمنية</mat-label>
+        <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+            <input matStartDate formControlName="start" placeholder="من تاريخ">
+            <input matEndDate formControlName="end" placeholder="إلى تاريخ">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker>
+            <mat-datepicker-actions>
+            <div class="d-flex justify-content-between mt-3 px-3 pb-2">
+                <button matDatepickerCancel class="btn btn-sm btn-outline-secondary">إلغاء</button>
+                <button matDatepickerApply class="btn btn-sm btn-primary" (click)="applyDateFilter()">تطبيق</button>
+            </div>
+            </mat-datepicker-actions>
+        </mat-date-range-picker>
+        </mat-form-field>
+
+
+      <button class="btn btn-primary" (click)="showForm = !showForm">
+        {{ showForm ? "إغلاق النموذج" : "+ مشروع جديد" }}
+      </button>
+    </div>
+
+    <form *ngIf="showForm" class="border p-4 rounded bg-light mt-4">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">اسم المشروع <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.name"
+            name="name"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">تكلفة المشروع <span class="text-danger">*</span></label>
+          <input
+            type="number"
+            class="form-control"
+            [(ngModel)]="newProject.cost"
+            name="cost"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">اسم العميل</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.client"
+            name="client"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">رقم العرض (يُولد تلقائيًا)</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="projects.length + 1"
+            disabled
+          />
+        </div>
+
+        <div  class="col-md-6">
+          <label class="form-label">اسم الاستشاري</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.consultantName"
+            name="consultantName"
+          />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">هاتف الاستشاري</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.consultantPhone"
+            name="consultantPhone"
+          />
+        </div>
+
+
+        <div class="col-md-12">
+            <label class="form-label">  موعد متوقع للتسليم <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" [(ngModel)]="newProject.deliveryDate" name="deliveryDate" />
+        </div>
+
+        <div class="col-md-12">
+          <label class="form-label">تفاصيل إضافية</label>
+          <textarea
+            rows="3"
+            class="form-control"
+            [(ngModel)]="newProject.extraDetails"
+            name="extraDetails"
+          ></textarea>
+        </div>
+
+
+        <div class="col-md-6">
+          <label class="form-label"
+            >النموذج المالي (PDF / Word / Excel / صورة)</label
+          >
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
+            class="form-control"
+            (change)="onFileSelected($event)"
+          />
+
+          <p class="card-text mt-2" *ngIf="newProject.financialModelFile">
+            <strong>عرض الملف:</strong>
+            <a
+              [href]="getFileUrl(newProject.financialModelFile)"
+              target="_blank"
+            >
+              {{ newProject.financialModelFile.name }}
+            </a>
+          </p>
+
+          <div
+            class="mb-2"
+            *ngIf="newProject.financialModelFile?.type?.startsWith('image/')"
+          >
+            <img
+              [src]="getFileUrl(newProject.financialModelFile)"
+              alt="معاينة"
+              class="img-thumbnail"
+              style="max-width: 150px"
+            />
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label">ملفات إضافية (PDF, Word, صور...)</label>
+          <input
+            type="file"
+            class="form-control"
+            multiple
+            accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
+            (change)="onExtraFilesSelected($event)"
+          />
+          <ul class="mt-2 small" *ngIf="newProject.extraFiles?.length">
+            <li *ngFor="let f of newProject.extraFiles">📎 {{ f.name }}</li>
+          </ul>
+        </div>
+
+        
+
+        <div class="col-12 text-end">
+          <button
+            class="btn btn-success px-4"
+            type="button"
+            (click)="saveProject()"
+          >
+            حفظ
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row mt-4" >
+    <div class="col-md-6" *ngFor="let project of filteredProjects()">
+      <div class="card border shadow-sm mb-4" [ngClass]="{ 'bg-light border-success': suppliedProjects.has(project.offerNumber) }">
+        <div class="card-body">
+          <h5 class="card-title text-primary">{{ project.name }}</h5>
+          <p *ngIf="project.client" class="card-text mb-1">
+            <strong>العميل:</strong> {{ project.client }}
+          </p>
+          <p class="card-text mb-1">
+            <strong>التكلفة:</strong> {{ project.cost | currency : "EGP" }}
+          </p>
+          <p  class="card-text mb-1">
+            <strong>رقم العرض:</strong> {{ project.offerNumber }}
+          </p>
+          <p *ngIf="newProject.consultantName" class="card-text mb-1">
+            <strong>الاستشاري:</strong> {{ project.consultantName }} - 📞
+            {{ project.consultantPhone }}
+          </p>
+          <p class="card-text mb-1" *ngIf="project.createdAt">
+            <strong>تاريخ الإنشاء:</strong> {{ project.createdAt | date:'yyyy-MM-dd' }}
+            </p>
+
+            <p class="card-text mb-1" *ngIf="project.supplyDate">
+            <strong>تاريخ التوريد:</strong>
+            {{ project.supplyDate | date:'yyyy-MM-dd – h:m' }}
+            </p>
+          <p  class="card-text mb-1" *ngIf="project.extraDetails">
+            <strong>تفاصيل إضافية:</strong> {{ project.extraDetails }}
+            </p>
+
+
+
+
+          <p class="card-text mb-1" *ngIf="project.financialModelFile">
+            <strong>النموذج المالي:</strong>
+            <a [href]="getFileUrl(project.financialModelFile)" target="_blank">
+              عرض الملف ({{ project.financialModelFile.name }})
+            </a>
+          </p>
+
+          <!-- عرض معاينة إذا كان صورة -->
+          <div
+            class="mb-2"
+            *ngIf="project.financialModelFile?.type?.startsWith('image/')"
+          >
+            <img
+              [src]="getFileUrl(project.financialModelFile)"
+              class="img-thumbnail"
+              style="max-width: 150px"
+            />
+          </div>
+
+          <div *ngIf="project.extraFiles?.length">
+            <p class="mb-1"><strong>ملفات إضافية:</strong></p>
+            <ul class="small">
+                <li *ngFor="let file of project.extraFiles">
+                <a [href]="getFileUrl(file)" target="_blank">📎 {{ file.name }}</a>
+                </li>
+            </ul>
+            </div>
+
+          <div class="text-end mt-3">
+            <button class="btn btn-sm"
+                    [ngClass]="suppliedProjects.has(project.offerNumber) ? 'btn-success' : 'btn-outline-primary'"
+                    [disabled]="suppliedProjects.has(project.offerNumber)"
+                    (click)="viewProject(project)">
+                {{ suppliedProjects.has(project.offerNumber) ? 'تم التوريد' : 'أمر توريد' }}
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

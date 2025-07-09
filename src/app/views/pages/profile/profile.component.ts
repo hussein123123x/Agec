@@ -90,6 +90,11 @@ requestLoan() {
   alert('فتح نموذج طلب السلفة...');
 }
 
+getDeductionsTotal(): number {
+  if (!this.profile?.deductions?.length) return 0;
+  return this.profile.deductions.reduce((total: number, d: any) => total + d.amount, 0);
+}
+
   loadProfileData() {
     this.profile = {
       name: 'محمد السالم',
@@ -103,6 +108,18 @@ requestLoan() {
       upcomingLeaves: [
         { date: '2025-07-15', reason: 'إجازة عائلية' },
         { date: '2025-08-01', reason: 'سفر شخصي' }
+      ],
+      delaysDays: [
+        { date: '2025-07-15', reason: '30 دقيقة' },
+        { date: '2025-08-01', reason: '1:30 ساعة' }
+      ],
+      absentsDays: [
+        { date: '2025-07-16', reason: 'اجازة عارضة' },
+        { date: '2025-08-03', reason: 'بدون عذر' }
+      ],
+      deductions: [
+        { date: '2025-05-15', reason: 'تأخير متكرر', amount: 200 },
+        { date: '2025-06-10', reason: 'غياب بدون عذر', amount: 300 }
       ],
       bonuses: [
         { title: 'مكافأة إنجاز مشروع', amount: 1000, date: '2025-06-01' },
@@ -129,7 +146,30 @@ requestLoan() {
         { date: '2025-06-28', amount: 500, status: 'مرفوضة' }
       ],
 
-      totalLoans: 2500
+      totalLoans: 2500,
+      insuranceStatus: 'مسجل بالتأمينات',
+      educationLevel: 'بكالوريوس هندسة كهربائية',
+      certificates: [
+        { title: 'شهادة السلامة المهنية', date: '2023-05-01' },
+        { title: 'دورة القيادة الفعالة', date: '2024-03-10' }
+      ],
+      languages: ['العربية', 'الإنجليزية', 'الفرنسية'],
+
+      familyInfo: {
+        maritalStatus: 'متزوج',
+        dependents: 2,
+        emergencyContact: {
+          name: 'أحمد السالم',
+          relation: 'أخ',
+          phone: '01012345678'
+        }
+      },
+
+      residence: {
+        governorate: 'القاهرة',
+        city: 'مدينة نصر',
+        street: 'شارع الطيران'
+      }
     };
   }
 

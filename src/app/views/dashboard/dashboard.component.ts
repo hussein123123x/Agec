@@ -44,7 +44,7 @@ interface IUser {
 @Component({
   templateUrl: 'dashboard.component.html',
   styleUrls: ['dashboard.component.scss'],
-  imports: [WidgetsDropdownComponent, CardComponent, CardBodyComponent, RowComponent, ColComponent, ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressComponent, WidgetsBrandComponent, CardHeaderComponent]
+  imports: [WidgetsDropdownComponent, WidgetStatCComponent, TableDirective, CardComponent, CardBodyComponent, RowComponent, ColComponent, ButtonDirective, IconDirective, ReactiveFormsModule, ButtonGroupComponent, FormCheckLabelDirective, ChartjsComponent, NgStyle, CardFooterComponent, GutterDirective, ProgressComponent, WidgetsBrandComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -52,6 +52,45 @@ export class DashboardComponent implements OnInit {
   readonly #document: Document = inject(DOCUMENT);
   readonly #renderer: Renderer2 = inject(Renderer2);
   readonly #chartsData: DashboardChartsData = inject(DashboardChartsData);
+
+  attendanceData = [
+  {
+    id: 1001,
+    name: 'أحمد محمد',
+    department: 'الموارد البشرية',
+    absences: 2,
+    absencesPercent: 20,
+    delays: 6,
+    reason: "تأخير",
+    amountOfTime: "15",
+    delaysPercent: 30,
+    kpi: "20%"
+  },
+  {
+    id: 1002,
+    name: 'فاطمة الزهراء',
+    department: 'التسويق',
+    absences: 0,
+    absencesPercent: 0,
+    delays: 1,
+    reason: "تأخير",
+    amountOfTime: "30",
+    delaysPercent: 10,
+    kpi: "92%"
+  },
+  {
+    id: 1003,
+    name: 'علي يوسف',
+    department: 'تكنولوجيا المعلومات',
+    absences: 4,
+    absencesPercent: 40,
+    delays: 2,
+    reason: "غياب",
+    delaysPercent: 20,
+    kpi: "63%"
+  }
+];
+
 
   public users: IUser[] = [
     {

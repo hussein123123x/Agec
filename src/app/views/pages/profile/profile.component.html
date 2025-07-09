@@ -66,6 +66,61 @@
     </div>
   </div>
 
+  <h5 class="text-primary fw-bold mt-4 mb-3">المعلومات الإضافية</h5>
+<div class="row mb-4">
+
+  <!-- الحالة التأمينية والتعليم -->
+  <div class="col-md-6">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-secondary fw-bold mb-3">البيانات المهنية</h6>
+      <p><strong>الحالة التأمينية:</strong> {{ profile.insuranceStatus }}</p>
+      <p><strong>الدرجة العلمية:</strong> {{ profile.educationLevel }}</p>
+
+      <div *ngIf="profile.certificates?.length">
+        <h6 class="text-muted small mt-3">الشهادات والدورات:</h6>
+        <ul class="list-unstyled">
+          <li *ngFor="let cert of profile.certificates">
+            📜 {{ cert.title }} - {{ cert.date }}
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="profile.languages?.length">
+        <h6 class="text-muted small mt-3">اللغات المكتسبة:</h6>
+        <p>{{ profile.languages.join('، ') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- معلومات العائلة والعنوان -->
+  <div class="col-md-6">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-secondary fw-bold mb-3">معلومات شخصية</h6>
+
+      <p><strong>الحالة الاجتماعية:</strong> {{ profile.familyInfo.maritalStatus }}</p>
+      <p><strong>عدد المعالين:</strong> {{ profile.familyInfo.dependents }}</p>
+
+      <div>
+        <h6 class="text-muted small">جهة الاتصال للطوارئ:</h6>
+        <p>
+          {{ profile.familyInfo.emergencyContact.name }} ({{ profile.familyInfo.emergencyContact.relation }})<br>
+          📞 {{ profile.familyInfo.emergencyContact.phone }}
+        </p>
+      </div>
+
+      <div>
+        <h6 class="text-muted small">عنوان السكن:</h6>
+        <p>
+          {{ profile.residence.governorate }} - {{ profile.residence.city }}<br>
+          {{ profile.residence.street }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
   <h5 class="text-primary fw-bold mt-4 mb-3">الاجازات</h5>
   <div class="row mb-4">
     
@@ -84,6 +139,39 @@
         </div>
       </div>
     </div>
+
+    <!-- الغيابات -->
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary fw-bold mb-3">الغيابات</h6>
+        <p><strong>عدد أيام الغياب:</strong> {{ profile.delays }} يوم</p>
+        <div *ngIf="profile.absentsDays.length">
+          <h6 class="text-muted small">إجازات قادمة:</h6>
+          <ul class="list-unstyled">
+            <li *ngFor="let leave of profile.absentsDays">
+              📅 {{ leave.date }} - {{ leave.reason }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- التأخيرات -->
+    <div class="col-md-3">
+      <div class="card shadow-sm p-3">
+        <h6 class="text-secondary fw-bold mb-3">التأخيرات</h6>
+        <p><strong>عدد أيام التأخير:</strong> {{ profile.delays }} يوم</p>
+        <div *ngIf="profile.upcomingLeaves.length">
+          <h6 class="text-muted small">ايام التأخير:</h6>
+          <ul class="list-unstyled">
+            <li *ngFor="let leave of profile.delaysDays">
+              📅 {{ leave.date }} - {{ leave.reason }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
 
     
 
@@ -170,6 +258,36 @@
       </table>
     </div>
   </div>
+
+  <!-- الخصومات والجزاءات -->
+  <div class="col-md-6 mb-4">
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="text-secondary fw-bold mb-3">سجل الخصومات والجزاءات</h6>
+
+      <!-- مجموع الخصومات -->
+      <p><strong>إجمالي الخصومات:</strong> 
+        {{ getDeductionsTotal() }} جنيه
+      </p>
+
+      <table class="table table-sm table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>التاريخ</th>
+            <th>السبب</th>
+            <th>القيمة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of profile.deductions">
+            <td>{{ d.date }}</td>
+            <td>{{ d.reason }}</td>
+            <td class="text-danger">-{{ d.amount }} جنيه</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 
 </div>
 

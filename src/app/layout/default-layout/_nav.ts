@@ -11,9 +11,14 @@ export const navItems: INavData[] = [
     }
   },
   {
+    name: 'الدراسات',
+    url: '/study',
+    iconComponent: { name: 'cil-handshake' },
+  },
+  {
     name: 'إدارة المشاريع',
     url: '/projects',
-    iconComponent: { name: 'cil-handshake' },
+    iconComponent: { name: 'cil-task' },
   },
   {
     name: 'إدارة الموظفين',
@@ -39,6 +44,11 @@ export const navItems: INavData[] = [
     }
   },
   {
+    name: 'العملاء',
+    url: '/customers',
+    iconComponent: { name: 'cil-people' },
+  },
+  {
     name: 'الموردين',
     url: '/sales',
     iconComponent: { name: 'cil-group' }
@@ -48,6 +58,11 @@ export const navItems: INavData[] = [
     url: '/accounting',
     iconComponent: { name: 'cil-dollar' },
 
+  },
+  {
+    name: 'الاحداث اليومية',
+    url: '/events',
+    iconComponent: { name: 'cil-calendar' },
   },
   {
     name: ' الصاينة و الدعم الفنى ',
