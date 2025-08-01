@@ -1,1 +1,134 @@
-<p>events works!</p>
+<div
+    class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3"
+  >
+    <h4 class="mb-0">الاحداث</h4>
+
+    <div
+      class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-end"
+    >
+      <input
+        type="text"
+        class="form-control  py-3 mb-3"
+        placeholder="بحث "
+        [(ngModel)]="searchText"
+        style="max-width: 250px"
+      />
+
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>تحديد مدة زمنية</mat-label>
+        <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+            <input matStartDate formControlName="start" placeholder="من تاريخ">
+            <input matEndDate formControlName="end" placeholder="إلى تاريخ">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker>
+            <mat-datepicker-actions>
+            <div class="d-flex justify-content-between mt-3 px-3 pb-2">
+                <button matDatepickerCancel class="btn btn-sm btn-outline-secondary" (click)="clearDateFilter()">إلغاء</button>
+                <button matDatepickerApply class="btn btn-sm btn-primary" (click)="applyDateFilter()">تطبيق</button>
+            </div>
+            </mat-datepicker-actions>
+        </mat-date-range-picker>
+        </mat-form-field>
+
+
+      <button class="btn btn-primary" (click)="showForm = !showForm">
+        {{ showForm ? "إغلاق النموذج" : "+ حدث جديد" }}
+      </button>
+    </div>
+
+    <form *ngIf="showForm" class="col-12 border p-4 rounded bg-light mt-4">
+      <div class="row g-3">
+        <div class="col-md-12">
+          <label class="form-label"> الحدث <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="event.name"
+            name="name"
+          />
+        </div>
+
+        <div class="col-md-6">
+        <label class="form-label">المرجع <span class="text-danger">*</span></label>
+        <select
+            class="form-select"
+            [(ngModel)]="event.reference"
+            name="reference"
+            required
+        >
+            <option value="">اختر المرجع</option>
+            <option>الصيانة العامة</option>
+            <option>الإنتاج</option>
+            <option>شؤون الموظفين</option>
+            <option>المشتريات</option>
+            <option>المحاسبة</option>
+            <option>الإدارة</option>
+        </select>
+        </div>
+
+        <div class="col-md-6">
+        <label class="form-label">وقت الحدث</label>
+        <input
+            type="time"
+            class="form-control"
+            [(ngModel)]="event.time"
+            name="time"
+        />
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">تفاصيل الحدث</label>
+          <textarea
+            class="form-control"
+            [(ngModel)]="event.details"
+            name="details"
+            rows="3"
+          ></textarea>
+        </div>
+
+
+        
+
+        <div class="col-12 text-end">
+          <button
+            class="btn btn-success px-4"
+            type="button"
+            (click)="saveEvent()"
+          >
+            حفظ
+          </button>
+        </div>
+      </div>
+    </form>
+
+</div>
+
+<div class="mt-4"  *ngIf="filteredEvents.length > 0">
+  <h6 class="text-secondary mb-3">سجل الأحداث</h6>
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>الحدث</th>
+          <th>التاريخ</th>
+          <th>التفاصيل</th>
+          <th>المرجع</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of filteredEvents">
+          <td>{{ e.name }}</td>
+          <td>{{ e.date  | date: 'dd/MM/yyyy – h:mm a' }}</td>
+          <td>{{ e.details }}</td>
+          <td>{{ e.reference }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div *ngIf="filteredEvents.length === 0" class="alert alert-warning mt-4">
+  لا يوجد أحداث مطابقة لنتائج البحث.
+</div>
+

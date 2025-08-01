@@ -19,6 +19,7 @@ import Chart from 'chart.js/auto';
 })
 export class ProjectsComponent {
   selectedProject: any = null;
+  flag: boolean = false;
   searchQuery: string = '';
   statusFilter: string = '';
   showDetails: boolean = false;
@@ -33,6 +34,15 @@ export class ProjectsComponent {
   owner: 'شركة المجمعات الحديثة',
   startDate: '2025-02-10',
   dueDate: '2025-05-20',
+  financial: {
+  projectValue: 1500000,
+  receivedAmount: 850000,
+  estimatedCost: 1200000,
+  spentCost: 700000,
+  toolsCost: 300000,
+  executedHours: 520,
+  notes: 'تم صرف دفعتين، باقي دفعة واحدة عند التسليم النهائي.'
+},
   status: 'مكتمل',
   progress: '100%',
   voltageLevel: 'جهد متوسط (11 ك.ف.)',
@@ -145,6 +155,15 @@ export class ProjectsComponent {
   status: 'جاري',
   progress: '45%',
   voltageLevel: 'جهد منخفض (400 فولت)',
+  financial: {
+  projectValue: 1500000,
+  receivedAmount: 850000,
+  estimatedCost: 1200000,
+  spentCost: 700000,
+  toolsCost: 300000,
+  executedHours: 520,
+  notes: 'تم صرف دفعتين، باقي دفعة واحدة عند التسليم النهائي.'
+},
   location: 'فرع اكتوبر',
   engineerInCharge: 'م. سارة العبدالله',
   description: 'تحديث شامل للوحات التوزيع الكهربائية بالمصنع لتشمل أنظمة حماية ذكية وقياس الطاقة.',
@@ -344,7 +363,6 @@ export class ProjectsComponent {
     ]
   }
 ]
-
 ,
   currentPhase: 1,
   notes: [
@@ -369,6 +387,15 @@ export class ProjectsComponent {
     dueDate: '2025-06-15',
     status: 'متأخر',
     progress: '68%',
+    financial: {
+  projectValue: 1500000,
+  receivedAmount: 850000,
+  estimatedCost: 1200000,
+  spentCost: 700000,
+  toolsCost: 300000,
+  executedHours: 520,
+  notes: 'تم صرف دفعتين، باقي دفعة واحدة عند التسليم النهائي.'
+},
     voltageLevel: 'جهد عالي (66 ك.ف.)',
     location: 'فرع اكتوبر',
     engineerInCharge: 'م. أحمد القحطاني',
@@ -479,6 +506,15 @@ export class ProjectsComponent {
     owner: 'هيئة الكهرباء والمياه',
     startDate: '2025-01-01',
     dueDate: '2025-07-15',
+    financial: {
+  projectValue: 1500000,
+  receivedAmount: 850000,
+  estimatedCost: 1200000,
+  spentCost: 700000,
+  toolsCost: 300000,
+  executedHours: 520,
+  notes: 'تم صرف دفعتين، باقي دفعة واحدة عند التسليم النهائي.'
+},
     status: 'اقترب',
     progress: '68%',
     voltageLevel: 'جهد عالي (66 ك.ف.)',
@@ -713,6 +749,18 @@ getProjectPerformance(progressStr: string, dueDate: string, startDate: string): 
   if (diff <= 10) return 'جيد';
   if (diff <= 20) return 'جيد جدًا';
   return 'ممتاز';
+}
+
+getSpentPercentage(project: any): number {
+  const spent = project?.financial?.spentCost;
+  const total = project?.financial?.estimatedCost;
+  return spent && total ? (spent / total) * 100 : 0;
+}
+
+getCollectionPercentage(project: any): number {
+  const received = project?.financial?.receivedAmount;
+  const total = project?.financial?.projectValue;
+  return received && total ? (received / total) * 100 : 0;
 }
 
 

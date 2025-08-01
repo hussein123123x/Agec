@@ -21,6 +21,11 @@ export const navItems: INavData[] = [
     iconComponent: { name: 'cil-task' },
   },
   {
+    name: 'إدارة الأنتاج',
+    url: '/production',
+    iconComponent: { name: 'cil-factory' }
+  },
+  {
     name: 'إدارة الموظفين',
     url: '/users',
     iconComponent: { name: 'cil-user' },
@@ -28,11 +33,6 @@ export const navItems: INavData[] = [
       color: 'info',
       text: 'Admin'
     }
-  },
-  {
-    name: 'إدارة خط الأنتاج',
-    url: '/production',
-    iconComponent: { name: 'cil-factory' }
   },
   {
     name: 'إدارة المخزون',

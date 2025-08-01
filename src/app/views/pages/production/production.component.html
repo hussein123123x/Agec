@@ -1,190 +1,446 @@
 <!-- إدارة خطوط الإنتاج -->
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">إدارة خطوط الإنتاج</h5>
-    <div class="d-flex gap-2">
-      <div class="input-group me-2">
-        <input type="text" class="form-control" placeholder="بحث باسم الخط أو المشرف">
-        <button class="btn btn-primary">بحث</button>
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button class="nav-link" [class.active]="activeTab === 'projects'" (click)="activeTab = 'projects'">
+      المشاريع
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" [class.active]="activeTab === 'lines'" (click)="showLines()">
+      خطوط الانتاج
+    </button>
+  </li>
+</ul>
+
+<div *ngIf="activeTab === 'lines'">
+  <c-card class="mb-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">إدارة خطوط الإنتاج</h5>
+      <div class="d-flex gap-2">
+        <div class="input-group me-2">
+          <input type="text" class="form-control" placeholder="بحث باسم الخط أو المشرف">
+          <button class="btn btn-primary">بحث</button>
+        </div>
+        <button class="btn btn-success" (click)="openForm()">إضافة خط</button>
+        <select class="form-select" [(ngModel)]="statusFilter">
+          <option value="">كل الحالات</option>
+          <option value="نشط">نشط</option>
+          <option value="متوقف">متوقف</option>
+          <option value="صيانة">صيانة</option>
+        </select>
       </div>
-      <button class="btn btn-success" (click)="openForm()">إضافة خط</button>
-      <select class="form-select" [(ngModel)]="statusFilter">
-        <option value="">كل الحالات</option>
-        <option value="نشط">نشط</option>
-        <option value="متوقف">متوقف</option>
-        <option value="صيانة">صيانة</option>
-      </select>
+    </c-card-header>
+  
+    <c-card-body>
+      <!-- الإحصائيات -->
+      <c-row class="mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="primary" [value]="lines.length" [title]="'إجمالي الخطوط'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-factory" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="success" [value]="activeCount" [title]="'الخطوط العاملة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-check-circle" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="danger" [value]="stoppedCount" [title]="'متوقفة'" inverse>
+          <ng-template cTemplateId="widgetIconTemplate">
+            <svg cIcon name="cil-ban" height="36"></svg>
+          </ng-template>
+        </c-widget-stat-c>
+  
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="warning" [value]="maintenanceCount" [title]="'صيانة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-settings" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+      </c-row>
+  
+      <!-- <div class="table-responsive border">
+        <table class="table table-hover table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>الاسم</th>
+              <th>المشرف</th>
+              <th>عدد العمال</th>
+              <th>الطاقة الإنتاجية</th>
+              <th>الإنتاج الفعلي</th>
+              <th>الحالة</th>
+              <th>آخر صيانة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let line of filteredLines()">
+              <td>{{ line.name }}</td>
+              <td>{{ line.supervisor }}</td>
+              <td>{{ line.workers }}</td>
+              <td>{{ line.capacity }}</td>
+              <td>{{ line.actual }}</td>
+              <td>
+                <c-badge [color]="line.status === 'نشط' ? 'success' : line.status === 'متوقف' ? 'danger' : 'warning'">{{ line.status }}</c-badge>
+              </td>
+              <td>{{ line.lastMaintenance }}</td>
+              <td>
+                <button class="btn btn-light btn-sm" (click)="showDetailsModal(line)"  title="عرض">
+                  <svg cIcon name="cil-magnifying-glass" size="sm"></svg>
+                </button>
+                <button class="btn btn-light btn-sm" (click)="editLine(line)" title="تعديل">
+                  <svg cIcon name="cil-pencil" size="sm"></svg>
+                </button>
+                <button class="btn btn-light btn-sm" (click)="deleteLine(line)" title="حذف">
+                  <svg cIcon name="cil-trash" size="sm"></svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div> -->
+      <div class="mb-4">
+      <canvas id="lineChartCanvas"></canvas>
+      </div>
+  
+      <div class="container my-4">
+  
+    <!-- Main Card: خط ميكانيكي -->
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span>خط ميكانيكي</span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3" *ngFor="let machine of mechanicalMachines">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">{{ machine.name }}</h5>
+                <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
+                <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
+                <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
+              </div>
+              <div class="card-footer text-end">
+                <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
+                <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
+                <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </c-card-header>
+  
+    <!-- Main Card: خط كهربائي -->
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <span>خط كهربائي</span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3" *ngFor="let machine of electricalMachines">
+            <div class="card h-100 shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">{{ machine.name }}</h5>
+                <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
+                <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
+                <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
+              </div>
+              <div class="card-footer text-end">
+                <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
+                <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
+                <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+      </div>
+  
+  
+      <!-- الرسوم البيانية -->
+      
+  
+      <!-- جدول خطوط الإنتاج -->
+      
+    </c-card-body>
+  </c-card>
+  
+  <!-- Modal تفاصيل -->
+  <c-modal [visible]="detailsVisible()" (visibleChange)="detailsVisible.set($event)">
+    <c-modal-header>
+      <strong>تفاصيل خط الإنتاج</strong>
+    </c-modal-header>
+    <c-modal-body *ngIf="selectedLine">
+      <ul class="list-group">
+        <li class="list-group-item"><strong>الاسم:</strong> {{ selectedLine.name }}</li>
+        <li class="list-group-item"><strong>المشرف:</strong> {{ selectedLine.supervisor }}</li>
+        <li class="list-group-item">
+          <strong>عدد العمال:</strong> {{ selectedLine.workers }}
+          <ng-container *ngIf="selectedLine.absentEmployees as absentList">
+            <span *ngIf="absentList.length > 0" class="text-danger">
+              ({{ absentList.join('، ') }} {{ absentList.length > 1 ? 'لم يحضروا اليوم' : 'لم يحضر اليوم' }})
+            </span>
+          </ng-container>
+        </li>
+        <li class="list-group-item"><strong>الطاقة الإنتاجية:</strong> {{ selectedLine.capacity }}</li>
+        <li class="list-group-item"><strong>الإنتاج الفعلي:</strong> {{ selectedLine.actual }}</li>
+        <li class="list-group-item"><strong>الحالة:</strong> {{ selectedLine.status }}</li>
+        <li class="list-group-item"><strong>آخر صيانة:</strong> {{ selectedLine.lastMaintenance }}</li>
+        <li class="list-group-item"><strong>ملاحظات:</strong> {{ selectedLine.notes }}</li>
+      </ul>
+    </c-modal-body>
+    <c-modal-footer>
+      <button class="btn btn-secondary" (click)="closeDetailsModal()">إغلاق</button>
+    </c-modal-footer>
+  </c-modal>
+</div>
+
+<div *ngIf="activeTab === 'projects'">
+   <h3 class="mb-4">قائمة المشاريع</h3>
 
   <c-card-body>
-    <!-- الإحصائيات -->
-    <c-row class="mb-4 text-center">
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="primary" [value]="lines.length" [title]="'إجمالي الخطوط'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-factory" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="success" [value]="activeCount" [title]="'الخطوط العاملة'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-check-circle" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="danger" [value]="stoppedCount" [title]="'متوقفة'" inverse>
-        <ng-template cTemplateId="widgetIconTemplate">
-          <svg cIcon name="cil-ban" height="36"></svg>
-        </ng-template>
-      </c-widget-stat-c>
+      <!-- الإحصائيات -->
+      <c-row class=" mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="primary" value="5" [title]="'عدد المشاريع'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-home" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="success" value="4" [title]="'مشاريع مكتملة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-warning" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
 
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="warning" [value]="maintenanceCount" [title]="'صيانة'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-settings" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-    </c-row>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="warning" value="4" [title]="'مشاريع اقتربت'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-warning" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
 
-    <!-- <div class="table-responsive border">
-      <table class="table table-hover table-striped align-middle mb-0">
-        <thead class="table-light">
-          <tr>
-            <th>الاسم</th>
-            <th>المشرف</th>
-            <th>عدد العمال</th>
-            <th>الطاقة الإنتاجية</th>
-            <th>الإنتاج الفعلي</th>
-            <th>الحالة</th>
-            <th>آخر صيانة</th>
-            <th>إجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let line of filteredLines()">
-            <td>{{ line.name }}</td>
-            <td>{{ line.supervisor }}</td>
-            <td>{{ line.workers }}</td>
-            <td>{{ line.capacity }}</td>
-            <td>{{ line.actual }}</td>
-            <td>
-              <c-badge [color]="line.status === 'نشط' ? 'success' : line.status === 'متوقف' ? 'danger' : 'warning'">{{ line.status }}</c-badge>
-            </td>
-            <td>{{ line.lastMaintenance }}</td>
-            <td>
-              <button class="btn btn-light btn-sm" (click)="showDetailsModal(line)"  title="عرض">
-                <svg cIcon name="cil-magnifying-glass" size="sm"></svg>
-              </button>
-              <button class="btn btn-light btn-sm" (click)="editLine(line)" title="تعديل">
-                <svg cIcon name="cil-pencil" size="sm"></svg>
-              </button>
-              <button class="btn btn-light btn-sm" (click)="deleteLine(line)" title="حذف">
-                <svg cIcon name="cil-trash" size="sm"></svg>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div> -->
-    <div class="mb-4">
-    <canvas id="lineChartCanvas"></canvas>
-    </div>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="danger" value="4" [title]="'مشاريع متأخرة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-warning" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        
 
-    <div class="container my-4">
+      </c-row>
+    
+    </c-card-body>
 
-  <!-- Main Card: خط ميكانيكي -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <span>خط ميكانيكي</span>
-    </div>
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-4 mb-3" *ngFor="let machine of mechanicalMachines">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">{{ machine.name }}</h5>
-              <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
-              <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
-              <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
-            </div>
-            <div class="card-footer text-end">
-              <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
-              <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
-              <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
-            </div>
+  <div *ngFor="let project of projects" class="card mb-3 shadow-sm border">
+    <!-- رأس الكرت -->
+    <div 
+      class="card-header bg-light d-flex justify-content-between align-items-center"
+      (click)="toggleProject(project.id)"
+      style="cursor: pointer;"
+    >
+      <h5 class="mb-0 text-primary">{{ project.name }}</h5>
+      <div>
+        <!-- <span class="badge"
+          [ngClass]="{
+            'bg-success': project.status === 'مكتملة',
+            'bg-warning text-dark': project.status !== 'مكتمل'
+          }">
+          {{ project.status }}
+        </span> -->
+        <div class="mt-2">
+        <label class="form-label">نسبة الإنجاز</label>
+        <div class="progress" style="height: 20px;">
+          <div class="progress-bar"
+              role="progressbar"
+              [style.width]="project.progress"
+              [ngClass]="{
+                'bg-success': parseProgress(project.progress) >= 100,
+                'bg-info': parseProgress(project.progress) >= 50 && parseProgress(project.progress) < 100,
+                'bg-danger': parseProgress(project.progress) < 50
+              }">
+            {{ project.progress }}
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- Main Card: خط كهربائي -->
-  <div class="card mb-4">
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-      <span>خط كهربائي</span>
-    </div>
-    <div class="card-body">
-      <div class="row">
-        <div class="col-md-6 mb-3" *ngFor="let machine of electricalMachines">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">{{ machine.name }}</h5>
-              <p class="card-text"><strong>رقم الماكينة:</strong> {{ machine.number }}</p>
-              <p class="card-text"><strong>المشرف:</strong> {{ machine.supervisor }}</p>
-              <p class="card-text"><strong>عدد العمال:</strong> {{ machine.employees }}</p>
-            </div>
-            <div class="card-footer text-end">
-              <button class="btn btn-outline-primary btn-sm me-2" (click)="showDetailsModal(machine)">عرض</button>
-              <button class="btn btn-outline-secondary btn-sm me-2" (click)="editMachine(machine)">تعديل</button>
-              <button class="btn btn-outline-danger btn-sm" (click)="deleteMachine(machine)">حذف</button>
-            </div>
-          </div>
-        </div>
       </div>
+
+    </div>
+
+    <!-- محتوى الكرت القابل للفتح/الإغلاق -->
+    <div class="card-body" *ngIf="expandedProjectId === project.id">
+      <p><strong>المالك:</strong> {{ project.owner }}</p>
+      <p><strong>تاريخ البدء:</strong> {{ project.startDate }} | <strong>تاريخ التسليم:</strong> {{ project.dueDate }}</p>
+
+
+      
+
+      <!-- ملاحظات عامة -->
+<div class="mt-3">
+  <div class="d-flex justify-content-between align-items-center">
+    <h6 class="text-primary">ملاحظات عامة:</h6>
+    <div>
+      <button class="btn btn-sm btn-outline-primary me-1" > إضافة ملاحظة</button>
     </div>
   </div>
 
-    </div>
+  <ul class="list-group mt-2 mb-3" *ngIf="project.notes?.length">
+    <li *ngFor="let note of project.notes; let i = index" class="list-group-item d-flex justify-content-between align-items-start">
+      <div>
+        <strong>{{ note.author }}</strong> - <small>{{ note.date }}</small>
+        <p class="mb-0">{{ note.content }}</p>
+      </div>
+      <div class="ms-2">
+        <button class="btn btn-sm btn-outline-secondary me-1" >تعديل</button>
+        <button class="btn btn-sm btn-outline-danger" >حدف</button>
+      </div>
+    </li>
+  </ul>
+</div>
 
 
-    <!-- الرسوم البيانية -->
-    
+<!-- المتطلبات -->
+<div *ngIf="project.requirements?.length">
+  <div class="d-flex justify-content-between align-items-center">
+    <h6 class="text-primary">المتطلبات:</h6>
+    <button class="btn btn-sm btn-outline-primary" > إضافة</button>
+  </div>
+  <ul class="list-unstyled ms-3 mt-2">
+    <li *ngFor="let req of project.requirements; let i = index" class="my-2">
+      • {{ req }}
+        <button class="btn btn-sm btn-outline-secondary me-1" >تعديل</button>
+        <button class="btn btn-sm btn-outline-danger" >حدف</button>
+    </li>
+  </ul>
+</div>
 
-    <!-- جدول خطوط الإنتاج -->
-    
-  </c-card-body>
-</c-card>
 
-<!-- Modal تفاصيل -->
-<c-modal [visible]="detailsVisible()" (visibleChange)="detailsVisible.set($event)">
-  <c-modal-header>
-    <strong>تفاصيل خط الإنتاج</strong>
-  </c-modal-header>
-  <c-modal-body *ngIf="selectedLine">
-    <ul class="list-group">
-      <li class="list-group-item"><strong>الاسم:</strong> {{ selectedLine.name }}</li>
-      <li class="list-group-item"><strong>المشرف:</strong> {{ selectedLine.supervisor }}</li>
-      <li class="list-group-item">
-        <strong>عدد العمال:</strong> {{ selectedLine.workers }}
-        <ng-container *ngIf="selectedLine.absentEmployees as absentList">
-          <span *ngIf="absentList.length > 0" class="text-danger">
-            ({{ absentList.join('، ') }} {{ absentList.length > 1 ? 'لم يحضروا اليوم' : 'لم يحضر اليوم' }})
+<!-- المرحلة الحالية -->
+<div class="mt-3">
+  <div class="d-flex justify-content-between align-items-center">
+    <h6 class="text-primary">المرحلة الحالية:</h6>
+    <button class="btn btn-sm btn-outline-secondary me-1" >تعديل</button>
+  </div>
+  <p>{{ project.phases[project.currentPhase]?.name || 'غير محددة' }}</p>
+</div>
+
+<h6>المنتجات المطلوبة:</h6>
+      <ul class="list-group">
+        <li *ngFor="let product of project.products"
+            class="list-group-item d-flex justify-content-between align-items-center mb-1 badge"
+            [ngClass]="{
+              ' bg-success-subtle  ': product.quantityAvailable >= product.quantityRequired,
+              ' bg-danger-subtle  ': product.quantityAvailable < product.quantityRequired
+            }"    
+            >
+
+          <span>
+            {{ product.name }} (عدد مطلوب: {{ product.quantityRequired }})
           </span>
-        </ng-container>
+
+          <span>
+            <span>
+              {{ product.quantityAvailable >= product.quantityRequired ? 'متوفر' : 'غير متوفر' }}
+            </span>
+            <span class="ms-2 text-muted">
+              - المخزون: {{ product.quantityAvailable }}
+            </span>
+          </span>
+
+        </li>
+      </ul>
+
+<!-- المراحل بالتفصيل -->
+<div class="mt-3">
+  <h6 class="text-primary">تفاصيل المراحل:</h6>
+  <div *ngFor="let phase of project.phases ; let i = index" class="mb-3 border rounded p-3 bg-light-subtle">
+
+    
+    <h6 class="mb-1 text-dark">
+      {{ phase.name }} 
+
+      
+      <span class="badge float-end" 
+            [ngClass]="{
+              'bg-success': phase.status === 'مكتملة',
+              'bg-warning text-dark': phase.status !== 'مكتملة'
+            }">
+        {{ phase.progress }}
+      </span>
+      
+    </h6>
+
+    <!-- ملاحظات المرحلة -->
+    <ul class="list-group my-2" *ngIf="phase.notes?.length">
+      <li *ngFor="let note of phase.notes" class="list-group-item small">
+        <strong>{{ note.author }}</strong> - {{ note.date }}<br />
+        {{ note.content }}
       </li>
-      <li class="list-group-item"><strong>الطاقة الإنتاجية:</strong> {{ selectedLine.capacity }}</li>
-      <li class="list-group-item"><strong>الإنتاج الفعلي:</strong> {{ selectedLine.actual }}</li>
-      <li class="list-group-item"><strong>الحالة:</strong> {{ selectedLine.status }}</li>
-      <li class="list-group-item"><strong>آخر صيانة:</strong> {{ selectedLine.lastMaintenance }}</li>
-      <li class="list-group-item"><strong>ملاحظات:</strong> {{ selectedLine.notes }}</li>
     </ul>
-  </c-modal-body>
-  <c-modal-footer>
-    <button class="btn btn-secondary" (click)="closeDetailsModal()">إغلاق</button>
-  </c-modal-footer>
-</c-modal>
+
+    <!-- المراحل الفرعية -->
+    <div *ngIf="phase.subPhases?.length">
+      <h6 class="fw-semibold small mt-3">المراحل الفرعية:</h6>
+      <ul class="list-group">
+        <li *ngFor="let sub of phase.subPhases" class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <span>{{ sub.name }}</span>
+            <span class="badge"
+              [ngClass]="{
+                'bg-success': sub.status === 'مكتملة',
+                'bg-warning text-dark': sub.status !== 'مكتملة'
+              }">
+              {{ sub.status }}
+            </span>
+          </div>
+          <!-- شريط التقدم -->
+      <div class="progress my-2" style="height: 16px;">
+        <div 
+          class="progress-bar"
+          [ngClass]="{
+            'bg-success': sub.progress === 100,
+            'bg-info': sub.progress < 100 && sub.progress > 0,
+            'bg-danger': sub.progress === 0
+          }"
+          [style.width.%]="sub.progress"
+          role="progressbar"
+          [attr.aria-valuenow]="sub.progress"
+          aria-valuemin="0"
+          aria-valuemax="100">
+          {{ sub.progress }}%
+        </div>
+      </div>
+
+          <!-- ملاحظات فرعية -->
+          <ul *ngIf="sub.notes?.length" class="mt-2 ps-3 small">
+            <li *ngFor="let note of sub.notes">
+              <strong>{{ note.author }}</strong>: {{ note.content }} ({{ note.date }})
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+    </div>
+  </div>
+
+</div>

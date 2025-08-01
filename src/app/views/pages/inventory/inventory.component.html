@@ -1,174 +1,417 @@
 <!-- صفحة إدارة المخزون -->
-<c-card class="mb-4">
-  <c-card-header class="d-flex justify-content-between align-items-center">
-    <h5 class="mb-0">إدارة المخزون</h5>
-    <div class="d-flex gap-2">
-      <div class="input-group me-2">
-        <input type="text" class="form-control" placeholder="بحث باسم المنتج أو الكود">
-        <button class="btn btn-primary">بحث</button>
+<!-- التبويبات الرئيسية -->
+<ul class="nav nav-tabs mb-3">
+  <li class="nav-item">
+    <button class="nav-link" [class.active]="activeTab === 'stores'" (click)="activeTab = 'stores'; activeStoreTab = 'general'">
+      المخازن
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link" [class.active]="activeTab === 'projects'" (click)="activeTab = 'projects'">
+      المشاريع
+    </button>
+  </li>
+</ul>
+
+<!-- التبويبات الفرعية للمخازن -->
+<div *ngIf="activeTab === 'stores'">
+  <ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeStoreTab === 'general'" (click)="activeStoreTab = 'general'">مخزن عام</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeStoreTab === 'reserved'" (click)="activeStoreTab = 'reserved'">مخزن حجز</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" [class.active]="activeStoreTab === 'finished'" (click)="activeStoreTab = 'finished'">مخزن تامة التصنيع</button>
+    </li>
+  </ul>
+</div>
+
+
+<div *ngIf="activeTab === 'stores' && activeStoreTab === 'general'">
+  <h1 class="my-4">جميع القطع</h1>
+  <c-card class="mb-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">إدارة المخزون</h5>
+      <div class="d-flex gap-2">
+        <div class="input-group me-2">
+          <input type="text"
+                class="form-control"
+                placeholder="البحث عن المنتج"
+                [(ngModel)]="searchTerm" />
+        </div>
+        <button class="btn btn-light">إضافة </button>
+        <button class="btn btn-light">استيراد</button>
+        <button class="btn btn-light">تصدير</button>
+        <button class="btn btn-light">طباعة</button>
       </div>
-      <button class="btn btn-dark">إضافة منتج</button>
-      <button class="btn btn-dark">استيراد</button>
-      <button class="btn btn-dark">تصدير</button>
-      <button class="btn btn-dark">تحديث</button>
-      <button class="btn btn-dark">طباعة</button>
-    </div>
-  </c-card-header>
+    </c-card-header>
+  
+    <c-card-body>
+      <!-- الإحصائيات -->
+      <c-row class="mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="primary" value="150" [title]="'إجمالي الأصناف'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-layers" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="danger" value="12" [title]="'أصناف ناقصة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-warning" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="success" value="5" [title]="'عدد المشاريع'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-home" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="info" value="500" [title]="'إجمالي الحركات'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-transfer" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+      </c-row>
+      
+      <div class="alert alert-warning mt-3 text-center"
+     *ngIf="filteredProducts.length === 0 && searchTerm">
+        لا يوجد منتج بهذا البحث.
+      </div>
 
-  <c-card-body>
-    <!-- الإحصائيات -->
-    <c-row class="mb-4 text-center">
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="primary" value="150" [title]="'إجمالي الأصناف'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-layers" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="danger" value="12" [title]="'أصناف ناقصة'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-warning" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="success" value="30" [title]="'عدد المخازن'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-home" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-      <c-col sm="6" md="3">
-        <c-widget-stat-c color="info" value="500" [title]="'إجمالي الحركات'" inverse>
-          <ng-template cTemplateId="widgetIconTemplate">
-            <svg cIcon name="cil-transfer" height="36"></svg>
-          </ng-template>
-        </c-widget-stat-c>
-      </c-col>
-    </c-row>
-
-    <!-- جدول المنتجات -->
-    <div class="table-responsive border">
-      <table class="table table-hover table-striped align-middle mb-0">
-        <thead class="table-dark">
+      <!-- جدول المنتجات -->
+      <div class="table-responsive border" *ngIf="filteredProducts.length > 0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>الكود</th>
+              <th>الاسم</th>
+              <th>التصنيف</th>
+              <th>الحد الأدنى</th>
+              <th>المخزون</th>
+              <!-- <th>الإجراءات</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredProducts" [ngClass]="item.quantity < item.min ? 'table-warning' : ''">
+              <td>{{ item.code }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.category }}</td>
+              <td>{{ item.min }}</td>
+              <td>{{ item.quantity }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </c-card-body>
+  </c-card>
+  
+  <c-row class="mb-4">
+    <!-- أصناف ناقصة -->
+    <c-col xs="12">
+    <c-card>
+      <c-card-header>
+        <h5 class="mb-0">أصناف ناقصة</h5> 
+      </c-card-header>
+      <c-card-body>
+        <c-row class="g-3">
+          <c-col xs="12" sm="6" md="4" lg="3" xl="2" *ngFor="let item of lowStockItems">
+            <c-card class="h-100 border border-danger-subtle">
+              <c-card-body class="text-center p-3">
+                <!-- <img [src]="item.image" alt="Low Stock Item" class="mb-2" style="width: 60px; height: 60px;" /> -->
+                <h6 class="mb-1 text-danger">{{ item.name }}</h6>
+                <p class="text-muted mb-1">كود: {{ item.code }}</p>
+                <p class="mb-0"><strong>الكمية الحالية:</strong> {{ item.quantity }}</p>
+                <p class="mb-0"><strong>الحد الأدنى:</strong> {{ item.min }}</p>
+              </c-card-body>
+            </c-card>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+  </c-col>
+  
+  </c-row>
+  
+  
+  <c-card class="mb-4">
+    <c-card-header>
+      <h6 class="mb-0">تاريخ المعاملات على المخازن</h6>
+    </c-card-header>
+    <c-card-body class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-light">
           <tr>
-            <th>الصورة</th>
-            <th>الاسم</th>
-            <th>الكود</th>
-            <th>التصنيف</th>
-            <th>الوحدة</th>
+            <th>التاريخ</th>
+            <th>نوع المعاملة</th>
+            <th>اسم المنتج</th>
             <th>الكمية</th>
-            <th>الحد الأدنى</th>
-            <th>السعر</th>
-            <th>الموقع</th>
-            <th>الإجراءات</th>
+            <th>المخزن</th>
+            <th>المستخدم</th>
+            <th>المشروع</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of inventory">
-            <td><img [src]="item.image" alt="" width="50" /></td>
-            <td>{{ item.name }}</td>
-            <td>{{ item.code }}</td>
-            <td>{{ item.category }}</td>
-            <td>{{ item.unit }}</td>
-            <td>{{ item.quantity }}</td>
-            <td>{{ item.min }}</td>
-            <td>{{ item.price | currency:'EGP' }}</td>
-            <td>{{ item.location }}</td>
-            <td>
-              <button class="btn btn-dark btn-sm" title="عرض"><svg cIcon name="cil-magnifying-glass" size="sm"></svg></button>
-              <button class="btn btn-dark btn-sm" title="تعديل"><svg cIcon name="cil-pencil" size="sm"></svg></button>
-              <button class="btn btn-dark btn-sm" title="حذف"><svg cIcon name="cil-trash" size="sm"></svg></button>
-            </td>
+          <tr *ngFor="let transaction of transactionsHistory">
+            <td>{{ transaction.date | date: 'short' }}</td>
+            <td>{{ transaction.type }}</td>
+            <td>{{ transaction.product }}</td>
+            <td>{{ transaction.quantity }}</td>
+            <td>{{ transaction.store }}</td>
+            <td>{{ transaction.user }}</td>
+            <td>{{ transaction.project }}</td>
           </tr>
         </tbody>
       </table>
+    </c-card-body>
+  </c-card>
+</div>
+
+<div *ngIf="activeTab === 'stores' && activeStoreTab === 'reserved'">
+  <h1 class="my-4">القطع المحجوزة</h1>
+
+  <c-card class="mb-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"> المخزون المحجوز</h5>
+      <div class="d-flex gap-2">
+        <div class="input-group me-2">
+          <input type="text"
+                class="form-control"
+                placeholder="البحث عن المنتج"
+                [(ngModel)]="reversedSearchTerm" />
+        </div>
+        <button class="btn btn-outline-primary">إضافة </button>
+        <button class="btn btn-outline-primary">استيراد</button>
+        <button class="btn btn-outline-primary">تصدير</button>
+        <button class="btn btn-outline-primary">طباعة</button>
+      </div>
+    </c-card-header>
+  
+    <c-card-body>
+      <!-- الإحصائيات -->
+      <c-row class="mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="primary" value="10" [title]="' إجمالي الأصناف المحجوزة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-layers" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+      </c-row>
+      
+      <div class="alert alert-warning mt-3 text-center"
+      *ngIf="filteredReversedProducts.length === 0 && reversedSearchTerm">
+          لا يوجد منتج بهذا البحث.
+      </div>
+
+      <!-- جدول المنتجات -->
+      <div class="table-responsive border" *ngIf="filteredReversedProducts.length > 0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>الكود</th>
+              <th>الاسم</th>
+              <th>التصنيف</th>
+              <th>المشروع</th>
+              <th>عدد القطع المحجوزة</th>
+              <th>المتبقى</th>
+              <!-- <th>الإجراءات</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredReversedProducts">
+              <td>{{ item.code }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.category }}</td>
+              <td>{{ item.project }}</td>
+              <td>{{ item.revers }}</td>
+              <td>{{ item.remain }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </c-card-body>
+  </c-card>
+</div>
+
+<div *ngIf="activeTab === 'stores' && activeStoreTab === 'finished'">
+<h1 class="my-4">جاهز للتسليم</h1>
+
+  <c-card class="mb-4">
+    <c-card-header class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"> المخزون المنتهى</h5>
+      <div class="d-flex gap-2">
+        <div class="input-group me-2">
+          <input type="text"
+                class="form-control"
+                placeholder="البحث عن المنتج"
+                [(ngModel)]="finishedSearchTerm" />
+        </div>
+        <button class="btn btn-outline-primary">إضافة </button>
+        <button class="btn btn-outline-primary">استيراد</button>
+        <button class="btn btn-outline-primary">تصدير</button>
+        <button class="btn btn-outline-primary">طباعة</button>
+      </div>
+    </c-card-header>
+  
+    <c-card-body>
+      <!-- الإحصائيات -->
+      <c-row class="mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="primary" value="5" [title]="' إجمالي المنتجات المنتهية'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-layers" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+      </c-row>
+      
+      <div class="alert alert-warning mt-3 text-center"
+      *ngIf="filteredFinishedProducts.length === 0 && finishedSearchTerm">
+          لا يوجد منتج بهذا البحث.
+      </div>
+
+      <!-- جدول المنتجات -->
+      <div class="table-responsive border" *ngIf="filteredFinishedProducts.length > 0">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>الكود</th>
+              <th>الاسم</th>
+              <th>العدد</th>
+              <th>المشروع</th>
+              <th>التكلفة</th>
+              <!-- <th>الإجراءات</th> -->
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filteredFinishedProducts">
+              <td>{{ item.code }}</td>
+              <td>{{ item.name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.project }}</td>
+              <td>{{ item.coast * item.quantity }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </c-card-body>
+  </c-card>
+</div>
+
+<div *ngIf="activeTab === 'projects'">
+  <h3 class="mb-4">قائمة المشاريع</h3>
+
+  <c-card-body>
+      <!-- الإحصائيات -->
+      <c-row class=" mb-4 text-center">
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="success" value="5" [title]="'عدد المشاريع'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-home" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        
+        <c-col sm="6" md="3">
+          <c-widget-stat-c color="danger" value="4" [title]="'أصناف ناقصة'" inverse>
+            <ng-template cTemplateId="widgetIconTemplate">
+              <svg cIcon name="cil-warning" height="36"></svg>
+            </ng-template>
+          </c-widget-stat-c>
+        </c-col>
+        
+
+      </c-row>
+    
+    </c-card-body>
+
+  <div *ngFor="let project of projects" class="card mb-3 shadow-sm border">
+    <!-- رأس الكرت -->
+    <div 
+      class="card-header bg-light d-flex justify-content-between align-items-center"
+      (click)="toggleProject(project.id)"
+      style="cursor: pointer;"
+    >
+      <h5 class="mb-0 text-primary">{{ project.name }}</h5>
+      <!-- <span class="badge"
+        [ngClass]="{
+          'bg-success': project.status === 'مكتمل',
+          'bg-warning text-dark': project.status !== 'مكتمل'
+        }">
+        {{ project.status }}
+      </span> -->
     </div>
-  </c-card-body>
-</c-card>
 
-<c-row class="mb-4">
-  <!-- إجمالي الأصناف -->
+    <!-- محتوى الكرت القابل للفتح/الإغلاق -->
+    <div class="card-body" *ngIf="expandedProjectId === project.id">
+      <p><strong>المالك:</strong> {{ project.owner }}</p>
+      <p><strong>تاريخ البدء:</strong> {{ project.startDate }} | <strong>تاريخ التسليم:</strong> {{ project.dueDate }}</p>
+
+      <hr />
+
+      <h6>المنتجات المطلوبة:</h6>
+      <ul class="list-group">
+        <li *ngFor="let product of project.products"
+            class="list-group-item d-flex justify-content-between align-items-center mb-1 badge"
+            [ngClass]="{
+              ' bg-success-subtle  ': product.quantityAvailable >= product.quantityRequired,
+              ' bg-danger-subtle  ': product.quantityAvailable < product.quantityRequired
+            }"    
+            >
+
+          <span>
+            {{ product.name }} (عدد مطلوب: {{ product.quantityRequired }})
+          </span>
+
+          <span>
+            <span>
+              {{ product.quantityAvailable >= product.quantityRequired ? 'متوفر' : 'غير متوفر' }}
+            </span>
+            <span class="ms-2 text-muted">
+              - المخزون: {{ product.quantityAvailable }}
+            </span>
+          </span>
+
+        </li>
+      </ul>
+
+
+
+    </div>
+  </div>
+
   <c-col xs="12">
-  <c-card>
-    <c-card-header>
-      <h5 class="mb-0">إجمالي الأصناف</h5>
-    </c-card-header>
-    <c-card-body>
-      <c-row class="g-3">
-        <c-col xs="12" sm="6" md="4" lg="3" xl="2" *ngFor="let item of totalProductsList">
-          <c-card class="h-100 border">
-            <c-card-body class="text-center p-3">
-              <h6 class="mb-1">{{ item.name }}</h6>
-              <p class="text-muted mb-1">كود: {{ item.code }}</p>
-              <p class="mb-0"><strong>الكمية:</strong> {{ item.quantity }}</p>
-              <p class="mb-0"><strong>السعر:</strong> {{ item.price | currency:'EGP' }}</p>
-              <p class="mb-0"><strong>الفرع:</strong> {{ item.location }}</p>
-
-            </c-card-body>
-          </c-card>
-        </c-col>
-      </c-row>
-    </c-card-body>
-  </c-card>
-</c-col>
-
-  <!-- أصناف ناقصة -->
-  <c-col xs="12">
-  <c-card>
-    <c-card-header>
-      <h5 class="mb-0">أصناف ناقصة</h5>
-    </c-card-header>
-    <c-card-body>
-      <c-row class="g-3">
-        <c-col xs="12" sm="6" md="4" lg="3" xl="2" *ngFor="let item of lowStockItems">
-          <c-card class="h-100 border border-danger-subtle">
-            <c-card-body class="text-center p-3">
-              <!-- <img [src]="item.image" alt="Low Stock Item" class="mb-2" style="width: 60px; height: 60px;" /> -->
-              <h6 class="mb-1 text-danger">{{ item.name }}</h6>
-              <p class="text-muted mb-1">كود: {{ item.code }}</p>
-              <p class="mb-0"><strong>الكمية الحالية:</strong> {{ item.quantity }}</p>
-              <p class="mb-0"><strong>الحد الأدنى:</strong> {{ item.min }}</p>
-            </c-card-body>
-          </c-card>
-        </c-col>
-      </c-row>
-    </c-card-body>
-  </c-card>
-</c-col>
-
-</c-row>
+    <c-card>
+      <c-card-header>
+        <h5 class="mb-0">أصناف ناقصة</h5> 
+      </c-card-header>
+      <c-card-body>
+        <c-row class="g-3">
+          <c-col xs="12" sm="6" md="4" lg="3" xl="2" *ngFor="let item of lowStockItems">
+            <c-card class="h-100 border border-danger-subtle">
+              <c-card-body class="text-center p-3">
+                <!-- <img [src]="item.image" alt="Low Stock Item" class="mb-2" style="width: 60px; height: 60px;" /> -->
+                <h6 class="mb-1 text-danger">{{ item.name }}</h6>
+                <p class="text-muted mb-1">كود: {{ item.code }}</p>
+                <p class="mb-0"><strong>المشروع:</strong> {{ item.project }}</p>
+                <p class="mb-0"><strong>الكمية الناقصة:</strong> {{ item.req - item.quantity }}</p>
+              </c-card-body>
+            </c-card>
+          </c-col>
+        </c-row>
+      </c-card-body>
+    </c-card>
+  </c-col>
+</div>
 
 
-<c-card class="mb-4">
-  <c-card-header>
-    <h6 class="mb-0">تاريخ المعاملات على المخازن</h6>
-  </c-card-header>
-  <c-card-body class="table-responsive">
-    <table class="table table-striped table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>التاريخ</th>
-          <th>نوع المعاملة</th>
-          <th>اسم المنتج</th>
-          <th>الكمية</th>
-          <th>المخزن</th>
-          <th>المستخدم</th>
-          <th>المشروع</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let transaction of transactionsHistory">
-          <td>{{ transaction.date | date: 'short' }}</td>
-          <td>{{ transaction.type }}</td>
-          <td>{{ transaction.product }}</td>
-          <td>{{ transaction.quantity }}</td>
-          <td>{{ transaction.store }}</td>
-          <td>{{ transaction.user }}</td>
-          <td>{{ transaction.project }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </c-card-body>
-</c-card>
+
+

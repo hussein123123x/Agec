@@ -8,7 +8,7 @@
   </li>
   <li class="nav-item">
     <button class="nav-link" [class.active]="activeTab === 'vacations'" (click)="activeTab = 'vacations'">
-      الإجازات الرسمية
+      الإجازات
     </button>
   </li>
   <li class="nav-item">
@@ -126,7 +126,7 @@
 <div *ngIf="activeTab === 'vacations'">
   <div class="card p-3" style="margin-bottom: 20px">
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <h6 class="fw-bold text-secondary mb-0">الإجازات الرسمية</h6>
+      <h6 class="fw-bold text-secondary mb-0">الإجازات </h6>
       <button class="btn btn-sm btn-outline-primary" (click)="showVacationForm = !showVacationForm">
         {{ showVacationForm ? 'إغلاق النموذج' : 'إضافة إجازة' }}
       </button>
@@ -134,74 +134,98 @@
 
     <!-- ✅ نموذج الإضافة -->
     <form *ngIf="showVacationForm" [formGroup]="vacationForm">
-      <div class="row g-4 align-items-end">
-        <!-- من - إلى -->
-        <div class="col-md-6 col-lg-4">
-          <label class="form-label fw-semibold">من تاريخ</label>
-          <input type="date" class="form-control" formControlName="fromDate" />
-        </div>
-        <div class="col-md-6 col-lg-4">
-          <label class="form-label fw-semibold">إلى تاريخ</label>
-          <input type="date" class="form-control" formControlName="toDate" />
-        </div>
+  <div class="row g-4 align-items-end">
 
-        <div class="col-md-6 col-lg-4">
-          <label class="form-label fw-semibold">سبب الإجازة</label>
-          <input type="text" class="form-control" formControlName="reason" />
-        </div>
+    <!-- نوع الإجازة -->
+    <div class="col-md-4 col-lg-4">
+      <label class="form-label fw-semibold">نوع الإجازة</label>
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>اختر النوع</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="رسمية">رسمية</mat-option>
+          <mat-option value="خاصة">خاصة</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
-        <!-- التفاصيل -->
-        <div class="col-12">
-          <label class="form-label fw-semibold">تفاصيل إضافية</label>
-          <textarea rows="2" class="form-control" formControlName="details" placeholder="تفاصيل الإجازة..."></textarea>
-        </div>
+    <!-- مدة الإجازة -->
+    <div class="col-md-4 col-lg-4">
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>تحديد مدة الإجازة</mat-label>
+        <mat-date-range-input [formGroup]="vacationForm" [rangePicker]="picker">
+          <input matStartDate formControlName="fromDate" placeholder="من تاريخ" />
+          <input matEndDate formControlName="toDate" placeholder="إلى تاريخ" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker>
+          <mat-datepicker-actions>
+            <div class="d-flex justify-content-between mt-3 px-3 pb-2">
+              <button matDatepickerCancel class="btn btn-sm btn-outline-secondary">إلغاء</button>
+              <button matDatepickerApply class="btn btn-sm btn-primary">تطبيق</button>
+            </div>
+          </mat-datepicker-actions>
+        </mat-date-range-picker>
+      </mat-form-field>
+    </div>
 
-        <!-- الموظفون -->
-        <div class="col-12">
-          <label class="form-label fw-semibold">اختر الموظفين</label>
-          <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
-            <ul class="list-unstyled mb-0">
-              <li *ngFor="let emp of employees"
-                  class="d-flex align-items-center justify-content-between p-2 rounded mb-1"
-                  [class.bg-light]="selectedEmployees.includes(emp.id)"
-                  (click)="toggleEmployee(emp.id)"
-                  style="cursor: pointer;">
-                <div class="form-check">
-                  <input type="checkbox"
-                         class="form-check-input"
-                         [checked]="selectedEmployees.includes(emp.id)"
-                         (change)="toggleEmployee(emp.id); $event.stopPropagation();"
-                         id="emp{{ emp.id }}" />
-                  <label class="form-check-label ms-2" for="emp{{ emp.id }}">
-                    {{ emp.name }}
-                  </label>
-                </div>
-                <small class="text-muted">{{ emp.jobTitle }}</small>
-              </li>
-            </ul>
-          </div>
-          <button type="button" class="btn btn-sm btn-outline-primary mt-2" (click)="selectAllEmployees()">
-            تحديد الكل
-          </button>
-        </div>
+    <!-- السبب -->
+    <div class="col-md-4 col-lg-4" style="margin-bottom: 20px;">
+      <label class="form-label fw-semibold">سبب الإجازة</label>
+      <input type="text" class="form-control" formControlName="reason" />
+    </div>
 
-        <!-- تأكيد -->
-        <div class="col-12 text-end">
-          <button type="button" class="btn btn-primary mt-3 px-5" (click)="assignOfficialVacation()">
-            <svg cIcon name="cil-check" class="me-2"></svg> تأكيد الإجازة
-          </button>
-        </div>
+    <!-- التفاصيل -->
+    <div class="col-12">
+      <label class="form-label fw-semibold">تفاصيل إضافية</label>
+      <textarea rows="2" class="form-control" formControlName="details" placeholder="تفاصيل الإجازة..."></textarea>
+    </div>
 
-        <br>
+    <!-- الموظفون -->
+    <div class="col-12">
+      <label class="form-label fw-semibold">اختر الموظفين</label>
+      <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+        <ul class="list-unstyled mb-0">
+          <li *ngFor="let emp of employees"
+              class="d-flex align-items-center justify-content-between p-2 rounded mb-1"
+              [class.bg-light]="selectedEmployees.includes(emp.id)"
+              (click)="toggleEmployee(emp.id)"
+              style="cursor: pointer;">
+            <div class="form-check">
+              <input type="checkbox"
+                     class="form-check-input"
+                     [checked]="selectedEmployees.includes(emp.id)"
+                     (change)="toggleEmployee(emp.id); $event.stopPropagation();"
+                     id="emp{{ emp.id }}" />
+              <label class="form-check-label ms-2" for="emp{{ emp.id }}">
+                {{ emp.name }}
+              </label>
+            </div>
+            <small class="text-muted">{{ emp.jobTitle }}</small>
+          </li>
+        </ul>
       </div>
-    </form>
+      <button type="button" class="btn btn-sm btn-outline-primary mt-2" (click)="selectAllEmployees()">
+        تحديد الكل
+      </button>
+    </div>
+
+    <!-- تأكيد -->
+    <div class="col-12 text-end">
+      <button type="button" class="btn btn-primary mt-3 px-5" (click)="assignOfficialVacation()">
+        <svg cIcon name="cil-check" class="me-2"></svg> تأكيد الإجازة
+      </button>
+    </div>
+
+  </div>
+</form>
+
 
     
 
     <!-- ✅ عرض الإجازات المسجلة -->
     <div *ngIf="officialVacations.length > 0 && !showVacationForm" class="table-responsive mb-4">
-      <table class="table table-striped table-sm">
-        <thead class="table-light">
+      <table class="table table-sm">
+        <thead class="table">
           <tr>
             <th>السبب</th>
             <th>التفاصيل</th>
@@ -216,7 +240,7 @@
             <td>{{ vac.details }}</td>
             <td>
               <ng-container *ngIf="vac.isAllSelected; else selectedList">
-                 تم تحديد جميع الموظفين ({{ vac.employees.length }})
+                 الكل
               </ng-container>
               <ng-template #selectedList>
                 <ul class="mb-0 list-unstyled small">

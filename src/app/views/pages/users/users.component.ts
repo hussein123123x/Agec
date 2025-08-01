@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } 
 import { CommonModule } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 import { NgSelectModule } from '@ng-select/ng-select';
+import moment from 'moment';
 
 
 
@@ -21,6 +22,14 @@ import {
   ModalFooterComponent,
 } from '@coreui/angular';
 import { ToastrService } from 'ngx-toastr';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
 
 
 
@@ -29,7 +38,6 @@ import { ToastrService } from 'ngx-toastr';
   standalone: true,
   imports: [
     IconDirective,  
-    CommonModule,
     CardComponent,
     CardHeaderComponent,
     CardBodyComponent,
@@ -43,8 +51,17 @@ import { ToastrService } from 'ngx-toastr';
     ModalBodyComponent,
     ModalFooterComponent,
     NgSelectModule,
-    ReactiveFormsModule,
     FormsModule,
+    MatNativeDateModule,
+    CommonModule,
+    ReactiveFormsModule,
+    MatDatepickerModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatOptionModule,
   ],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss']
@@ -54,7 +71,7 @@ export class UsersComponent {
   vacationForm: FormGroup;
   selectedEmployees: number[] = [];
   showVacationForm: boolean = false;
-
+  range: FormGroup;
   // تخزين الإجازات المضافة
   officialVacations: any[] = [];
 
@@ -145,8 +162,8 @@ export class UsersComponent {
       age: 25,
       address: 'القاهرة',
       salary: 12000,           // الراتب
-    kpi: 88,                 // مؤشر الأداء
-    absenceDays: 2           // عدد أيام الغياب
+      kpi: 88,                 // مؤشر الأداء
+      absenceDays: 2           // عدد أيام الغياب
 
     },
     {
@@ -196,12 +213,18 @@ export class UsersComponent {
       address: ['']
     });
 
+    this.range = this.fb.group({
+      start: [null],
+      end: [null]
+    });
+
     this.vacationForm = this.fb.group({
       fromDate: [''],
       toDate: [''],
       selectedEmployees: [[]],
       reason: [''],        // سبب الإجازة
-      details: ['']   
+      details: [''],
+      type: [''],          // نوع الإجازة 
     });
 
     this.officialVacations = [
@@ -226,8 +249,10 @@ export class UsersComponent {
 
   assignOfficialVacation() {
   const data = this.vacationForm.value;
-  const fromDate = data.fromDate;
-  const toDate = data.toDate;
+  const fromDate = moment(data.fromDate).format('YYYY-MM-DD'); 
+  const toDate = moment(data.toDate).format('YYYY-MM-DD'); 
+  const type = data.type;
+  console.log("🚀 ~ UsersComponent ~ assignOfficialVacation ~ type:", type)
   const daysRequested = this.getDateDiffInDays(fromDate, toDate);
 
   const selectedIds = data.selectedEmployees.includes('all')
@@ -236,17 +261,19 @@ export class UsersComponent {
 
   const selectedEmployees = this.employees.filter(emp => selectedIds.includes(emp.id));
 
-  // تحقق من كل موظف
-  for (const emp of selectedEmployees) {
-    const found = this.officialVacations[0]?.employees.find((e: any) => e.id === emp.id);
-    const daysRemaining = found?.daysRemaining ?? 0;
-
-    if (daysRemaining < daysRequested) {
-      this.toastr.error(
-        `الموظف ${emp.name} ايام متبقية  ${daysRemaining} يومًا ولا يمكنه أخذ ${daysRequested} أيام.`,
-        'رصيد غير كافٍ'
-      );
-      return; // إلغاء التسجيل
+  if(type == 'خاصة'){
+    // تحقق من كل موظف
+    for (const emp of selectedEmployees) {
+      const found = this.officialVacations[0]?.employees.find((e: any) => e.id === emp.id);
+      const daysRemaining = found?.daysRemaining ?? 0;
+  
+      if (daysRemaining < daysRequested) {
+        this.toastr.error(
+          `الموظف ${emp.name} ايام متبقية  ${daysRemaining} يومًا ولا يمكنه أخذ ${daysRequested} أيام.`,
+          'رصيد غير كافٍ'
+        );
+        return; // إلغاء التسجيل
+      }
     }
   }
 
@@ -256,10 +283,11 @@ export class UsersComponent {
     toDate,
     reason: data.reason,
     details: data.details,
-    isAllSelected: data.selectedEmployees.includes('all'),
+    isAllSelected: data.selectedEmployees.length == this.employees.length ? true : false,
     employees: selectedEmployees
   });
-
+  console.log("🚀 ~ UsersComponent ~ assignOfficialVacation ~ this.officialVacations:", this.officialVacations)
+  
   this.toastr.success('تم تسجيل الإجازة بنجاح', 'نجاح');
   this.vacationForm.reset();
   this.selectedEmployees = [];

@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IconDirective, IconModule } from '@coreui/icons-angular';
+import { FormsModule } from '@angular/forms';
+
 import {
   CardComponent,
   CardHeaderComponent,
@@ -16,6 +18,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     IconModule,
     ReactiveFormsModule,
     IconDirective,
@@ -31,31 +34,323 @@ import {
 })
 export class InventoryComponent {
   totalProducts = 150;
+  activeTab: string = 'stores';
+  activeStoreTab: string = 'general'; // التبويب الفرعي للمخازن
+  expandedProjectId: number | null = null;
+
 totalProductsList = [
-  { name: 'كمبيوتر محمول HP', code: 'HP123', quantity: 25, price: 18500, location: 'الفرع الرئيسي', image: 'assets/images/products/laptop.png' },
-  { name: 'طابعة ليزر', code: 'PR456', quantity: 12, price: 3500, location: 'فرع الغربية', image: 'assets/images/products/printer.png' },
-  { name: 'ماسح ضوئي', code: 'SC789', quantity: 7, price: 2700, location: 'فرع الشرقية', image: 'assets/images/products/scanner.png' },
-  { name: 'شاشة سامسونج', code: 'SM241', quantity: 18, price: 2200, location: 'الفرع الرئيسي', image: 'assets/images/products/monitor.png' },
-  { name: 'قرص صلب', code: 'HD321', quantity: 50, price: 950, location: 'فرع الجنوب', image: 'assets/images/products/hdd.png' },
-  { name: 'فأرة لاسلكية', code: 'MS654', quantity: 33, price: 180, location: 'فرع الغربية', image: 'assets/images/products/mouse.png' },
-  { name: 'لوحة مفاتيح', code: 'KB987', quantity: 40, price: 220, location: 'فرع الشرقية', image: 'assets/images/products/keyboard.png' },
-  { name: 'كاميرا ويب', code: 'WB741', quantity: 15, price: 500, location: 'الفرع الرئيسي', image: 'assets/images/products/webcam.png' },
-  { name: 'سماعات رأس', code: 'HP852', quantity: 22, price: 320, location: 'فرع الجنوب', image: 'assets/images/products/headphones.png' },
-  { name: 'UPS', code: 'UP963', quantity: 5, price: 1450, location: 'فرع الشرقية', image: 'assets/images/products/ups.png' },
+  {
+    name: 'قاطع رئيسي MCCB 400A',
+    code: 'LV001',
+    quantity: 25,
+    price: 1850,
+    location: 'الفرع الرئيسي',
+    image: 'assets/images/products/mccb.png',
+    voltageLevel: 'LV',
+    category: 'قواطع كهربائية',
+    min: 5,
+  },
+  {
+    name: 'قاطع فرعي MCB 32A',
+    code: 'LV002',
+    quantity: 40,
+    price: 120,
+    location: 'فرع الغربية',
+    image: 'assets/images/products/mcb.png',
+    voltageLevel: 'LV',
+    category: 'قواطع كهربائية',
+    min: 10,
+  },
+  {
+    name: 'كونتاكتور 24V',
+    code: 'LV003',
+    quantity: 30,
+    price: 350,
+    location: 'فرع الشرقية',
+    image: 'assets/images/products/contactor.png',
+    voltageLevel: 'LV',
+    category: 'حمايات وتحكم',
+    min: 30,
+  },
+  {
+    name: 'بار نحاسي 10x30 مم',
+    code: 'LV004',
+    quantity: 100,
+    price: 90,
+    location: 'الفرع الرئيسي',
+    image: 'assets/images/products/copperbar.png',
+    voltageLevel: 'LV',
+    category: 'نحاس وتوصيلات',
+    min: 50,
+  },
+  {
+    name: 'مفتاح تحميل RMU 11kV',
+    code: 'MV001',
+    quantity: 10,
+    price: 4500,
+    location: 'فرع الجنوب',
+    image: 'assets/images/products/rmu.png',
+    voltageLevel: 'MV',
+    category: 'قواطع كهربائية',
+    min: 30,
+  },
+  {
+    name: 'قاطع داخلي VCB 11kV',
+    code: 'MV002',
+    quantity: 8,
+    price: 8200,
+    location: 'فرع الغربية',
+    image: 'assets/images/products/vcb.png',
+    voltageLevel: 'MV',
+    category: 'قواطع كهربائية',
+    min: 10,
+  },
+  {
+    name: 'محول تيار CT 400/5',
+    code: 'MV003',
+    quantity: 15,
+    price: 600,
+    location: 'فرع الشرقية',
+    image: 'assets/images/products/ct.png',
+    voltageLevel: 'MV',
+    category: 'محولات',
+    min: 2,
+  },
+  {
+    name: 'محول جهد PT 11kV/110V',
+    code: 'MV004',
+    quantity: 12,
+    price: 950,
+    location: 'الفرع الرئيسي',
+    image: 'assets/images/products/pt.png',
+    voltageLevel: 'MV',
+    category: 'محولات',
+    min: 20,
+  },
+  {
+    name: 'ريليه حماية SEPAM',
+    code: 'MV005',
+    quantity: 6,
+    price: 3200,
+    location: 'فرع الجنوب',
+    image: 'assets/images/products/relay.png',
+    voltageLevel: 'MV',
+    category: 'حمايات وتحكم',
+    min: 5,
+  },
+  {
+    name: 'لمبة بيان LED حمراء',
+    code: 'LV005',
+    quantity: 50,
+    price: 30,
+    location: 'فرع الشرقية',
+    image: 'assets/images/products/led.png',
+    voltageLevel: 'LV',
+    category: 'إشارات وعدادات',
+    min: 10,
+  }
 ];
+
+reversedProductsList = [
+  {
+    name: 'قاطع رئيسي MCCB 400A',
+    code: 'LV001',
+    quantity: 50,
+    revers: 15,
+    category: 'قواطع كهربائية',
+    project: 'العاصمة الإدارية - مجمع الوزارات',
+    remain: 35,
+  },
+  {
+    name: 'قاطع فرعي MCB 32A',
+    code: 'LV002',
+    quantity: 100,
+    revers: 30,
+    category: 'قواطع كهربائية',
+    project: 'جامعة القاهرة - كلية العلوم',
+    remain: 70,
+  },
+  {
+    name: 'محول تيار CT 600/5',
+    code: 'MV001',
+    quantity: 20,
+    revers: 8,
+    category: 'محولات',
+    project: 'محطة كهرباء بدر - خط توزيع صناعي',
+    remain: 12,
+  },
+  {
+    name: 'ريليه حماية SEPAM S40',
+    code: 'MV002',
+    quantity: 10,
+    revers: 4,
+    category: 'حمايات وتحكم',
+    project: 'محطة مترو العتبة - لوحة رئيسية',
+    remain: 6,
+  },
+  {
+    name: 'بار نحاسي 20x5 مم',
+    code: 'LV003',
+    quantity: 150,
+    revers: 50,
+    category: 'نحاس وتوصيلات',
+    project: 'مجمع التحرير - إعادة تأهيل كهربائي',
+    remain: 100,
+  },
+  {
+    name: 'لمبة بيان LED 24V خضراء',
+    code: 'LV004',
+    quantity: 80,
+    revers: 20,
+    category: 'إشارات وعدادات',
+    project: 'مستشفى القصر العيني - مبنى العمليات',
+    remain: 60,
+  },
+  {
+    name: 'محول جهد PT 11kV/110V',
+    code: 'MV003',
+    quantity: 18,
+    revers: 6,
+    category: 'محولات',
+    project: 'مدينة نصر - محطة توزيع رئيسية',
+    remain: 12,
+  },
+  {
+    name: 'كونتاكتور 24V - 3 Pole',
+    code: 'LV005',
+    quantity: 60,
+    revers: 18,
+    category: 'حمايات وتحكم',
+    project: 'هيئة المترو - ورشة صيانة العباسية',
+    remain: 42,
+  },
+  {
+    name: 'عداد طاقة رقمي 3 Phase',
+    code: 'LV006',
+    quantity: 35,
+    revers: 10,
+    category: 'إشارات وعدادات',
+    project: 'مول كايرو فيستيفال - مركز التحكم',
+    remain: 25,
+  },
+  {
+    name: 'قاطع داخلي VCB 11kV',
+    code: 'MV004',
+    quantity: 12,
+    revers: 3,
+    category: 'قواطع كهربائية',
+    project: 'العاصمة الإدارية - محطة كهرباء الحي الحكومي',
+    remain: 9,
+  },
+];
+
+finishedProductsList = [
+  {
+    name: 'لوحة إنارة رئيسية 250A - 18 دائرة',
+    code: 'LV1001',
+    quantity: 5,
+    project: 'العاصمة الإدارية - مجمع الوزارات',
+    coast: 6700
+  },
+  {
+    name: 'لوحة ATS تحويل أوتوماتيكي 400A',
+    code: 'LV1002',
+    quantity: 2,
+    project: 'مستشفى القصر العيني - مبنى الطوارئ',
+    coast: 9200
+  },
+  {
+    name: 'لوحة توزيع قوة 630A - 3 Phase',
+    code: 'LV1003',
+    quantity: 4,
+    project: 'جامعة القاهرة - كلية الهندسة',
+    coast: 11200
+  },
+  {
+    name: 'لوحة DB فرعية 63A - 12 خط',
+    code: 'LV1004',
+    quantity: 8,
+    project: 'مول كايرو فيستيفال - المبنى الإداري',
+    coast: 2800
+  },
+  {
+    name: 'لوحة MDB رئيسية 800A - 4 خانات',
+    code: 'LV1005',
+    quantity: 3,
+    project: 'العاصمة الإدارية - محطة كهرباء الحي الدبلوماسي',
+    coast: 14800
+  }
+];
+
+
+
+
+searchTerm: string = '';
+reversedSearchTerm: string = '';
+finishedSearchTerm: string = '';
+
+projects = [
+  {
+    id: 1,
+    name: 'توريد لوحات توزيع جهد متوسط لمجمع سكني',
+    owner: 'شركة المجمعات الحديثة',
+    startDate: '2025-02-10',
+    dueDate: '2025-05-20',
+    status: 'مكتمل',
+    products: [
+      { name: 'RMU لوحات توزيع 11 ك.ف.', inStock: true, quantityRequired: 3, quantityAvailable: 20 },
+      { name: 'كابلات جهد متوسط 3x70mm', inStock: true, quantityRequired: 44, quantityAvailable: 20 }
+    ],
+  },
+  {
+    id: 2,
+    name: 'مشروع إنارة الطرق في حي النرجس',
+    owner: 'أمانة العاصمة',
+    startDate: '2025-03-01',
+    dueDate: '2025-06-15',
+    status: 'قيد التنفيذ',
+    products: [
+      { name: 'أعمدة إنارة 9 متر', inStock: true, quantityRequired: 50, quantityAvailable: 20 },
+      { name: 'كشافات LED 150 واط', inStock: false, quantityRequired: 50, quantityAvailable: 20 }
+    ],
+  },
+  {
+    id: 3,
+    name: 'تركيب محولات كهربائية لمصنع النسيج',
+    owner: 'شركة النسيج الوطنية',
+    startDate: '2025-01-20',
+    dueDate: '2025-04-30',
+    status: 'متأخر',
+    products: [
+      { name: 'محول 500 ك.ف.', inStock: true, quantityRequired: 2, quantityAvailable: 10 },
+      { name: 'قواطع حماية 11 ك.ف.', inStock: false, quantityRequired: 4, quantityAvailable: 20 }
+    ],
+  },
+  {
+    id: 4,
+    name: 'تحسين شبكة الكهرباء في حي الروضة',
+    owner: 'وزارة الطاقة',
+    startDate: '2025-05-01',
+    dueDate: '2025-08-01',
+    status: 'قيد التنفيذ',
+    products: [
+      { name: 'أسلاك نحاسية 3x150mm', inStock: false, quantityRequired: 100, quantityAvailable: 200 },
+      { name: 'عدادات ذكية', inStock: true, quantityRequired: 200, quantityAvailable: 300 }
+    ],
+  }
+];
+
+
 
 
 lowStockItems = [
-  { name: 'طابعة ليزر', code: 'PR456', quantity: 3, min: 5, image: 'https://cdn-icons-png.flaticon.com/512/809/809957.png' },
-  { name: 'فأرة لاسلكية', code: 'MS123', quantity: 2, min: 10, image: 'https://cdn-icons-png.flaticon.com/512/149/149995.png' },
-  { name: 'قرص صلب', code: 'HD321', quantity: 1, min: 6, image: 'https://cdn-icons-png.flaticon.com/512/4149/4149654.png' },
-  { name: 'شاشة عرض', code: 'SM888', quantity: 4, min: 7, image: 'https://cdn-icons-png.flaticon.com/512/168/168882.png' },
-  { name: 'كاميرا ويب', code: 'WB741', quantity: 0, min: 3, image: 'https://cdn-icons-png.flaticon.com/512/747/747376.png' },
-  { name: 'لوحة مفاتيح', code: 'KB963', quantity: 2, min: 5, image: 'https://cdn-icons-png.flaticon.com/512/777/777197.png' },
-  { name: 'سماعات رأس', code: 'HP852', quantity: 1, min: 4, image: 'https://cdn-icons-png.flaticon.com/512/1828/1828961.png' },
-  { name: 'UPS', code: 'UP741', quantity: 0, min: 2, image: 'https://cdn-icons-png.flaticon.com/512/1042/1042267.png' },
-  // أضف المزيد حسب الحاجة
+  { name: 'كونتاكتور 24V', code: 'LV003', quantity: 2, req:33, min: 5, image: 'https://cdn-icons-png.flaticon.com/512/971/971882.png', voltageLevel: 'LV', project: "توريد لوحات توزيع جهد متوسط لمجمع سكني" },
+  { name: 'قاطع داخلي VCB 11kV', code: 'MV002', quantity: 1, req:6, min: 3, image: 'https://cdn-icons-png.flaticon.com/512/806/806171.png', voltageLevel: 'MV', project: 'مشروع إنارة الطرق في حي النرجس' },
+  { name: 'بار نحاسي 10x30 مم', code: 'LV004', quantity: 3, req:14, min: 10, image: 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png', voltageLevel: 'LV', project: 'مشروع إنارة الطرق في حي النرجس' },
+  { name: 'قاطع فرعي MCB 32A', code: 'LV002', quantity: 4, req:50, min: 10, image: 'https://cdn-icons-png.flaticon.com/512/806/806177.png', voltageLevel: 'LV', project: 'تركيب محولات كهربائية لمصنع النسيج' },
+  { name: 'لمبة بيان LED حمراء', code: 'LV005', quantity: 1, req:13, min: 10, image: 'https://cdn-icons-png.flaticon.com/512/2913/2913606.png', voltageLevel: 'LV', project: 'تحسين شبكة الكهرباء في حي الروضة' },
 ];
+
 
 lowStockCount = this.lowStockItems.length;
 
@@ -139,6 +434,53 @@ transactionsHistory = [
       notes: ['']
     });
   }
+
+  get filteredProducts() {
+  const term = this.searchTerm.toLowerCase().trim();
+
+  if (!term) {
+    return this.totalProductsList;
+  }
+
+  return this.totalProductsList.filter(item =>
+    item.name.toLowerCase().includes(term) ||
+    item.code.toLowerCase().includes(term) ||
+    item.category.toLowerCase().includes(term)
+  );
+}
+
+get filteredReversedProducts() {
+  const term = this.reversedSearchTerm.toLowerCase().trim();
+
+  if (!term) {
+    return this.reversedProductsList;
+  }
+
+  return this.reversedProductsList.filter(item =>
+    item.name.toLowerCase().includes(term) ||
+    item.code.toLowerCase().includes(term) ||
+    item.category.toLowerCase().includes(term) ||
+    item.project.toLowerCase().includes(term)
+  );
+}
+
+get filteredFinishedProducts() {
+  const term = this.finishedSearchTerm.toLowerCase().trim();
+
+  if (!term) {
+    return this.finishedProductsList;
+  }
+
+  return this.finishedProductsList.filter(item =>
+    item.name.toLowerCase().includes(term) ||
+    item.code.toLowerCase().includes(term) ||
+    item.project.toLowerCase().includes(term)
+  );
+}
+
+  toggleProject(id: number) {
+  this.expandedProjectId = this.expandedProjectId === id ? null : id;
+}
 
   openForm(product: any = null) {
     this.editMode = !!product;
