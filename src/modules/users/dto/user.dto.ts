@@ -13,6 +13,8 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { UniquePhone } from './unique-phone.validator';
+import { UniqueEmail } from './unique-email.validator';
 
 class EducationDto {
   @IsString()
@@ -33,7 +35,8 @@ class FamilyMemberDto {
   fullName: string;
 
   @IsOptional()
-  @IsString()
+  @IsPhoneNumber()
+  @UniquePhone({ message: 'Phone number must be unique' })
   phone?: string;
 
   @IsOptional()
@@ -55,7 +58,7 @@ export class CreateUserDto {
 
   @IsString() nationalId?: string;
 
-  @IsEmail() email: string;
+  @IsEmail() @UniqueEmail({ message: 'Email must be unique' }) email: string;
 
   @IsString() phone: string;
 
@@ -92,6 +95,8 @@ export class CreateUserDto {
 
   @IsOptional() @IsNumber() rate?: number;
 
+  @IsOptional() @IsArray() absences?: string[];
+
   @IsOptional() @IsArray() @IsString({ each: true }) languages?: string[];
 
   @IsOptional() @IsArray() @IsString({ each: true }) courses?: string[];
@@ -108,12 +113,12 @@ export class CreateUserDto {
   // 💵 Financial
   @IsOptional() @IsString() bankAccount?: string;
 
-  @IsOptional() @IsString() salaryHash?: string;
+  @IsOptional() @IsString() salary?: string;
 
   @IsOptional() @IsString() salaryCurrency?: string;
 
   // 🔐 Auth
-  @IsString() passwordHash: string;
+  @IsString() password: string;
 
   // 🌐 Social
   @IsOptional() @IsString() facebookLink?: string;
