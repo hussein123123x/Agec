@@ -21,6 +21,11 @@ export class AuthController {
     return this.authService.forgetPassword(body.email);
   }
 
+  @Post('validateUser')
+  async validateUser(@Body() body: { email: string; password: string }) {
+    return this.authService.validateUser(body.email, body.password);
+  }
+
   @Post('update-password')
   @Public()
   async updatePassword(@Body() body: { email: string, newPassword: string }) {

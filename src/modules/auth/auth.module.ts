@@ -6,11 +6,13 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from 'src/core/auth/jwt.strategy';
 import { FirebaseModule } from 'src/core/firebase/firebase.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     PassportModule,
     FirebaseModule,
+    UsersModule ,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

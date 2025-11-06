@@ -3,50 +3,78 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as admin from 'firebase-admin';
 import { FirebaseService } from 'src/core/firebase/firebase.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService, private readonly firebaseService: FirebaseService) {}
+  constructor(private jwtService: JwtService, private readonly firebaseService: FirebaseService, private usersService: UsersService) {}
   private get usersCollection() {
     return this.firebaseService.getFirestore().collection('users');
   }
   async validateUser(email: string, password: string) {
-    const snapshot = await this.usersCollection
-      .where('email', '==', email.trim())
-      .limit(1)
-      .get();
-    console.log("🚀 ~ AuthService ~ validateUser ~ snapshot:", snapshot)
+    try {
+      const snapshot = await this.usersCollection
+        .where('email', '==', email.trim())
+        .limit(1)
+        .get();
 
-    if (snapshot.empty) {
-      throw new UnauthorizedException('Invalid credentials (user not found)');
+      console.log("📘 [validateUser] Firestore snapshot:", snapshot);
+
+      if (snapshot.empty) {
+        console.warn("❌ [validateUser] User not found for email:", email);
+        return { isValid: false, reason: 'user_not_found' };
+      }
+
+      const userDoc = snapshot.docs[0].data();
+
+      const isPasswordValid = await bcrypt.compare(password, userDoc.passwordHash);
+
+      if (!isPasswordValid) {
+        console.warn("❌ [validateUser] Incorrect password for user:", email);
+        return { isValid: false, reason: 'wrong_password' };
+      }
+
+      return {
+        isValid: true,
+        email: userDoc.email,
+        isResetPassword: userDoc.isResetPassword || false,
+        isLocked: userDoc.isLocked || false
+      };
+    } catch (error) {
+      console.error("🔥 [validateUser] Unexpected error:", error);
+      return { isValid: false, reason: 'internal_error' };
     }
-
-    const userDoc = snapshot.docs[0].data();
-
-    const isPasswordValid = await bcrypt.compare(password, userDoc.passwordHash);
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials (wrong password)');
-    }
-
-    return { email: userDoc.email, isResetPassword: userDoc.isResetPassword  };
   }
+
 
   async login(email: string, password: string) {
-    const data:any = await this.validateUser(email, password);
-    const user = data
-    const isResetPassword = data.isResetPassword
-    
-    console.log("🚀 ~ AuthService ~ login ~ user:", user)
+    try {
+      const result: any = await this.validateUser(email, password);
 
-    const payload = { email: user.email, sub: user.email }; // you can include user ID if needed
-    const token = this.jwtService.sign(payload);
+      if (!result.isValid) {
+        return {
+          success: false,
+          reason: result.reason, // 'user_not_found' | 'wrong_password' | 'internal_error'
+        };
+      }
 
-    return {
-      access_token: token,
-      isResetPassword
-    };
+      const payload = { email: result.email, sub: result.email }; // Add userId if available
+      const token = this.jwtService.sign(payload);
+
+      return {
+        success: true,
+        access_token: token,
+        isResetPassword: result.isResetPassword,
+      };
+    } catch (error) {
+      console.error("🔥 [login] Unexpected error:", error);
+      return {
+        success: false,
+        reason: 'internal_error',
+      };
+    }
   }
+
 
   async forgetPassword(email: string) {
     const normalizedEmail = email?.trim().toLowerCase();
@@ -79,6 +107,8 @@ export class AuthService {
 
     // ✅ Log or notify the admin (optional)
     console.log(`Password for ${normalizedEmail} reset to: ${newPassword}`);
+
+    await this.usersService.updateUser({email: normalizedEmail, notifications: [{title: "أستعادة كلمه المرور", message: `تمت إعادة تعيين كلمة المرور للبريد الإلكتروني ${normalizedEmail} إلى: ${newPassword}`, isRead: false, createdAt: new Date()}]})
     // await this.notifyAdmin(normalizedEmail, newPassword);
 
     const updatedDoc = await docRef.get();
