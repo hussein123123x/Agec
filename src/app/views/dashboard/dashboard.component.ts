@@ -18,6 +18,8 @@ import {
   TableDirective
 } from '@coreui/angular';
 
+import {UserService} from '../../core/services/users.service';
+
 import { ChartjsComponent } from '@coreui/angular-chartjs';
 import { IconDirective } from '@coreui/icons-angular';
 import { WidgetStatCComponent } from '@coreui/angular';
@@ -26,6 +28,7 @@ import { WidgetStatCComponent } from '@coreui/angular';
 import { WidgetsBrandComponent } from '../widgets/widgets-brand/widgets-brand.component';
 import { WidgetsDropdownComponent } from '../widgets/widgets-dropdown/widgets-dropdown.component';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
+import { AuthService } from '../pages/login/login.service';
 
 interface IUser {
   name: string;
@@ -53,6 +56,11 @@ export class DashboardComponent implements OnInit {
   readonly #renderer: Renderer2 = inject(Renderer2);
   readonly #chartsData: DashboardChartsData = inject(DashboardChartsData);
 
+
+  constructor(private userService: UserService) { }
+
+  userEmail = '';
+  loginUser: any = []
   attendanceData = [
   {
     id: 1001,
@@ -186,8 +194,24 @@ export class DashboardComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const userEmail = localStorage.getItem('email');
+    if (userEmail) {
+      this.userEmail = userEmail;
+    }
+
+    this.userService.getUser(this.userEmail).then((user) => {
+      if (user) {
+        this.loginUser = user;
+        console.log("🚀 ~ DashboardComponent ~ ngOnInit ~ this.loginUser:", this.loginUser)
+      }
+    }).catch((error) => {
+      console.error('Error fetching user:', error);
+    });
+    
     this.initCharts();
     this.updateChartOnColorModeChange();
+
+
   }
 
   initCharts(): void {

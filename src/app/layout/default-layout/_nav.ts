@@ -44,14 +44,14 @@ export const navItems: INavData[] = [
     }
   },
   {
-    name: 'العملاء',
-    url: '/customers',
-    iconComponent: { name: 'cil-people' },
-  },
-  {
     name: 'الموردين',
     url: '/sales',
     iconComponent: { name: 'cil-group' }
+  },
+  {
+    name: 'عميل',
+    url: '/customers',
+    iconComponent: { name: 'cil-cursor' },
   },
   {
     name: 'المحاسبة والتكاليف',

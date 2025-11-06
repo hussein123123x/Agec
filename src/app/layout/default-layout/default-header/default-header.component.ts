@@ -1,6 +1,7 @@
-import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { Component, computed, inject, input, OnInit } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import {
   AvatarComponent,
@@ -23,14 +24,18 @@ import {
 } from '@coreui/angular';
 
 import { IconDirective } from '@coreui/icons-angular';
+import { AuthService } from '../../../views/pages/login/login.service';
+import { UserService } from '../../../core/services/users.service';
 
 @Component({
     selector: 'app-default-header',
     templateUrl: './default-header.component.html',
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavLinkDirective, RouterLink, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownItemDirective]
+  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavLinkDirective, RouterLink, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownItemDirective, CommonModule,
+ReactiveFormsModule,
+FormsModule]
 })
-export class DefaultHeaderComponent extends HeaderComponent {
-
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
+  email:any = localStorage.getItem('email');
   readonly #colorModeService = inject(ColorModeService);
   readonly colorMode = this.#colorModeService.colorMode;
 
@@ -45,8 +50,21 @@ export class DefaultHeaderComponent extends HeaderComponent {
     return this.colorModes.find(mode => mode.name === currentMode)?.icon ?? 'cilSun';
   });
 
-  constructor() {
+  constructor(private router: Router, private loginService: AuthService, private userService: UserService) {
     super();
+  }
+  async ngOnInit() {
+    const user = await this.userService.getUser(this.email).then((user) => user).catch((error) => console.error('Error fetching user:', error));
+    const isLocked = user ? user.isLocked : false;
+
+    if (isLocked) {
+      this.showPasswordDialog = true;
+
+      window.onbeforeunload = () => {
+        this.signOut(); // Force logout if trying to reload
+        return '';
+      };
+    }
   }
 
   sidebarId = input('sidebar1');
@@ -126,4 +144,50 @@ export class DefaultHeaderComponent extends HeaderComponent {
     { id: 4, title: 'Angular Version', value: 100, color: 'success' }
   ];
 
+    showPasswordDialog = false;
+    passwordInput = '';
+
+    async openSecretPopup() {
+      console.log('open secret popup');
+      await this.userService.updateUser({
+        email: this.email,
+        isLocked: true
+      }).then((res) => {
+        console.log('✅ User locked:', res);
+      }).catch((err) => {
+        console.error('❌ Failed to lock user:', err);
+      });
+      this.showPasswordDialog = true;
+
+      // Auto-logout on refresh
+      window.onbeforeunload = () => {
+        this.signOut();
+        return '';
+      };
+    }
+
+    async submitPassword() {
+      const response = await this.loginService.validateUser(this.email, this.passwordInput).toPromise();
+      console.log("🚀 ~ DefaultHeaderComponent ~ submitPassword ~ response:", response)
+
+      if (response.isValid) {
+        await this.userService.updateUser({
+          email: this.email,
+          isLocked: false
+        })
+        this.showPasswordDialog = false;
+        this.passwordInput = '';
+        window.onbeforeunload = null;
+      } else {
+        alert('كلمة المرور غير صحيحة ، يرجى التأكد من كلمة المرور.');
+        this.signOut();
+      }
+    }
+
+    signOut() {
+      console.log('Signing out...');
+      // localStorage.clear();
+      // sessionStorage.clear();
+      this.router.navigate(['/login']);
+    }
 }

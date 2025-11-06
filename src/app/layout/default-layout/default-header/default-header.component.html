@@ -26,19 +26,50 @@
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto">
-    <a cNavLink class="position-relative d-inline-block">
-      <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
-      <svg cIcon class="my-1 mx-2" name="cilLockUnlocked" size="lg"></svg>
-      <span
-        class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger"
-        style="font-size: 10px;
-          margin-right: -12px;
-          margin-top: 12px;"
-      >
-        5
-      </span>
-    </a>
-  </c-header-nav>
+      <a cNavLink class="position-relative d-inline-flex align-items-center gap-2" style="cursor: pointer;">
+        
+        <!-- Notification Bell Icon -->
+        <div class="position-relative">
+          <div (click)="openSecretPopup()" title="Open Secret" class="hover-effect">
+            <svg cIcon name="cilLockUnlocked" size="lg" class="my-1 mx-1"></svg>
+          </div>
+          
+          <!-- Notification Badge -->
+          <span
+          class="position-absolute top-0 ms-2 start-100 translate-middle badge rounded-pill bg-danger"
+          style="font-size: 6px; margin-top: 8px"
+          >
+          5
+        </span>
+      </div>
+      
+      <!-- Lock/Secret Icon -->
+      <svg cIcon name="cilBell" size="lg" class="my-1"></svg>
+      <div *ngIf="showPasswordDialog" class="overlay">
+
+        <div *ngIf="showPasswordDialog" class="position-fixed top-0 start-0 w-100 h-100 bg-transparent" style="z-index: 1049;" (click)="$event.stopPropagation()"></div>
+
+        <!-- Blocking Password Modal -->
+        <div *ngIf="showPasswordDialog" class="fade-in position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="z-index: 1050;">
+          <div class="bg-white p-4 rounded shadow-lg" style="width: 100%; max-width: 400px;">
+            <h5 class="mb-3 text-center">🔒 الرجاء إدخال كلمة المرور لاستكمال استخدام الحساب</h5>
+
+            <input
+              type="password"
+              [(ngModel)]="passwordInput"
+              (keyup.enter)="submitPassword()"
+              class="form-control mb-3"
+              placeholder="Enter password"
+            />
+
+            <button class="btn btn-primary w-100" (click)="submitPassword()">Unlock</button>
+          </div>
+        </div>
+
+      </div>
+      </a>
+    </c-header-nav>
+
   
 
 
@@ -65,7 +96,7 @@
 
 <ng-template #userDropdown>
   <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
-    <button [caret]="false" cDropdownToggle class="py-0 pe-0" aria-label="Open user menu">
+    <button [caret]="false" cDropdownToggle class="py-2 pe-0" aria-label="Open user menu">
       <c-avatar
         shape="rounded-1"
         [size]="'md'"
@@ -75,14 +106,14 @@
         alt="User avatar"
       />
     </button>
-    <ul cDropdownMenu class="pt-0 w-auto">
+    <ul cDropdownMenu class="pt-1 w-auto">
       <li>
         <a cDropdownItem routerLink="/profile">
           <svg cIcon class="me-2" name="cilUser"></svg>
           الصفحة الشخصية
         </a>
       </li>
-      <li>
+      <!-- <li>
         <a cDropdownItem routerLink="">
           <svg cIcon class="me-2" name="cilCalendar"></svg>
           طلب اجازة
@@ -92,13 +123,13 @@
         <a cDropdownItem routerLink="">
           <svg cIcon class="me-2" name="cilSettings"></svg>
           الاعدادات
-        </a>
-      </li>
+        </a> 
+      </li> -->
 
       <li>
         <a cDropdownItem routerLink="">
           <svg cIcon class="me-2" name="cilAccountLogout"></svg>
-          Logout
+          الخروج من الحساب
         </a>
       </li>
     </ul>

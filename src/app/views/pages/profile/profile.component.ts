@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormGroup, FormBuilder } from '@angular/forms';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { WidgetStatCComponent, BadgeComponent } from '@coreui/angular';
 import Chart from 'chart.js/auto';
 
@@ -12,7 +16,12 @@ import Chart from 'chart.js/auto';
     CommonModule, ReactiveFormsModule,
     FormsModule,
     CommonModule,
-    ReactiveFormsModule
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatNativeDateModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    
 ],
 })
 export class ProfileComponent implements OnInit {
@@ -23,7 +32,7 @@ export class ProfileComponent implements OnInit {
   @ViewChild('monthlyRatingChart') monthlyRatingChartRef!: ElementRef;
   ratingChart: any;
 monthlyRatingChart: any;
-
+range: FormGroup;
   monthlyRatings = [
     { month: 'يناير', rating: 40 },
     { month: 'فبراير', rating: 60 },
@@ -33,7 +42,12 @@ monthlyRatingChart: any;
     { month: 'يونيو', rating: 88 }
   ];
 
-
+  constructor(private fb: FormBuilder){
+    this.range = this.fb.group({
+      start: [null],
+      end: [null]
+    });
+  }
   ngOnInit(): void {
     this.loadProfileData();
     setTimeout(() => {
@@ -105,6 +119,11 @@ getDeductionsTotal(): number {
       joinDate: '2022-03-01',
       image: 'assets/images/avatars/3.jpg',
       leaveBalance: 7,
+      events: [
+    { date: '13/07', type: 'حضور', details: 'الساعة 8 تأخير نصف ساعة' },
+    { date: '25/07', type: 'مأمورية', details: 'الرجوع الساعة 4' },
+    { date: '20/07', type: 'انصراف مبكر', details: 'الساعة 2:30' }
+  ],
       upcomingLeaves: [
         { date: '2025-07-15', reason: 'إجازة عائلية' },
         { date: '2025-08-01', reason: 'سفر شخصي' }
@@ -173,6 +192,9 @@ getDeductionsTotal(): number {
     };
   }
 
+  applyDateFilter(){
+
+  }
   renderMonthlyRatingChart() {
   if (this.monthlyRatingChart) this.monthlyRatingChart.destroy();
 

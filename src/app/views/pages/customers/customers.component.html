@@ -1,1 +1,62 @@
-<p>customers works!</p>
+<h1>Customers</h1>
+<table border="1" style="width:100%; text-align:center; border-collapse: collapse;">
+  <thead>
+    <tr style="background-color: #f0f0f0;">
+      <th>رقم المشروع</th>
+      <th>اسم المشروع</th>
+      <th>قيمة المشروع</th>
+      <th>المدفوع منه</th>
+      <th>المستحق</th>
+      <th>عرض التفاصيل</th>
+    </tr>
+  </thead>
+  <tbody>
+  <ng-container *ngFor="let project of projects">
+    <tr>
+      <td>{{ project.projectNumber }}</td>
+      <td>{{ project.projectName }}</td>
+      <td>{{ project.projectValue | currency:'SAR':'symbol':'1.0-0' }}</td>
+      <td>{{ project.amountPaid | currency:'SAR':'symbol':'1.0-0' }}</td>
+      <td>{{ project.amountDue | currency:'SAR':'symbol':'1.0-0' }}</td>
+      <td>
+        <button (click)="toggleDetails(project)">
+          {{ project.expanded ? 'إخفاء' : 'عرض' }}
+        </button>
+      </td>
+    </tr>
+
+    <tr *ngIf="project.expanded">
+      <td colspan="6">
+        <table border="1" style="width:100%; text-align:center; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #e0e0e0;">
+              <th>البند</th>
+              <th>التكلفة</th>
+              <th>الكمية</th>
+              <th>الحالة</th>
+              <th>الإجمالي</th>
+              <th>يستحق الصرف</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detail of project.details">
+              <td>{{ detail.item }}</td>
+              <td>{{ detail.cost | currency:'SAR':'symbol':'1.0-0' }}</td>
+              <td>{{ detail.quantity }}</td>
+              <td>{{ detail.status }}</td>
+              <td>{{ calcTotal(detail) | currency:'SAR':'symbol':'1.0-0' }}</td>
+              <td>
+                <input type="checkbox" [(ngModel)]="detail.eligibleForPayment">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </ng-container>
+</tbody>
+
+</table>
+
+
+

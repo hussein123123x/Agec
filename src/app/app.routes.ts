@@ -128,6 +128,13 @@ export const routes: Routes = [
       title: 'Login Page'
     }
   },
+    {
+    path: 'reset-password',
+    loadComponent: () => import('../app/views/pages/reset_password/reset_password.component').then(m => m.ResetPassword),
+    data: {
+      title: 'Reset Password'
+    }
+  },
   {
     path: 'register',
     loadComponent: () => import('./views/pages/register/register.component').then(m => m.RegisterComponent),

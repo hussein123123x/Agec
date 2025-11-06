@@ -6,7 +6,7 @@ export const routes: Routes = [
     path: '',
     component: CustomersComponent,
     data: {
-      title: ''
+      title: 'Customers'
     }
   }
 ];
