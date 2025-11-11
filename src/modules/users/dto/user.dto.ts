@@ -86,6 +86,10 @@ export class CreateUserDto {
 
   @IsOptional() @IsDateString() hiredAt?: string;
 
+  @IsEmail() @UniqueEmail({ message: 'Email must be unique' }) agecEmail?: string;
+
+  @IsBoolean() isNewMember?: boolean;
+
   // 💼 Experience & Skills
   @IsOptional() @IsNumber() age?: number;
 

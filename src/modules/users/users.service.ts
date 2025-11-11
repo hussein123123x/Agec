@@ -16,7 +16,10 @@ export class UsersService {
 
   // ➕ Create new user
   async createUser(data: any) {
-  const email = data.email.trim().toLowerCase();
+  const agecAccount = data.fullName.replace(' ', '.').toLowerCase() + '@agec.com';
+  const password = '1234'
+  console.log("🚀 ~ UsersService ~ createUser ~ agecAccount:", agecAccount)
+  const email = agecAccount.trim().toLowerCase();
   const phone = data.phone.trim();
   const now = admin.firestore.FieldValue.serverTimestamp();
 
@@ -34,8 +37,9 @@ export class UsersService {
 
   // 🔐 Hash password
   let passwordHash: string | undefined;
+  passwordHash = await bcrypt.hash(password, 10);
+
   if (data.password) {
-    passwordHash = await bcrypt.hash(data.password, 10);
     delete data.password;
   }
 
@@ -63,6 +67,8 @@ export class UsersService {
     vacations: [],
     absences: [],
     events: [],
+    agecAccount: agecAccount,
+    isNewMember: true,
     updatedAt: now,
   };
 
@@ -119,10 +125,18 @@ export class UsersService {
 
     const docRef = snapshot.docs[0].ref;
 
-    const updatedData = {
+    // Prepare data for update
+    const updatedData: any = {
       ...updateData,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
+
+    // ✅ If password is provided, hash it and remove plain password
+    if (updateData.password) {
+      const passwordHash = await bcrypt.hash(updateData.password, 10);
+      updatedData.passwordHash = passwordHash;
+      delete updatedData.password;
+    }
 
     await docRef.update(updatedData);
 

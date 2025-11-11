@@ -12,39 +12,47 @@ export class AuthService {
     return this.firebaseService.getFirestore().collection('users');
   }
   async validateUser(email: string, password: string) {
-    try {
-      const snapshot = await this.usersCollection
-        .where('email', '==', email.trim())
-        .limit(1)
-        .get();
+  console.log("🚀 ~ AuthService ~ validateUser ~ email:", email);
+  try {
+    const snapshot = await this.usersCollection
+      .where('agecAccount', '==', email.trim())
+      .limit(1)
+      .get();
 
-      console.log("📘 [validateUser] Firestore snapshot:", snapshot);
+    console.log("📘 [validateUser] Firestore snapshot:", snapshot);
 
-      if (snapshot.empty) {
-        console.warn("❌ [validateUser] User not found for email:", email);
-        return { isValid: false, reason: 'user_not_found' };
-      }
-
-      const userDoc = snapshot.docs[0].data();
-
-      const isPasswordValid = await bcrypt.compare(password, userDoc.passwordHash);
-
-      if (!isPasswordValid) {
-        console.warn("❌ [validateUser] Incorrect password for user:", email);
-        return { isValid: false, reason: 'wrong_password' };
-      }
-
-      return {
-        isValid: true,
-        email: userDoc.email,
-        isResetPassword: userDoc.isResetPassword || false,
-        isLocked: userDoc.isLocked || false
-      };
-    } catch (error) {
-      console.error("🔥 [validateUser] Unexpected error:", error);
-      return { isValid: false, reason: 'internal_error' };
+    if (snapshot.empty) {
+      console.warn("❌ [validateUser] User not found for email:", email);
+      return { isValid: false, reason: 'user_not_found' };
     }
+
+    const userDoc = snapshot.docs[0].data();
+
+    if (!userDoc.passwordHash) {
+      console.warn("❌ [validateUser] Missing passwordHash for user:", email);
+      return { isValid: false, reason: 'missing_password_hash' };
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userDoc.passwordHash);
+
+    if (!isPasswordValid) {
+      console.warn("❌ [validateUser] Incorrect password for user:", email);
+      return { isValid: false, reason: 'wrong_password' };
+    }
+
+    return {
+      isValid: true,
+      email: userDoc.email,
+      isResetPassword: userDoc.isResetPassword || false,
+      isNewMember: userDoc.isNewMember || false,
+      isLocked: userDoc.isLocked || false,
+    };
+  } catch (error) {
+    console.error("🔥 [validateUser] Unexpected error:", error);
+    return { isValid: false, reason: 'internal_error' };
   }
+}
+
 
 
   async login(email: string, password: string) {
@@ -65,6 +73,8 @@ export class AuthService {
         success: true,
         access_token: token,
         isResetPassword: result.isResetPassword,
+        isNewMember: result.isNewMember,
+        isLocked: result.isLocked
       };
     } catch (error) {
       console.error("🔥 [login] Unexpected error:", error);

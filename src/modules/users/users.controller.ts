@@ -90,3 +90,130 @@ export class UsersController {
 
   
 }
+/*
+Add User Body
+{
+  "id": "u123456789",
+  "fullName": "Murad Mohamed",
+  "fullNameArabic": "راضى محمد",
+  "gender": "Male",
+  "maritalStatus": "Single",
+  "nationalId": "29805011234567",
+
+  "phone": "+201234527190",
+  "additionalPhone": "+201028765432",
+  "address": "123 Nile Street, Giza",
+  "city": "Giza",
+
+  "role": "employee",
+  "departmentName": "Engineering",
+  "departmentRole": "Team Leader",
+  "status": "active",
+
+  "addedAt": "2024-01-15T09:30:00.000Z",
+  "updatedAt": "2024-08-25T13:45:00.000Z",
+  "dateOfBirth": "1995-05-10",
+  "hiredAt": "2022-02-01T00:00:00.000Z",
+
+  "age": 29,
+  "yearsOfExperience": 7,
+  "yearsInCompany": 2,
+  "rate": 4.5,
+
+  "languages": ["Arabic", "English"],
+  "courses": ["NestJS Fundamentals", "Advanced TypeScript"],
+  "certifications": ["AWS Certified Developer", "Scrum Master Certified"],
+
+  "educations": [
+    {
+      "degree": "B.Sc. Computer Science",
+      "institution": "Cairo University",
+      "year": 2017
+    },
+    {
+      "degree": "M.Sc. Information Systems",
+      "institution": "AUC",
+      "year": 2020
+    }
+  ],
+
+  "cvLink": "https://drive.google.com/file/d/abc123/view?usp=sharing",
+  "avatarUrl": "https://cdn.agec.com/avatars/u123456.jpg",
+
+  "bankAccount": "EG12 3456 7890 1234 5678 9012 345 1",
+  "salary": "33000",
+  "salaryCurrency": "EGP",
+
+  "facebookLink": "https://facebook.com/ahmed.essam",
+
+  "family": [
+    {
+      "relation": "Father",
+      "fullName": "Essam Hassan",
+      "phone": "+201234001422",
+      "notes": "Emergency contact"
+    },
+    {
+      "relation": "Mother",
+      "fullName": "Mona Samir"
+    }
+  ],
+
+  "employeeIds": ["emp_1098", "emp_2033"],
+  "notes": "Promoted to Team Leader in 2023",
+  "tags": ["react", "nestjs", "backend"],
+  "metadata": {
+    "preferredLanguage": "en",
+    "shift": "morning",
+    "remote": true
+  }
+}
+
+*/ 
+
+// {
+//   "absences":[],
+//   "addedAt":"1970-01-01T00:00:45.942Z",
+//   "additionalPhone":undefined, string
+//   "address":"الرشاح - كرداسة",
+//   "age":48,
+//   "avatarUrl":undefined, string
+//   "bankAccount":undefined, string
+//   "certifications":["لا يوجد"],
+//   "city":"الجيزة",
+//   "computerSkills":undefined, array
+//   "courses":[],
+//   "cvLink":undefined, string
+//   "dateOfBirth":undefined, string
+//   "departmentName":"الانتاج",
+//   "departmentRole":"مشرف القسم",
+//   "educationLevel":undefined, string
+//   "educations":undefined, string
+//   "email":undefined, string
+//   "employeeIds":[],
+//   "facebookLink":undefined, string
+//   "family":undefined, array
+//   "fullName":"Ahmed Mohamed Mohamady",
+//   "fullNameArabic":"أحمد محمد محمدي",
+//   "gender":"ذكر",
+//   "hasCar":false,
+//   "hiredAt":"1970-01-01T00:00:41.061Z",
+//   "id":"EMP2",
+//   "languages":["عربي"],
+//   "lastCompanies":["السويدي للحلول الكهربائية"],
+//   "maritalStatus":"متزوج",
+//   "metadata":undefined, array
+//   "nationalId":"27709182101738",
+//   "notes":undefined, array
+//   "phone":"01007511682",
+//   "rate":undefined, string
+//   "role":"مشرف تركيبات",
+//   "salary":undefined, string
+//   "salaryCurrency":"جنية مصر",
+//   "status":"مفعل",
+//   "tags":[],
+//   "updatedAt":undefined, string
+//   "yearsInCompany":13,
+//   "yearsOfExperience":undefined, string
+//   }
+
