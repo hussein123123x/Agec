@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, signal, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { IconDirective } from '@coreui/icons-angular';
 import { NgSelectModule } from '@ng-select/ng-select';
 import moment from 'moment-timezone';
-
+import * as XLSX from 'xlsx';
 
 
 import {
@@ -88,6 +88,7 @@ export class UsersComponent implements OnInit {
   departmentsCount = 0;
   dataLoaded = false; // initially false
 
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   tabs = [
     { key: 'employees', label: 'الموظفون' },
@@ -309,19 +310,105 @@ export class UsersComponent implements OnInit {
     }));
   }
 
-  exportExcel() {
-      console.log("Exporting to Excel...");
-      // ضع هنا منطق التصدير إلى Excel
+    exportExcel() {
+      try {
+        console.log('Export to EXCEL :', this.filteredEmployees);
+
+        if (!this.filteredEmployees || this.filteredEmployees.length === 0) {
+          this.toastr.warning('لا توجد بيانات لتصديرها', 'تنبيه');
+          return;
+        }
+
+        const exportData = this.filteredEmployees.map((emp: any, index: number) => ({
+          'الرقم التعريفي': emp.id || '',
+          'الاسم الكامل': emp.fullName || '',
+          'الاسم الكامل بالعربية': emp.fullNameArabic || '',
+          'الجنس': emp.gender || '',
+          'الحالة الاجتماعية': emp.maritalStatus || '',
+          'الرقم القومي': emp.nationalId || '',
+          'البريد الإلكتروني': emp.email || '',
+          'رقم الهاتف': emp.phone || '',
+          'رقم هاتف إضافي': emp.additionalPhone || '',
+          'العنوان': emp.address || '',
+          'المحافظة': emp.city || '',
+          'المسمى الوظيفي': emp.role || '',
+          'الإدارة': emp.departmentName || '',
+          'القسم': emp.departmentRole || '',
+          'الدور داخل القسم': emp.departmentRole || '',
+          'الصلاحيات':  '',
+          'سوف يستخدم البرنامج': '',
+          'الحالة': emp.status || '',
+          'تاريخ الإضافة': emp.addedAt
+            ? new Date(
+                emp.addedAt._seconds ? emp.addedAt._seconds * 1000 : emp.addedAt
+              ).toLocaleDateString('ar-EG')
+            : '',
+          'تاريخ التحديث': emp.updatedAt
+            ? new Date(
+                emp.updatedAt._seconds ? emp.updatedAt._seconds * 1000 : emp.updatedAt
+              ).toLocaleDateString('ar-EG')
+            : '',
+          'تاريخ الميلاد': emp.dateOfBirth || '',
+          'تاريخ التوظيف': emp.hiredAt
+            ? new Date(
+                emp.hiredAt._seconds ? emp.hiredAt._seconds * 1000 : emp.hiredAt
+              ).toLocaleDateString('ar-EG')
+            : '',
+          'العمر': emp.age || '',
+          'سنوات الخبرة': emp.yearsOfExperience || '',
+          'عدد سنوات العمل بالشركة': emp.yearsInCompany || '',
+          'التقييم': emp.rate || '',
+          'الغيابات': Array.isArray(emp.absences) ? emp.absences.length : 0,
+          'اللغات': Array.isArray(emp.languages) ? emp.languages.join(', ') : '',
+          'الدورات': Array.isArray(emp.courses) ? emp.courses.join(', ') : '',
+          'الشهادات': Array.isArray(emp.certifications)
+            ? emp.certifications.join(', ')
+            : '',
+          'رابط السيرة الذاتية': emp.cvLink || '',
+          'صورة الملف الشخصي': emp.avatarUrl || '',
+          'الحساب البنكي': emp.bankAccount || emp.bankAccount_encrypted || '',
+          'الراتب': emp.salary || emp.salary_encrypted || '',
+          'عملة الراتب': emp.salaryCurrency || '',
+          'رابط فيسبوك': emp.facebookLink || '',
+          'أفراد العائلة': Array.isArray(emp.family)
+            ? emp.family.map((f: any) => f.name || '').join(', ')
+            : '',
+          'الملاحظات': emp.notes || '',
+          'بيانات إضافية': JSON.stringify(emp.metadata || {}),
+          'يمتلك سيارة': emp.hasCar ? 'نعم' : 'لا',
+          'مهارات الحاسوب': Array.isArray(emp.computerSkills)
+            ? emp.computerSkills.join(', ')
+            : '',
+          'المستوى التعليمي': emp.educationLevel || '',
+          'الشركات السابقة': Array.isArray(emp.lastCompanies)
+            ? emp.lastCompanies.join(', ')
+            : '',
+        }));
+
+        /// 🔹 تحويل البيانات إلى ورقة Excel
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees');
+
+        // 🔹 تنزيل الملف مباشرة بدون file-saver
+        const fileName = `employees_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+
+        this.toastr.success('تم تصدير البيانات بنجاح', 'تمت العملية');
+        this.showExportPopup = false;
+      } catch (error) {
+        console.error('❌ فشل تصدير البيانات:', error);
+        this.toastr.error('حدث خطأ أثناء تصدير البيانات', 'خطأ');
+      }
     }
 
-    exportPDF() {
-      console.log("Exporting to PDF...");
-      // ضع هنا منطق التصدير إلى PDF
-    }
 
     exportPrint() {
       console.log("Printing...");
-      // window.print(); // يمكن استبدالها بمنطق الطباعة المخصص
+      this.showExportPopup = false;
+      setTimeout(() => {
+        window.print(); // يمكن استبدالها بمنطق الطباعة المخصص
+      }, 1000);
     }
 
      toggleExportPopup(button: HTMLElement) {
@@ -408,6 +495,11 @@ selectAllEmployees(): void {
 
   showDetails(employee: any) {
     this.selectedEmployee = employee;
+
+    
+    console.log("🚀 ~ UsersComponent ~ showDetails ~ this.selectedEmployee:", this.selectedEmployee)
+    this.userService.setUsers(this.selectedEmployee);
+
     // this.showModal.set(true); // عرض النافذة المنبثقة
     this.router.navigate(['/profile']);
   }
@@ -425,6 +517,7 @@ selectAllEmployees(): void {
         emp.id.toLowerCase().includes(lowerTerm) ||
         emp.departmentName.toLowerCase().includes(lowerTerm)
       );
+      console.log("🚀 ~ UsersComponent ~ searchEmployee ~ this.filteredEmployees:", this.filteredEmployees)
     } else {
       this.filteredEmployees = [...this.employees]; // عرض الكل عند البحث الفارغ
     }
@@ -467,4 +560,318 @@ selectAllEmployees(): void {
   deleteEmployee(employee: any) {
     this.employees = this.employees.filter((e:any) => e !== employee);
   }
+
+  importData() {
+    // فتح ال file picker
+    this.fileInput.nativeElement.value = ''; // عشان يشتغل لو اختار نفس الملف تاني
+    this.fileInput.nativeElement.click();
+  }
+  
+  async onFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = async (e: any) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        if (!workbook.SheetNames?.length) {
+          throw new Error('ملف Excel لا يحتوي على أي شيتات');
+        }
+
+        const wsName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[wsName];
+        if (!worksheet) {
+          throw new Error(`الشيت "${wsName}" غير موجود أو فارغ`);
+        }
+
+        const rows: any[] = XLSX.utils.sheet_to_json(worksheet, {
+          header: 0,
+          defval: ''
+        });
+
+        if (!rows.length) {
+          throw new Error('ملف Excel لا يحتوي على بيانات');
+        }
+
+        const users: any[] = rows.map(row => this.mapRowToUser(row));
+        const cleanedUsers = users.map(user => this.normalizeObject(user));
+
+        this.toastr.success(
+          `تم استيراد ${cleanedUsers.length} موظف بنجاح`,
+          'تمت العملية بنجاح'
+        );
+
+        console.log('✅ Cleaned Users:', cleanedUsers);
+
+        // 🧩 إرسال المستخدمين واحدًا تلو الآخر
+        let successCount = 0;
+        let failCount = 0;
+
+        for (const user of cleanedUsers) {
+          try {
+            await this.userService.createUser(user);
+            successCount++;
+          } catch (err) {
+            console.error('❌ فشل إنشاء المستخدم:', user.fullName, err);
+            failCount++;
+          }
+        }
+
+        // ✅ إشعار نهائي بالنتيجة
+        this.toastr.info(
+          `تم إنشاء ${successCount} مستخدم بنجاح، وفشل ${failCount}`,
+          'نتيجة الاستيراد'
+        );
+      } catch (error: any) {
+        console.error('❌ خطأ أثناء قراءة الملف:', error);
+        this.toastr.error(
+          error.message || 'حدث خطأ أثناء قراءة ملف Excel',
+          'فشل في الاستيراد'
+        );
+      }
+    };
+
+    reader.onerror = () => {
+      this.toastr.error('حدث خطأ أثناء تحميل الملف', 'خطأ في القراءة');
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+
+
+  private mapRowToUser(row: any): any {
+  const user: any = {
+    // 🔐 Identity
+    id: this.toStringOrUndefined(row['الرقم تعريفي']),
+    fullName: this.requiredString(row['الاسم الكامل'], 'الاسم الكامل'),
+    fullNameArabic: this.toStringOrUndefined(row['الاسم الكامل بالعربية']),
+    gender: this.requiredString(row['الجنس'], 'الجنس') as 'Male' | 'Female',
+    maritalStatus: this.toStringOrUndefined(row['الحالة الاجتماعية']) as
+      | 'Single'
+      | 'Married'
+      | 'Divorced'
+      | 'Widowed'
+      | undefined,
+    nationalId: this.toStringOrUndefined(row['الرقم القومي']),
+
+    email: this.toStringOrUndefined(row['البريد الإلكتروني']),
+    phone: this.requiredString(row['رقم الهاتف'], 'رقم الهاتف'),
+    additionalPhone: this.toStringOrUndefined(row['رقم هاتف إضافي']),
+    address: this.toStringOrUndefined(row['العنوان']),
+    city: this.toStringOrUndefined(row['المحافظة']),
+
+    // 👥 Role & Organization
+    role: this.requiredString(row['المسمى الوظيفي'], 'المسمى الوظيفي'),
+    departmentName: this.toStringOrUndefined(row['الإدارة']),
+    departmentRole: this.toStringOrUndefined(row['الدور داخل القسم']) as
+      | 'Manager'
+      | 'Supervisor'
+      | 'Team Leader'
+      | 'Member'
+      | undefined,
+    status: (this.toStringOrUndefined(row['الحالة']) as
+      | 'active'
+      | 'inactive'
+      | 'suspended') ?? 'active',
+
+    // 🕒 Dates
+    // لو مفيش في الإكسل تاريخ إضافة، ممكن تحط الآن
+    addedAt: this.toIsoDate(row['تاريخ الإضافة']) ?? new Date().toISOString(),
+    updatedAt: this.toIsoDate(row['تاريخ التحديث']) ?? undefined,
+    dateOfBirth: this.toDateOnly(row['تاريخ الميلاد']) ?? undefined,
+    hiredAt: this.toIsoDate(row['تاريخ التوظيف']) ?? undefined,
+
+    // 💼 Experience & Skills
+    age: this.toNumberOrUndefined(row['العمر']),
+    yearsOfExperience: this.toNumberOrUndefined(row['سنوات الخبرة']),
+    yearsInCompany: this.toNumberOrUndefined(row['عدد سنوات العمل بالشركة']),
+    rate: this.toNumberOrUndefined(row['التقييم']),
+    absences: this.toStringArray(row['الغيابات']),      // لو عندكها في العمود
+
+    languages: this.toStringArray(row['اللغات']),
+    courses: this.toStringArray(row['الدورات']),
+    certifications: this.toStringArray(row['الشهادات']),
+
+    // مفيش تفاصيل تعليمية منفصلة في الأعمدة، هنسيبها undefined
+    educations: undefined,
+
+    // 🧾 Work Assets
+    cvLink: this.toStringOrUndefined(row['رابط السيرة الذاتية']),
+    avatarUrl: this.toStringOrUndefined(row['صورة الملف الشخصي']),
+
+    // 💵 Financial
+    bankAccount: this.toStringOrUndefined(row['الحساب البنكي']),
+    salary: this.toStringOrUndefined(row['الراتب']),
+    salaryCurrency: this.toStringOrUndefined(row['عملة الراتب']),
+
+    // 🌐 Social
+    facebookLink: this.toStringOrUndefined(row['رابط فيسبوك']),
+
+    // 👨‍👩‍👧 Family & Others
+    family: this.parseFamily(row['أفراد العائلة']),
+    employeeIds: this.toStringArray(row['المعرفات الوظيفية']),
+    notes: this.toStringOrUndefined(row['الملاحظات']),
+
+    // 🏷️ Tags/Customization
+    tags: this.toStringArray(row['الوسوم']),
+    metadata: this.parseMetadata(row['بيانات إضافية']),
+
+    hasCar: this.toBoolean(row['يمتلك سيارة']),
+    computerSkills: this.toStringOrUndefined(row['مهارات الحاسوب']) as
+      | 'Beginner'
+      | 'Intermediate'
+      | 'Advanced'
+      | 'Expert'
+      | undefined,
+    educationLevel: this.toStringOrUndefined(row['المستوى التعليمي']),
+    lastCompanies: this.toStringArray(row['الشركات السابق']),
+  };
+
+  return user;
+}
+
+private normalizeObject(obj: any): any {
+  return Object.entries(obj).reduce((acc, [key, value]) => {
+    // لو value undefined/null نحولها حسب نوعها المتوقع
+    if (value === undefined || value === null) {
+      // لو اسم الحقل يشير إلى array → نخلي []
+      if (
+        ['absences', 'languages', 'courses', 'certifications', 'employeeIds',
+         'tags', 'lastCompanies', 'family', 'metadata', 'notes', 'computerSkills'].includes(key)
+      ) {
+        acc[key] = [];
+      } else {
+        acc[key] = ''; // باقي الحقول نص فارغ
+      }
+      return acc;
+    }
+
+    // لو array ننظف العناصر الداخلية
+    if (Array.isArray(value)) {
+      acc[key] = value.map(v =>
+        typeof v === 'object' ? this.normalizeObject(v) : v
+      );
+    } 
+    // لو object ننظفه داخليًا
+    else if (typeof value === 'object' && !(value instanceof Date)) {
+      acc[key] = this.normalizeObject(value);
+    } 
+    // باقي القيم نحطها كما هي
+    else {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {} as any);
+}
+
+
+
+
+  // Helpers للتحويل
+
+  private requiredString(value: any, fieldName: string): string {
+  const v = String(value ?? '').trim();
+  if (!v) {
+    // هنا تقدر ترمي Error أو تخزن errors وتعرضها للمستخدم
+    console.warn(`حقل إلزامي مفقود في الإكسل: ${fieldName}`);
+  }
+  return v;
+}
+
+private toStringOrUndefined(value: any): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const v = String(value).trim();
+  return v || undefined;
+}
+
+private toIsoDate(value: any): string | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
+
+private toDateOnly(value: any): string | null {
+  if (!value) return null;
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().split('T')[0];
+}
+
+private toNumberOrUndefined(value: any): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const n = Number(value);
+  return isNaN(n) ? undefined : n;
+}
+
+private toStringArray(value: any): string[] {
+  if (!value) return [];
+  return String(value)
+    .split(/[,،;؛]/) // فواصل عربية وإنجليزية
+    .map(v => v.trim())
+    .filter(v => v.length > 0);
+}
+
+private toBoolean(value: any): boolean | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const v = String(value).trim().toLowerCase();
+  if (['1', 'true', 'نعم', 'yes', 'y'].includes(v)) return true;
+  if (['0', 'false', 'لا', 'no', 'n'].includes(v)) return false;
+  return undefined;
+}
+
+// لو عمود "أفراد العائلة" مكتوب فيه JSON
+// أو فورمات مثل: "Father:Ali:+2010...,Mother:Fatma"
+private parseFamily(value: any): any[] | undefined {
+  if (!value) return undefined;
+
+  const str = String(value).trim();
+  if (!str) return undefined;
+
+  try {
+    // لو المستخدم حاطط JSON كامل في الخلية
+    const parsed = JSON.parse(str);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (_) {
+    // مش JSON، نجرّب فورمات بسيط
+  }
+
+  // مثال فورمات نصي بسيط: "Father-Ali-010...,Mother-Fatma"
+  const members: any[] = str.split(/[,،;]/).map(ch => {
+    const parts = ch.split('-').map(p => p.trim());
+    return {
+      relation: parts[0] || '',
+      fullName: parts[1] || '',
+      phone: parts[2] || undefined,
+      notes: parts[3] || undefined,
+    };
+  });
+
+  return members.filter(m => m.relation && m.fullName);
+}
+
+// لو عمود "بيانات إضافية" فيه JSON، نخزنه في metadata
+private parseMetadata(value: any): Record<string, any> | undefined {
+  if (!value) return undefined;
+  const str = String(value).trim();
+  if (!str) return undefined;
+
+  try {
+    const parsed = JSON.parse(str);
+    if (parsed && typeof parsed === 'object') return parsed;
+  } catch (_) {}
+
+  // لو مش JSON نخزنه في key واحدة
+  return { raw: str };
+}
 }

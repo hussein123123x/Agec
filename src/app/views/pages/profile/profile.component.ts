@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { WidgetStatCComponent, BadgeComponent } from '@coreui/angular';
 import Chart from 'chart.js/auto';
+import { UserService } from '../../../core/services/users.service';
 
 @Component({
   selector: 'app-profile',
@@ -42,7 +43,7 @@ range: FormGroup;
     { month: 'يونيو', rating: 88 }
   ];
 
-  constructor(private fb: FormBuilder){
+  constructor(private fb: FormBuilder, private userService: UserService) {
     this.range = this.fb.group({
       start: [null],
       end: [null]
@@ -109,87 +110,91 @@ getDeductionsTotal(): number {
   return this.profile.deductions.reduce((total: number, d: any) => total + d.amount, 0);
 }
 
-  loadProfileData() {
-    this.profile = {
-      name: 'محمد السالم',
-      phone: '01050180934',
-      email: 'm.salem@example.com',
-      address: 'مدينة نصر - القاهرة',
-      role: 'عامل صيانة',
-      joinDate: '2022-03-01',
-      image: 'assets/images/avatars/3.jpg',
-      leaveBalance: 7,
-      events: [
-    { date: '13/07', type: 'حضور', details: 'الساعة 8 تأخير نصف ساعة' },
-    { date: '25/07', type: 'مأمورية', details: 'الرجوع الساعة 4' },
-    { date: '20/07', type: 'انصراف مبكر', details: 'الساعة 2:30' }
-  ],
-      upcomingLeaves: [
-        { date: '2025-07-15', reason: 'إجازة عائلية' },
-        { date: '2025-08-01', reason: 'سفر شخصي' }
-      ],
-      delaysDays: [
-        { date: '2025-07-15', reason: '30 دقيقة' },
-        { date: '2025-08-01', reason: '1:30 ساعة' }
-      ],
-      absentsDays: [
-        { date: '2025-07-16', reason: 'اجازة عارضة' },
-        { date: '2025-08-03', reason: 'بدون عذر' }
-      ],
-      deductions: [
-        { date: '2025-05-15', reason: 'تأخير متكرر', amount: 200 },
-        { date: '2025-06-10', reason: 'غياب بدون عذر', amount: 300 }
-      ],
-      bonuses: [
-        { title: 'مكافأة إنجاز مشروع', amount: 1000, date: '2025-06-01' },
-        { title: 'تحفيز على الأداء', amount: 500, date: '2025-04-10' }
-      ],
-      attendanceDays: 20,
-      absenceDays: 1,
-      delays: 2,
-      totalWorkHours: 30,
+  async loadProfileData() {
+    this.userService.getSelectedUsers().subscribe(users => {
+      this.profile = users;
+    })
+    console.log(this.profile)
+  //   this.profile = {
+  //     name: 'محمد السالم',
+  //     phone: '01050180934',
+  //     email: 'm.salem@example.com',
+  //     address: 'مدينة نصر - القاهرة',
+  //     role: 'عامل صيانة',
+  //     joinDate: '2022-03-01',
+  //     image: 'assets/images/avatars/3.jpg',
+  //     leaveBalance: 7,
+  //     events: [
+  //   { date: '13/07', type: 'حضور', details: 'الساعة 8 تأخير نصف ساعة' },
+  //   { date: '25/07', type: 'مأمورية', details: 'الرجوع الساعة 4' },
+  //   { date: '20/07', type: 'انصراف مبكر', details: 'الساعة 2:30' }
+  // ],
+  //     upcomingLeaves: [
+  //       { date: '2025-07-15', reason: 'إجازة عائلية' },
+  //       { date: '2025-08-01', reason: 'سفر شخصي' }
+  //     ],
+  //     delaysDays: [
+  //       { date: '2025-07-15', reason: '30 دقيقة' },
+  //       { date: '2025-08-01', reason: '1:30 ساعة' }
+  //     ],
+  //     absentsDays: [
+  //       { date: '2025-07-16', reason: 'اجازة عارضة' },
+  //       { date: '2025-08-03', reason: 'بدون عذر' }
+  //     ],
+  //     deductions: [
+  //       { date: '2025-05-15', reason: 'تأخير متكرر', amount: 200 },
+  //       { date: '2025-06-10', reason: 'غياب بدون عذر', amount: 300 }
+  //     ],
+  //     bonuses: [
+  //       { title: 'مكافأة إنجاز مشروع', amount: 1000, date: '2025-06-01' },
+  //       { title: 'تحفيز على الأداء', amount: 500, date: '2025-04-10' }
+  //     ],
+  //     attendanceDays: 20,
+  //     absenceDays: 1,
+  //     delays: 2,
+  //     totalWorkHours: 30,
 
-      rating: 90,
-      feedback: 'أداء ممتاز خلال المشاريع الأخيرة، يُظهر التزاماً ومهارة عالية في التنفيذ.',
+  //     rating: 90,
+  //     feedback: 'أداء ممتاز خلال المشاريع الأخيرة، يُظهر التزاماً ومهارة عالية في التنفيذ.',
 
-      projects: [
-        { name: 'توسعة محطة 66 ك.ف.', hours: 320 },
-        { name: 'تركيب لوحات جهد منخفض', hours: 140 },
-        { name: 'مشروع الإسكان - الدمام', hours: 185 }
-      ],
-      salary: 6000,
+  //     projects: [
+  //       { name: 'توسعة محطة 66 ك.ف.', hours: 320 },
+  //       { name: 'تركيب لوحات جهد منخفض', hours: 140 },
+  //       { name: 'مشروع الإسكان - الدمام', hours: 185 }
+  //     ],
+  //     salary: 6000,
 
-      loans: [
-        { date: '2024-06-01', amount: 1500, status: 'مدفوعة' },
-        { date: '2025-06-15', amount: 1000, status: 'مدفوعة' },
-        { date: '2025-06-28', amount: 500, status: 'مرفوضة' }
-      ],
+  //     loans: [
+  //       { date: '2024-06-01', amount: 1500, status: 'مدفوعة' },
+  //       { date: '2025-06-15', amount: 1000, status: 'مدفوعة' },
+  //       { date: '2025-06-28', amount: 500, status: 'مرفوضة' }
+  //     ],
 
-      totalLoans: 2500,
-      insuranceStatus: 'مسجل بالتأمينات',
-      educationLevel: 'بكالوريوس هندسة كهربائية',
-      certificates: [
-        { title: 'شهادة السلامة المهنية', date: '2023-05-01' },
-        { title: 'دورة القيادة الفعالة', date: '2024-03-10' }
-      ],
-      languages: ['العربية', 'الإنجليزية', 'الفرنسية'],
+  //     totalLoans: 2500,
+  //     insuranceStatus: 'مسجل بالتأمينات',
+  //     educationLevel: 'بكالوريوس هندسة كهربائية',
+  //     certificates: [
+  //       { title: 'شهادة السلامة المهنية', date: '2023-05-01' },
+  //       { title: 'دورة القيادة الفعالة', date: '2024-03-10' }
+  //     ],
+  //     languages: ['العربية', 'الإنجليزية', 'الفرنسية'],
 
-      familyInfo: {
-        maritalStatus: 'متزوج',
-        dependents: 2,
-        emergencyContact: {
-          name: 'أحمد السالم',
-          relation: 'أخ',
-          phone: '01012345678'
-        }
-      },
+  //     familyInfo: {
+  //       maritalStatus: 'متزوج',
+  //       dependents: 2,
+  //       emergencyContact: {
+  //         name: 'أحمد السالم',
+  //         relation: 'أخ',
+  //         phone: '01012345678'
+  //       }
+  //     },
 
-      residence: {
-        governorate: 'القاهرة',
-        city: 'مدينة نصر',
-        street: 'شارع الطيران'
-      }
-    };
+  //     residence: {
+  //       governorate: 'القاهرة',
+  //       city: 'مدينة نصر',
+  //       street: 'شارع الطيران'
+  //     }
+  //   };
   }
 
   applyDateFilter(){

@@ -17,12 +17,25 @@
   <c-card-header class="d-flex justify-content-between align-items-center relative">
     <h5 class="mb-0">إدارة الموظفين</h5>
     <div class="d-flex gap-2 position-relative">
-      <div class="input-group me-2">
-        <input type="text" class="form-control text-xs" [(ngModel)]="searchTerm" placeholder="اسم الموظف  ">
-        <button class="btn btn-primary" (click)="searchEmployee()">بحث</button>
+      <div class="input-group me-2 flex-nowrap flex-sm-row flex-column w-100 w-sm-auto">
+        <input
+          type="text"
+          class="form-control text-xs mb-2 mb-sm-0"
+          [(ngModel)]="searchTerm"
+          placeholder=""
+        />
+        <button class="btn btn-primary w-15 w-sm-auto" (click)="searchEmployee()">بحث</button>
       </div>
       <button class="btn btn-light" (click)="openForm()">إضافة</button>
-      <button class="btn btn-light">استيراد</button>
+      <button class="btn btn-light" (click)="importData()">استيراد</button>
+      <!-- input مخفي لاختيار الملف -->
+      <input
+        #fileInput
+        type="file"
+        accept=".xlsx, .xls"
+        style="display: none"
+        (change)="onFileChange($event)"
+      />
       <button #exportBtn class="btn btn-light" (click)="toggleExportPopup(exportBtn)">تصدير</button>
     </div>
 
@@ -88,7 +101,7 @@
           <td class="d-none d-md-table-cell">{{ employee.departmentName }}</td>
           <td class="d-none d-md-table-cell">{{ employee.departmentRole }}</td>
           <td>0</td>
-          <td>{{ employee.rate }}</td>
+          <td>{{ employee.rate || '-' }}</td>
         </tr>
       </tbody>
     </table>
@@ -100,9 +113,8 @@
 <div *ngIf="showExportPopup"
      class="position-fixed bg-white border border-secondary rounded shadow p-3"
      [ngStyle]="{ top: popupPosition.top + 'px', left: popupPosition.left + 'px', width: '155px', 'z-index': '2000' }">
-  <button class="btn btn-light w-100 mb-2" (click)="exportPrint()"> طباعة</button>
-  <button class="btn btn-light w-100 mb-2" (click)="exportExcel()"> Excel</button>
-  <button class="btn btn-light w-100" (click)="exportPDF()"> PDF</button>
+    <button class="btn btn-light w-100 mb-2" (click)="exportPrint()"> طباعة</button>
+    <button class="btn btn-light w-100 mb-2" (click)="exportExcel()"> Excel</button>
 </div>
 
 <div *ngIf="activeTab === 'vacations'">

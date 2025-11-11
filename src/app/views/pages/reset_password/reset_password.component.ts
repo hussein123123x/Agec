@@ -29,6 +29,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { Router } from '@angular/router';
 import { AuthService } from '../login/login.service';
 import { ToastrService } from 'ngx-toastr';
+import { UserService } from '../../../core/services/users.service';
 
 
 @Component({
@@ -51,7 +52,7 @@ export class ResetPassword implements OnInit {
   showConfirmPassword: boolean = false;
 
 
-  constructor(private router: Router, private authService: AuthService, private toastr: ToastrService){}
+  constructor(private router: Router, private authService: AuthService, private toastr: ToastrService, private userService: UserService){}
 
   ngOnInit(): void {
     history.pushState(null, '', location.href);
@@ -61,26 +62,35 @@ export class ResetPassword implements OnInit {
   }
 
 
-resetPassword() {
+async resetPassword() {
   if (this.newPassword !== this.confirmPassword) {
     this.toastr.error('كلمتا المرور غير متطابقتين', 'تنبيه');
     return;
   }
 
   const email:any = localStorage.getItem('email');
+  
+  await this.userService.updateUser({email: email, password: this.newPassword , isNewMember: false }).then((res) => {
+    localStorage.setItem('reset_password', 'false');
+    this.toastr.success('تم تحديث كلمة المرور بنجاح');
+    this.router.navigate(['/dashboard']);
+  }).catch((err) => {
+    this.toastr.error('حدث خطاء اثناء تحديث كلمة المرور', 'خطاء');
+    console.error(err);
+  })
 
   // Add your API call here
-  this.authService.updatePassword(email, this.newPassword).subscribe({
-    next: () => {
-      localStorage.setItem('reset_password', 'false');
-      this.toastr.success('تم تحديث كلمة المرور بنجاح');
-      this.router.navigate(['/dashboard']);
-    },
-    error: (err:any) => {
-      this.toastr.error('حدث خطأ أثناء تحديث كلمة المرور', 'خطأ');
-      console.error(err);
-    }
-  });
+  // this.authService.updatePassword(email, this.newPassword).subscribe({
+  //   next: () => {
+  //     localStorage.setItem('reset_password', 'false');
+  //     this.toastr.success('تم تحديث كلمة المرور بنجاح');
+  //     this.router.navigate(['/dashboard']);
+  //   },
+  //   error: (err:any) => {
+  //     this.toastr.error('حدث خطأ أثناء تحديث كلمة المرور', 'خطأ');
+  //     console.error(err);
+  //   }
+  // });
 }
 
 }

@@ -35,8 +35,9 @@ export class LoginComponent implements OnInit {
       localStorage.setItem('access_token', res.access_token);
       localStorage.setItem('reset_password', res.isResetPassword);
       localStorage.setItem('email', this.email);
-
-      if (res.isResetPassword) {
+      if (res.success == false) {
+        this.toastr.error('يرجى التحقق من اسم المستخدم وكلمة المرور', 'تنبيه');
+      } else if (res.isResetPassword || res.isNewMember) {
         this.router.navigate(['/reset-password'], { replaceUrl: true });
       } else {
         this.router.navigate(['/dashboard'], { replaceUrl: true });
@@ -49,7 +50,7 @@ export class LoginComponent implements OnInit {
         }
 
         console.log('Login successful!');
-      }
+      } 
     },
     error: (err) => {
       this.toastr.error('يرجى التحقق من اسم المستخدم وكلمة المرور', 'تنبيه');

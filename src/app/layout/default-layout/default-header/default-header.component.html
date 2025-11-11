@@ -26,49 +26,147 @@
     </c-header-nav>
 
     <c-header-nav class="d-none d-md-flex ms-auto">
-      <a cNavLink class="position-relative d-inline-flex align-items-center gap-2" style="cursor: pointer;">
-        
-        <!-- Notification Bell Icon -->
-        <div class="position-relative">
-          <div (click)="openSecretPopup()" title="Open Secret" class="hover-effect">
-            <svg cIcon name="cilLockUnlocked" size="lg" class="my-1 mx-1"></svg>
-          </div>
-          
-          <!-- Notification Badge -->
-          <span
-          class="position-absolute top-0 ms-2 start-100 translate-middle badge rounded-pill bg-danger"
-          style="font-size: 6px; margin-top: 8px"
-          >
-          5
-        </span>
-      </div>
-      
-      <!-- Lock/Secret Icon -->
-      <svg cIcon name="cilBell" size="lg" class="my-1"></svg>
-      <div *ngIf="showPasswordDialog" class="overlay">
-
-        <div *ngIf="showPasswordDialog" class="position-fixed top-0 start-0 w-100 h-100 bg-transparent" style="z-index: 1049;" (click)="$event.stopPropagation()"></div>
-
-        <!-- Blocking Password Modal -->
-        <div *ngIf="showPasswordDialog" class="fade-in position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75" style="z-index: 1050;">
-          <div class="bg-white p-4 rounded shadow-lg" style="width: 100%; max-width: 400px;">
-            <h5 class="mb-3 text-center">🔒 الرجاء إدخال كلمة المرور لاستكمال استخدام الحساب</h5>
-
-            <input
-              type="password"
-              [(ngModel)]="passwordInput"
-              (keyup.enter)="submitPassword()"
-              class="form-control mb-3"
-              placeholder="Enter password"
-            />
-
-            <button class="btn btn-primary w-100" (click)="submitPassword()">Unlock</button>
-          </div>
+      <a
+        cNavLink
+        class="d-inline-flex align-items-center gap-3 position-relative"
+      >
+        <!-- Secret Lock Icon -->
+        <div class="d-flex align-items-center justify-content-center"
+            (click)="openSecretPopup()" title="Open Secret">
+          <svg cIcon name="cilLockUnlocked" size="lg"></svg>
         </div>
 
+        <!-- Notification Bell Dropdown -->
+        <!-- Notification Bell Dropdown -->
+<div class="dropdown"> <!-- 👈 small right margin for spacing -->
+  <button
+    class="btn btn-link text-decoration-none p-0 position-relative"
+    id="notifDropdown"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+    (click)="toggleNotifications($event)"
+    style="border: none; background: transparent; margin-top:6px"
+  >
+    <svg cIcon name="cilBell" size="lg"></svg>
+
+    <!-- Badge -->
+    <span
+      *ngIf="unreadCount > 0"
+      class="position-absolute badge rounded-pill bg-danger text-white fw-bold"
+      style="
+        font-size: 0.4rem;
+        top: -10px;
+        right: -9px;  /* 👈 moves badge a bit right */
+        padding: 4px 7px;
+      "
+    >
+      {{ unreadCount }}
+    </span>
+  </button>
+
+  <!-- Dropdown Menu -->
+  <ul
+  class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2"
+  [class.show]="showNotifications"
+  aria-labelledby="notifDropdown"
+  style="
+    width: 400px;
+    margin-top: 1rem;
+    margin-right: -250px;
+    max-height: 420px;
+    overflow-y: auto;
+  "
+>
+  <!-- Header -->
+  <li class="border-bottom mb-2">
+    <h6 class="dropdown-header text-center fw-bold text-primary rounded py-2 mb-0">
+      Notifications
+    </h6>
+  </li>
+
+  <!-- Empty State -->
+  <li *ngIf="notifications.length === 0">
+    <div class="dropdown-item text-center text-muted small py-3">
+      No notifications
+    </div>
+  </li>
+
+  <!-- Each Notification -->
+  <li
+    *ngFor="let n of notifications; let i = index"
+    (click)="markAsRead(i)"
+    [ngClass]="{ 'bg-light': !n.isRead }"
+    class="dropdown-item px-3 py-2 mb-1 rounded-3 border d-flex flex-column gap-1 notification-item "
+  >
+    <!-- Title Row -->
+    <div class="d-flex justify-content-between align-items-center">
+      <div class="fw-semibold text-dark text-start">{{ n.title }}</div>
+
+      <div class="d-flex align-items-center gap-2">
+        <!-- Time -->
+        <small class="text-secondary">{{ n.createdAt | date:'shortTime' }}</small>
+
+        <!-- 🔵 Unread Dot -->
+        <span
+          *ngIf="!n.isRead"
+          class="unread-dot bg-primary rounded-circle"
+          style="width: 8px; height: 8px; display: inline-block;"
+        ></span>
       </div>
+    </div>
+
+    <!-- Message -->
+    <div class="text-muted small text-primary lh-sm text-wrap text-break">
+      {{ n.message }}
+    </div>
+
+    <!-- Date -->
+    <div class="text-secondary small text-end">
+      {{ n.createdAt | date:'mediumDate' }}
+    </div>
+  </li>
+
+  <!-- Footer -->
+  <li class="text-center mt-4">
+    <button class="btn btn-sm btn-outline-primary w-50 mt-8" (click)="closeNotifications()">
+      Close
+    </button>
+  </li>
+</ul>
+
+</div>
+
+
+        <!-- Password Dialog -->
+        <div *ngIf="showPasswordDialog" class="overlay">
+          <div
+            class="position-fixed top-0 start-0 w-100 h-100 bg-transparent"
+            style="z-index: 1049;"
+            (click)="showPasswordDialog = false"
+          ></div>
+
+          <div
+            class="fade position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75 show"
+            style="z-index: 1050;"
+          >
+            <div class="bg-white p-4 rounded shadow-lg" style="width: 100%; max-width: 400px;">
+              <h5 class="mb-3 text-center">
+                🔒 الرجاء إدخال كلمة المرور لاستكمال استخدام الحساب
+              </h5>
+              <input
+                type="password"
+                [(ngModel)]="passwordInput"
+                (keyup.enter)="submitPassword()"
+                class="form-control mb-3"
+                placeholder="Enter password"
+              />
+              <button class="btn btn-primary w-100" (click)="submitPassword()">Unlock</button>
+            </div>
+          </div>
+        </div>
       </a>
     </c-header-nav>
+
 
   
 

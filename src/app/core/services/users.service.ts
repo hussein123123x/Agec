@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private baseUrl = 'http://localhost:3000/users';
+  private usersSubject = new BehaviorSubject<any[]>([]);
+
 
   constructor(private http: HttpClient) {}
 
@@ -140,5 +144,25 @@ export class UserService {
       console.error('❌ deleteEvent failed:', error);
       throw error;
     }
+  }
+
+  // Update users list
+  getSelectedUsers(): Observable<any[]> {
+    return this.usersSubject.asObservable();
+  }
+
+  setUsers(users: any[]): void {
+    this.usersSubject.next(users);
+  }
+
+  // Add single user
+  addUser(user: any): void {
+    const current = this.usersSubject.value;
+    this.usersSubject.next([...current, user]);
+  }
+
+  // Optional: clear all users
+  clearUsers(): void {
+    this.usersSubject.next([]);
   }
 }

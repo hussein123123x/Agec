@@ -4,15 +4,20 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="text-primary fw-bold">الملف الشخصي</h4>
     <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary" (click)="requestLeave()"> طلب إجازة</button>
-        <button class="btn btn-outline-success" (click)="requestLoan()"> طلب سلفة</button>
+        <!-- <button class="btn btn-outline-primary" (click)="requestLeave()"> طلب إجازة</button>
+        <button class="btn btn-outline-success" (click)="requestLoan()"> طلب سلفة</button> -->
         <button class="btn btn-outline-secondary" (click)="requestLeave()"> تعديل البيانات</button>
     </div>
   </div>
 
 
   <!-- صورة واسم -->
-  <div class="text-center mb-4">
+  <div class="text-center mb-4" style="
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+">
     <img [src]="profile.image || 'assets/images/user.png'" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
     <h5 class="mt-2 fw-bold">{{ profile.name }}</h5>
     <p class="text-muted">{{ profile.role }}</p>

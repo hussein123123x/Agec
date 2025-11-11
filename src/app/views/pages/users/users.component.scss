@@ -16,3 +16,10 @@
 .toast-top-center {
   margin-top: 10px !important; // ← عدل المسافة هنا
 }
+
+@media (max-width: 576px) {
+  .input-group.flex-column input,
+  .input-group.flex-column button {
+    width: 100%;
+  }
+}

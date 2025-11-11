@@ -30,7 +30,7 @@ import { UserService } from '../../../core/services/users.service';
 @Component({
     selector: 'app-default-header',
     templateUrl: './default-header.component.html',
-  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavLinkDirective, RouterLink, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownItemDirective, CommonModule,
+  imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, RouterLink, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownItemDirective, CommonModule,
 ReactiveFormsModule,
 FormsModule]
 })
@@ -38,6 +38,36 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   email:any = localStorage.getItem('email');
   readonly #colorModeService = inject(ColorModeService);
   readonly colorMode = this.#colorModeService.colorMode;
+
+  showPasswordDialog = false;
+  showNotifications = false;
+  passwordInput = '';
+
+  notifications: any[] = []; // ✅ start empty
+
+  // Count unread notifications
+  get unreadCount() {
+    return Array.isArray(this.notifications)
+      ? this.notifications.filter((n: any) => !n.isRead).length
+      : 0;
+  }
+
+
+  toggleNotifications(event: MouseEvent) {
+    event.stopPropagation();
+    this.showNotifications = !this.showNotifications;
+
+    if (this.showNotifications) {
+      document.addEventListener('click', this.handleOutsideClick);
+    } else {
+      document.removeEventListener('click', this.handleOutsideClick);
+    }
+  }
+
+
+  markAsRead(index: number) {
+    this.notifications[index].isRead = true;
+  }
 
   readonly colorModes = [
     { name: 'light', text: 'Light', icon: 'cilSun' },
@@ -54,8 +84,13 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     super();
   }
   async ngOnInit() {
-    const user = await this.userService.getUser(this.email).then((user) => user).catch((error) => console.error('Error fetching user:', error));
+    const user = await this.userService.getUser(this.email).then((user) => {
+      console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ user:", user)
+      return user;
+    }).catch((error) => console.error('Error fetching user:', error));
     const isLocked = user ? user.isLocked : false;
+    this.notifications = Array.isArray(user?.notification) ? user.notification : [];
+    console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ this.notifications:", this.notifications)
 
     if (isLocked) {
       this.showPasswordDialog = true;
@@ -144,9 +179,6 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     { id: 4, title: 'Angular Version', value: 100, color: 'success' }
   ];
 
-    showPasswordDialog = false;
-    passwordInput = '';
-
     async openSecretPopup() {
       console.log('open secret popup');
       await this.userService.updateUser({
@@ -183,6 +215,21 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
         this.signOut();
       }
     }
+
+    closeNotifications() {
+      this.showNotifications = false;
+      document.removeEventListener('click', this.handleOutsideClick);
+    }
+
+    // Handle click outside the dropdown
+    handleOutsideClick = (event: MouseEvent) => {
+      const dropdown = document.querySelector('.dropdown-menu.show');
+      const bell = (event.target as HTMLElement).closest('button');
+
+      if (dropdown && !dropdown.contains(event.target as Node) && !bell) {
+        this.closeNotifications();
+      }
+    };
 
     signOut() {
       console.log('Signing out...');
