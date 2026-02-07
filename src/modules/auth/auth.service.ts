@@ -19,7 +19,7 @@ export class AuthService {
       .limit(1)
       .get();
 
-    console.log("📘 [validateUser] Firestore snapshot:", snapshot);
+    // console.log("📘 [validateUser] Firestore snapshot:", snapshot);
 
     if (snapshot.empty) {
       console.warn("❌ [validateUser] User not found for email:", email);
@@ -152,6 +152,7 @@ export class AuthService {
       isResetPassword: false, 
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     };
+    console.log("🚀 ~ AuthService ~ updatePassword ~ updateData:", updateData)
 
     // ✏️ Update Firestore document
     await docRef.update(updateData);
