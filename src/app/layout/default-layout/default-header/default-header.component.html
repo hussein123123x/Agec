@@ -104,7 +104,7 @@
 
       <div class="d-flex align-items-center gap-2">
         <!-- Time -->
-        <small class="text-secondary">{{ n.createdAt | date:'shortTime' }}</small>
+        <small class="text-secondary">{{ n.createdAt  }}</small>
 
         <!-- 🔵 Unread Dot -->
         <span
@@ -122,7 +122,7 @@
 
     <!-- Date -->
     <div class="text-secondary small text-end">
-      {{ n.createdAt | date:'mediumDate' }}
+      {{ n.createdAt}}
     </div>
   </li>
 
@@ -198,7 +198,7 @@
       <c-avatar
         shape="rounded-1"
         [size]="'md'"
-        [src]="user.avatarUrl ? user.avatarUrl : '../../../../assets/images/user.jpg'"
+        [src]="user?.avatarUrl ? user?.avatarUrl : '../../../../assets/images/user.jpg'"
         status="success"
         textColor="primary"
         alt="User avatar"

@@ -84,24 +84,25 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     super();
   }
   async ngOnInit() {
-    this.user = await this.userService.getUser(this.email).then((user) => {
-      console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ user:", user)
-      const isLocked = user ? user.isLocked : false;
-      this.notifications = Array.isArray(user?.notifications) ? user.notifications : [];
-      console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ this.notifications:", this.notifications)
-  
-      if (isLocked) {
-        this.showPasswordDialog = true;
-  
-        window.onbeforeunload = () => {
-          this.signOut(); // Force logout if trying to reload
-          return '';
-        };
-      }
-      return user;
-    }).catch((error) => console.error('Error fetching user:', error));
-    
+  try {
+    this.user = await this.userService.getUser(this.email);
+
+    const isLocked = this.user?.isLocked || false;
+    this.notifications = Array.isArray(this.user?.notifications) ? this.user.notifications : [];
+    console.log("🚀 Notifications:", this.notifications);
+
+    if (isLocked) {
+      this.showPasswordDialog = true;
+
+      window.onbeforeunload = () => {
+        this.signOut(); // Force logout if trying to reload
+        return '';
+      };
+    }
+  } catch (error) {
+    console.error('Error fetching user:', error);
   }
+}
 
   sidebarId = input('sidebar1');
 

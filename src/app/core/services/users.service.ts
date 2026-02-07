@@ -14,7 +14,8 @@ import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage
 export class UserService {
   private baseUrl = 'http://localhost:3000/users';
   private usersSubject = new BehaviorSubject<any[]>([]);
-
+  private currentUserSubject = new BehaviorSubject<any>(null);
+  public currentUser$: Observable<any> = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private storage: Storage, private firestore: Firestore) {}
 
@@ -25,7 +26,15 @@ export class UserService {
     });
   }
 
-  
+  // Optional: manual setter
+  setUser(user: any) {
+    this.currentUserSubject.next(user);
+  }
+
+  // Optional: get current user synchronously
+  getCurrentUser(): any {
+    return this.currentUserSubject.value;
+  }
 
   async createUser(data: any): Promise<any> {
     const url = `${this.baseUrl}/create`;
@@ -58,7 +67,9 @@ export class UserService {
     const headers = this.getAuthHeaders();
 
     try {
-      return await firstValueFrom(this.http.post(url, body, { headers }));
+      const user = await firstValueFrom(this.http.post(url, body, { headers }));
+       this.currentUserSubject.next(user);
+       return user
     } catch (error) {
       console.error('❌ getUser failed:', error);
       throw error;

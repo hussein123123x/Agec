@@ -4,54 +4,278 @@
   <div class="d-flex gap-2">
     <input type="text" class="form-control" placeholder="بحث بالعميل أو رقم الطلب" />
     <select class="form-select">
-      <option>كل الحالات</option>
-      <option>جديدة</option>
-      <option>قيد التنفيذ</option>
+      <option>قيد الدراسه</option>
+      <option>تم الاتفاق مع مورد</option>
+      <option>مستحقة الدفع</option>
       <option>مكتملة</option>
-      <option>ملغاة</option>
     </select>
-    <button class="btn btn-primary">طلب جديد</button>
-  </div>
+<button class="btn btn-primary" (click)="openNewOrderForm()">
+  طلب جديد
+</button>  </div>
 </div>
 
 <!-- الإحصائيات -->
 <c-row class="mb-4 text-center">
   <c-col sm="6" md="3">
-    <c-widget-stat-c color="info" [value]="orders.length" title=" الطلبات الحالية" inverse></c-widget-stat-c>
+    <c-widget-stat-c
+      color="info"
+        [value]="getCountByStatus('قيد الدراسة') + ''"
+      title="قيد الدراسة"
+      inverse>
+    </c-widget-stat-c>
   </c-col>
+
   <c-col sm="6" md="3">
-    <c-widget-stat-c color="success" [value]="totalSales" title="إجمالي المبيعات" inverse></c-widget-stat-c>
+    <c-widget-stat-c
+      color="primary"
+      [value]="supplierAgreed"
+      [value]="getCountByStatus('تم الاتفاق مع المورد') + ''"
+      title="تم الاتفاق مع المورد"
+      inverse>
+    </c-widget-stat-c>
   </c-col>
+
   <c-col sm="6" md="3">
-    <c-widget-stat-c color="primary" [value]="todayOrders" title="طلبات اليوم" inverse></c-widget-stat-c>
+    <c-widget-stat-c
+      color="warning"
+      [value]="receivedNotPaid"
+      [value]="getCountByStatus('مستحقة الدفع') + ''"
+      title="مستحقة الدفع"
+      inverse>
+    </c-widget-stat-c>
   </c-col>
+
   <c-col sm="6" md="3">
-    <c-widget-stat-c color="danger" [value]="canceledOrders" title="الملغاة" inverse></c-widget-stat-c>
+    <c-widget-stat-c
+      color="success"
+      [value]="getCountByStatus('مكتمل') + ''"
+      title="مكتمل"
+      inverse>
+    </c-widget-stat-c>
   </c-col>
 </c-row>
 
-<!-- شبكة البطاقات -->
-<div class="row">
-  <div class="col-md-4 mb-3" *ngFor="let order of filteredOrders">
-    <div class="card h-100 shadow-sm">
-      <div class="card-body">
-        <h5>طلب #{{ order.id }}</h5>
-        <p><strong>العميل:</strong> {{ order.customer }}</p>
-        <p><strong>السعر:</strong> {{ order.total }} EGP</p>
-        <p><strong>التاريخ:</strong> {{ order.createdAt }}</p>
-        <p><strong>موعد التسليم:</strong> {{ order.dueDate }}</p>
-        <p><strong>المسؤول:</strong> {{ order.supervisor }}</p>
-        <p><strong>ملاحظات:</strong> {{ order.notes }}</p>
-        <c-badge [color]="getStatusColor(order.status)">{{ order.status }}</c-badge>
+<div class="card mt-3 mb-3" *ngIf="showOrderForm">
+  <div class="card-body">
+    <h5 class="mb-3">إضافة طلب جديد</h5>
+
+    <form [formGroup]="orderForm" (ngSubmit)="submitOrder()">
+
+  <!-- MAIN INFO ROW -->
+  <div class="row mb-3">
+    <!-- Project Name -->
+    <div class="col-md-4">
+      <label class="form-label">اسم المشروع</label>
+      <input
+        class="form-control"
+        formControlName="projectName"
+        placeholder="اختياري"
+      />
+    </div>
+
+    <!-- Supplier Name -->
+    <div class="col-md-4">
+      <label class="form-label">اسم المورد</label>
+      <input
+        class="form-control"
+        formControlName="supplierName"
+        placeholder="اختياري"
+      />
+    </div>
+
+    <!-- Arrival Time -->
+    <div class="col-md-4">
+      <label class="form-label">موعد الوصول المطلوب</label>
+      <input
+        type="date"
+        class="form-control"
+        formControlName="arrivedNeededTime"
+      />
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- COMPONENTS -->
+  <h6>المكونات</h6>
+
+  <div formArrayName="components">
+    <div
+      class="border rounded p-3 mb-2"
+      *ngFor="let comp of components.controls; let i = index"
+      [formGroupName]="i"
+    >
+      <div class="row">
+        <div class="col-md-4">
+          <label>Model Number *</label>
+          <input class="form-control" formControlName="modelNum" />
+        </div>
+
+        <div class="col-md-4">
+          <label>Component Name *</label>
+          <input class="form-control" formControlName="name" />
+        </div>
+
+        <div class="col-md-3">
+          <label>Num of Units *</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="units"
+            min="1"
+          />
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+          <button
+  type="button"
+  class="btn btn-danger btn-sm"
+  (click)="removeNewOrderComponent(i)"
+>
+  ✕
+</button>
+
+        </div>
       </div>
-      <div class="card-footer d-flex justify-content-end gap-2">
-        <button class="btn btn-sm btn-light" (click)="showOrderDetails(order)">عرض</button>
-        <button class="btn btn-sm btn-outline-primary">تعديل</button>
-        <button class="btn btn-sm btn-outline-danger">إلغاء</button>
+
+      <div class="mt-2">
+        <label>Note</label>
+        <input class="form-control" formControlName="note" />
+      </div>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-outline-secondary btn-sm mb-3"
+    (click)="addNewOrderComponent()"
+  >
+    + إضافة مكون
+  </button>
+
+  <div class="d-flex justify-content-end gap-2">
+    <button type="submit" class="btn btn-success" [disabled]="orderForm.invalid">
+      حفظ
+    </button>
+    <button type="button" class="btn btn-light" (click)="cancelForm()">
+      إلغاء
+    </button>
+  </div>
+
+</form>
+
+  </div>
+</div>
+
+<div>
+  <div class="order-row card mb-2 shadow-sm" *ngFor="let order of filteredOrders">
+
+    <!-- MAIN ROW -->
+    <div class="card-body d-flex justify-content-between align-items-center cursor-pointer"
+         (click)="toggleOrder(order.id)">
+      <div><strong>#{{ order.id }}</strong></div>
+      <div>{{ order.projectName || 'بدون مشروع' }}</div>
+      <div>{{ order.supplierName || 'بدون مورد' }}</div>
+      <div>{{ order.arrivedNeededTime }}</div>
+
+      <c-badge [color]="getStatusColor(order.status)">{{ order.status }}</c-badge>
+    </div>
+
+    <!-- TOGGLED DETAILS -->
+    <div *ngIf="expandedOrderId === order.id" class="card-body border-top bg-light" [formGroup]="orderForms[order.id]">
+      
+      <div class="row mb-3">
+        <div class="col-md-4"><strong>تم الانشاء:</strong> {{ order.createdAt }}</div>
+        <div class="col-md-4"><strong>أنشئ بواسطة:</strong> {{ order.createdBy }}</div>
+        <div class="col-md-4" *ngIf="editingOrderId !== order.id"><strong>وقت التسليم:</strong>{{ order.arrivedNeededTime }}</div>
+        <div class="col-md-4" *ngIf="editingOrderId === order.id">
+          <input type="date" class="form-control" formControlName="arrivedNeededTime" />
+        </div>
+      </div>
+
+      <!-- Project Name & Supplier Name -->
+      <div class="row mb-3" *ngIf="editingOrderId === order.id">
+        <div class="col-md-6">
+          <label>اسم المشروع</label>
+<input class="form-control" formControlName="projectName" />
+        </div>
+        <div class="col-md-6">
+          <label>اسم المورد</label>
+<input class="form-control" formControlName="supplierName" />
+        </div>
+      </div>
+
+      <!-- COMPONENTS TABLE -->
+      <table class="table table-sm table-bordered" *ngIf="editingOrderId !== order.id">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Model Number</th>
+            <th>Note</th>
+            <th>Price (EGP)</th>
+            <th>Units</th>
+            <th>Total (EGP)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let comp of order.components">
+            <td>{{ comp.id }}</td>
+            <td>{{ comp.modelNum }}</td>
+            <td>{{ comp.note }}</td>
+            <td>{{ comp.price || 'غير محدد' }}</td>
+            <td>{{ comp.units }}</td>
+            <td>{{ comp.price * comp.units || 'غير محدد' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Editable components -->
+      <div *ngIf="editingOrderId === order.id" formArrayName="components">
+        <div class="mb-2" *ngFor="let comp of getComponents(order.id).controls; let i = index" [formGroupName]="i">
+          <div class="row">
+  <div class="col-md-2">
+    <input class="form-control" formControlName="modelNum" placeholder="Model Number"/>
+  </div>
+  <div class="col-md-2">
+    <input class="form-control" formControlName="name" placeholder="Component Name"/>
+  </div>
+  <div class="col-md-2">
+    <input class="form-control" formControlName="note" placeholder="Note"/>
+  </div>
+  <div class="col-md-2">
+    <input type="number" class="form-control" formControlName="units" placeholder="Units" min="1"/>
+  </div>
+  <div class="col-md-2">
+    <input type="number" class="form-control" formControlName="price" placeholder="Price"/>
+  </div>
+  <div class="col-md-1 d-flex align-items-center">
+    <button type="button" class="btn btn-danger btn-sm" (click)="removeComponent(order.id, i)">✕</button>
+  </div>
+</div>
+
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm mb-2" (click)="addComponent(order.id)">
+          + إضافة مكون
+        </button>
+      </div>
+
+      <hr />
+      <div class="col-md-3"><strong>إجمالي السعر:</strong> {{ order.totalPrice }} EGP</div>
+
+      <!-- Edit / Save / Cancel Buttons -->
+      <div class="d-flex justify-content-end gap-2 mt-2">
+        <button type="button" class="btn btn-primary" *ngIf="editingOrderId !== order.id" 
+                (click)="startEdit(order.id)">Edit</button>
+        <button type="button" class="btn btn-success" *ngIf="editingOrderId === order.id" 
+                (click)="saveOrder(order.id)">Save</button>
+        <button type="button" class="btn btn-light" *ngIf="editingOrderId === order.id" 
+                (click)="cancelEdit(order.id)">Cancel</button>
       </div>
     </div>
   </div>
 </div>
+
+
 
 <h4 class="mt-5 mb-3">الموردين المعتمدين</h4>
 
