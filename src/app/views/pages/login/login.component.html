@@ -1,9 +1,9 @@
-<div class="bg-light dark:bg-transparent min-vh-100 d-flex flex-row align-items-center">
-  <c-container breakpoint="md">
+<div class="login-page min-vh-100 d-flex flex-row align-items-center">
+  <c-container breakpoint="md" >
     <c-row class="justify-content-center">
       <c-col lg="10" xl="8">
-        <c-card-group>
-          <c-card class="p-4">
+        <c-card-group class="login-cards">
+          <c-card class="p-4 login-card">
             <c-card-body>
               <form cForm>
                 <h1>الدخول للنظام</h1>
@@ -52,7 +52,7 @@
 
             </c-card-body>
           </c-card>
-          <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white bg-light py-5">
+          <c-card [ngStyle]="{'minWidth.%': 44}" class="text-white bg-light py-5 login-side">
             <c-card-body class="text-center text-black" style="display: flex;justify-content: center;align-content: center;">
               <div>
                 <img src="../../../../assets/images/logo small.svg" style="width: 100px; height: 100px; margin-bottom: 20px;" alt="">

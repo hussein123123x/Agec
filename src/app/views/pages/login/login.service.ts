@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +13,7 @@ export class AuthService {
 
   public showPasswordDialog = false;
   public isLocked = false;
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private auth: Auth) {}
 
   login(email: string, password: string): Observable<any> {
     console.log("🚀 ~ AuthService ~ login ~ password:", password)

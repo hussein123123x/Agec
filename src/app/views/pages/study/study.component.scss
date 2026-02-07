@@ -1,0 +1,38 @@
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.popup-content {
+  background-color: #fff;
+  padding: 20px;
+  width: 80%;
+  max-width: 900px;
+  top: 80px;
+  right:150px;
+  max-height: 70%;
+  overflow-y: auto;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.project-details p {
+  margin: 3px 0;
+}
+
+.history-item p {
+  margin: 2px 0;
+}
+
+.history-item {
+  background-color: #f9f9f9;
+}

@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
+import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+
+
 
 
 @Injectable({
@@ -12,7 +16,7 @@ export class UserService {
   private usersSubject = new BehaviorSubject<any[]>([]);
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private storage: Storage, private firestore: Firestore) {}
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('access_token') || '';
@@ -20,6 +24,8 @@ export class UserService {
       Authorization: `Bearer ${token}`,
     });
   }
+
+  
 
   async createUser(data: any): Promise<any> {
     const url = `${this.baseUrl}/create`;
@@ -120,6 +126,30 @@ export class UserService {
       console.error('❌ getEvents failed:', error);
       throw error;
     }
+  }
+
+  async calculateAbsences(userId: string, userEmail: string,startDate: string, endDate: string): Promise<any> {
+    const url = `${this.baseUrl}/calculateAbsences`;
+    const body = { userId, userEmail, startDate, endDate };
+    const headers = this.getAuthHeaders();
+
+    try {
+      return await firstValueFrom(this.http.post(url, body, { headers }));
+    } catch (error) {
+      console.error('❌ calculateAbsences failed:', error);
+      throw error;
+    }
+  }
+
+  async uploadProfileImage(userId: string, file: File) {
+    const storageRef = ref(this.storage, `profiles/${userId}.jpg`);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    const userRef = doc(this.firestore, `users/${userId}`);
+    await updateDoc(userRef, { profileImage: url });
+
+    return url;
   }
 
   async updateEvent(userId: string, eventId: string, body: { name?: string; date?: string; action?: string }): Promise<any> {

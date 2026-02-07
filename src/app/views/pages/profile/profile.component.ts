@@ -5,9 +5,16 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { WidgetStatCComponent, BadgeComponent } from '@coreui/angular';
+import { Storage, ref, uploadBytes, getDownloadURL } from '@angular/fire/storage';
+import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+import { inject } from '@angular/core';
+import { Firestore, doc, updateDoc } from '@angular/fire/firestore';
+import { isEqual } from 'lodash'; // optional: lodash makes it easy
+
+
 import Chart from 'chart.js/auto';
 import { UserService } from '../../../core/services/users.service';
+import moment from 'moment-timezone';
 
 @Component({
   selector: 'app-profile',
@@ -27,6 +34,7 @@ import { UserService } from '../../../core/services/users.service';
 })
 export class ProfileComponent implements OnInit {
 
+  private auth: Auth = inject(Auth); // Inject Auth
 
   profile: any;
   @ViewChild('ratingChart') ratingChartRef!: ElementRef;
@@ -42,19 +50,27 @@ range: FormGroup;
     { month: 'مايو', rating: 82 },
     { month: 'يونيو', rating: 88 }
   ];
+  userReport: any;
+  emptyReport: boolean = false;
 
-  constructor(private fb: FormBuilder, private userService: UserService) {
+  constructor(private fb: FormBuilder, private userService: UserService, private storage: Storage, private firestore: Firestore) {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
     this.range = this.fb.group({
-      start: [null],
-      end: [null]
+      start: [firstDay],
+      end: [today]
     });
+
+    // Auto run filter when user changes dates
   }
   ngOnInit(): void {
     this.loadProfileData();
-    setTimeout(() => {
-    this.renderRatingChart();
-    this.renderMonthlyRatingChart();
-  }, 0);
+    this.applyDateFilter();
+  //   setTimeout(() => {
+  //   this.renderRatingChart();
+  //   this.renderMonthlyRatingChart();
+  // }, 0);
   }
 
   getTotalLoans(): number {
@@ -110,94 +126,127 @@ getDeductionsTotal(): number {
   return this.profile.deductions.reduce((total: number, d: any) => total + d.amount, 0);
 }
 
+getReadableDate(ts: any) {
+  if (!ts) return '';
+  const seconds = ts._seconds || ts.seconds; // some SDK versions
+  return new Date(seconds * 1000).toLocaleDateString('ar-EG');
+}
+
+get delayEvents() {
+  return this.profile.events?.filter((e: any) => e.type === 'delay') || [];
+}
+
+get hasDelays() {
+  return this.delayEvents.length > 0;
+}
+
+async onFileSelected(event: Event) {
+  // استخرج الملف من الـ event
+  const input = event.target as HTMLInputElement;
+  if (!input.files || input.files.length === 0) return;
+
+  const file: File = input.files[0];  // هنا النوع صحيح الآن
+
+  try {
+    const userId = this.profile.id;
+    const path = `profiles/${userId}.jpg`;
+    const storageRef = ref(this.storage, path);
+
+    const snapshot = await uploadBytes(storageRef, file);           
+    const avatarUrl = await getDownloadURL(snapshot.ref);  
+
+    console.log('Avatar URL:', avatarUrl);
+
+    // تحديث في Firestore
+    const userRef = doc(this.firestore, `users/${userId}`);
+    await updateDoc(userRef, { avatarUrl });
+
+    this.profile.avatarUrl = avatarUrl;
+    console.log('Upload successful:', avatarUrl);
+  } catch (error) {
+    console.error('Error uploading file:', error);
+  }
+}
+
+
+
   async loadProfileData() {
-    this.userService.getSelectedUsers().subscribe(users => {
-      this.profile = users;
-    })
-    console.log(this.profile)
-  //   this.profile = {
-  //     name: 'محمد السالم',
-  //     phone: '01050180934',
-  //     email: 'm.salem@example.com',
-  //     address: 'مدينة نصر - القاهرة',
-  //     role: 'عامل صيانة',
-  //     joinDate: '2022-03-01',
-  //     image: 'assets/images/avatars/3.jpg',
-  //     leaveBalance: 7,
-  //     events: [
-  //   { date: '13/07', type: 'حضور', details: 'الساعة 8 تأخير نصف ساعة' },
-  //   { date: '25/07', type: 'مأمورية', details: 'الرجوع الساعة 4' },
-  //   { date: '20/07', type: 'انصراف مبكر', details: 'الساعة 2:30' }
-  // ],
-  //     upcomingLeaves: [
-  //       { date: '2025-07-15', reason: 'إجازة عائلية' },
-  //       { date: '2025-08-01', reason: 'سفر شخصي' }
-  //     ],
-  //     delaysDays: [
-  //       { date: '2025-07-15', reason: '30 دقيقة' },
-  //       { date: '2025-08-01', reason: '1:30 ساعة' }
-  //     ],
-  //     absentsDays: [
-  //       { date: '2025-07-16', reason: 'اجازة عارضة' },
-  //       { date: '2025-08-03', reason: 'بدون عذر' }
-  //     ],
-  //     deductions: [
-  //       { date: '2025-05-15', reason: 'تأخير متكرر', amount: 200 },
-  //       { date: '2025-06-10', reason: 'غياب بدون عذر', amount: 300 }
-  //     ],
-  //     bonuses: [
-  //       { title: 'مكافأة إنجاز مشروع', amount: 1000, date: '2025-06-01' },
-  //       { title: 'تحفيز على الأداء', amount: 500, date: '2025-04-10' }
-  //     ],
-  //     attendanceDays: 20,
-  //     absenceDays: 1,
-  //     delays: 2,
-  //     totalWorkHours: 30,
-
-  //     rating: 90,
-  //     feedback: 'أداء ممتاز خلال المشاريع الأخيرة، يُظهر التزاماً ومهارة عالية في التنفيذ.',
-
-  //     projects: [
-  //       { name: 'توسعة محطة 66 ك.ف.', hours: 320 },
-  //       { name: 'تركيب لوحات جهد منخفض', hours: 140 },
-  //       { name: 'مشروع الإسكان - الدمام', hours: 185 }
-  //     ],
-  //     salary: 6000,
-
-  //     loans: [
-  //       { date: '2024-06-01', amount: 1500, status: 'مدفوعة' },
-  //       { date: '2025-06-15', amount: 1000, status: 'مدفوعة' },
-  //       { date: '2025-06-28', amount: 500, status: 'مرفوضة' }
-  //     ],
-
-  //     totalLoans: 2500,
-  //     insuranceStatus: 'مسجل بالتأمينات',
-  //     educationLevel: 'بكالوريوس هندسة كهربائية',
-  //     certificates: [
-  //       { title: 'شهادة السلامة المهنية', date: '2023-05-01' },
-  //       { title: 'دورة القيادة الفعالة', date: '2024-03-10' }
-  //     ],
-  //     languages: ['العربية', 'الإنجليزية', 'الفرنسية'],
-
-  //     familyInfo: {
-  //       maritalStatus: 'متزوج',
-  //       dependents: 2,
-  //       emergencyContact: {
-  //         name: 'أحمد السالم',
-  //         relation: 'أخ',
-  //         phone: '01012345678'
-  //       }
-  //     },
-
-  //     residence: {
-  //       governorate: 'القاهرة',
-  //       city: 'مدينة نصر',
-  //       street: 'شارع الطيران'
-  //     }
-  //   };
+    
+    const savedProfileStr = localStorage.getItem('profile');
+    const savedProfile = savedProfileStr ? JSON.parse(savedProfileStr) : null;
+    
+    if (savedProfile) {
+      this.profile = savedProfile;
+    console.log('✅ Loaded profile from localStorage:', this.profile);
   }
 
-  applyDateFilter(){
+
+
+  // 2️⃣ جلب المستخدم المحدد من السيرفس
+  this.userService.getSelectedUsers().subscribe((selectedUser: any) => {
+    if (!selectedUser || Object.keys(selectedUser).length === 0) {
+      // ⚠️ لا تحدّث البروفايل إذا كانت البيانات فارغة
+      console.log('⚠️ No selected user from service, keeping local profile');
+      return;
+    }
+
+    // 3️⃣ فقط حدّث البيانات إذا المستخدم مختلف
+    if (!savedProfile || savedProfile.agecAccount !== selectedUser.agecAccount) {
+      this.profile = selectedUser;
+
+      localStorage.setItem('profile', JSON.stringify(selectedUser));
+      console.log('🔄 Updated profile from service:', selectedUser);
+    }
+  });
+    console.log(this.profile)
+  }
+
+  isEmptyReport(profile: any): boolean {
+  if (!profile || !profile.userReport) return true;
+
+  const report = profile.userReport;
+
+  return (
+    (report.cameLate?.length ?? 0) === 0 &&
+    (report.leaveEarly?.length ?? 0) === 0 &&
+    (report.overTime?.length ?? 0) === 0 &&
+    (report.absences?.length ?? 0) === 0 &&
+    (report.holidayWork?.length ?? 0) === 0 &&
+    (report.reviewDays?.length ?? 0) === 0 &&
+    (report.events?.length ?? 0) === 0 &&
+    Object.values(report.totals ?? {}).every(v => v === 0) &&
+    Object.values(report.kpis ?? {}).every(v => v === 0)
+  );
+}
+
+
+  async applyDateFilter() {
+    const start = this.range.get('start')?.value;
+    const end = this.range.get('end')?.value;
+
+    if (!start || !end) return;
+
+    const startDate = moment(start)
+      .startOf('day')
+      .format('YYYY-MM-DDTHH:mm:ssZ');
+      
+      const endDate = moment(end)
+      .endOf('day')
+      .format('YYYY-MM-DDTHH:mm:ssZ');
+
+    const userEmail = this.profile.agecAccount
+
+    this.userReport = await this.userService.calculateAbsences(
+      this.profile.id,
+      userEmail,
+      startDate,
+      endDate
+    );
+
+    console.log(this.userReport);
+    if(Object.keys(this.userReport).length === 0) {
+      this.emptyReport = true
+    }
 
   }
   renderMonthlyRatingChart() {

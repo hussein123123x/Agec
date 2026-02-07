@@ -88,6 +88,7 @@
     <table *ngIf="showTable && filteredEmployees.length > 0" class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
+          <th>الصورة</th>
           <th>الاسم</th>
           <th class="d-none d-md-table-cell">القسم</th>
           <th class="d-none d-md-table-cell">الوظيفة</th>
@@ -96,14 +97,32 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let employee of filteredEmployees" (click)="showDetails(employee)" style="cursor: pointer;">
-          <td>{{ employee.fullNameArabic }}</td>
-          <td class="d-none d-md-table-cell">{{ employee.departmentName }}</td>
-          <td class="d-none d-md-table-cell">{{ employee.departmentRole }}</td>
-          <td>0</td>
-          <td>{{ employee.rate || '-' }}</td>
-        </tr>
-      </tbody>
+  <tr *ngFor="let employee of filteredEmployees" (click)="showDetails(employee)" style="cursor: pointer;">
+    <td>
+      <img 
+        *ngIf="employee.avatarUrl; else defaultAvatar"
+        [src]="employee.avatarUrl" 
+        alt="Avatar" 
+        width="40" height="40" 
+        style="border-radius: 50%; object-fit: cover;"
+      >
+      <ng-template #defaultAvatar>
+        <img 
+          src="../../../../assets/icons/user.png" 
+          alt="Avatar" 
+          width="40" height="40" 
+          style="border-radius: 50%; object-fit: cover;"
+        >
+      </ng-template>
+    </td>
+    <td>{{ employee.fullNameArabic }}</td>
+    <td class="d-none d-md-table-cell">{{ employee.departmentName }}</td>
+    <td class="d-none d-md-table-cell">{{ employee.departmentRole }}</td>
+    <td>0</td>
+    <td>{{ employee.rate || '-' }}</td>
+  </tr>
+</tbody>
+
     </table>
   </div>
 </c-card-body>

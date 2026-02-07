@@ -1,266 +1,483 @@
-<div class="container my-4">
 
+<div class="container my-4">
   <!-- رأس الصفحة -->
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="text-primary fw-bold">الملف الشخصي</h4>
+    <h4 class="text-primary fw-bold">البيانات الشخصية</h4>
     <div class="d-flex gap-2">
-        <!-- <button class="btn btn-outline-primary" (click)="requestLeave()"> طلب إجازة</button>
-        <button class="btn btn-outline-success" (click)="requestLoan()"> طلب سلفة</button> -->
-        <button class="btn btn-outline-secondary" (click)="requestLeave()"> تعديل البيانات</button>
+      <button class="btn btn-outline-secondary" (click)="requestLeave()">
+        تعديل البيانات
+      </button>
     </div>
   </div>
 
 
-  <!-- صورة واسم -->
   <div class="text-center mb-4" style="
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: column;
-">
-    <img [src]="profile.image || 'assets/images/user.png'" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
-    <h5 class="mt-2 fw-bold">{{ profile.name }}</h5>
+      align-items: center;
+      justify-content: center;
+      display: flex;
+      flex-direction: column;
+    ">
+    <div class="position-relative d-inline-block">
+  <!-- صورة البروفايل -->
+  <img 
+    [src]="profile.avatarUrl && profile.avatarUrl.length > 0 ? profile.avatarUrl : '../../../../assets/icons/user.png'" 
+    class="rounded-circle border" 
+    style="width: 120px; height: 120px; object-fit: cover; cursor: pointer;" 
+    (click)="fileInput.click()"
+  />
+
+  <!-- أيقونة القلم تظهر عند hover -->
+  <div 
+    class="position-absolute top-50 start-52 translate-middle edit-icon"
+  >
+    <img src="../../../../assets/icons/pencil.png" style="width: 30px; height: 30px; margin-right: 20px;" alt="Edit">
+  </div>
+
+  <!-- input مخفي لاختيار الصورة -->
+  <input 
+    type="file" 
+    accept="image/*" 
+    #fileInput 
+    style="display: none" 
+    (change)="onFileSelected($event)" 
+  />
+</div>
+
+    <h5 class="mt-2 fw-bold">{{ profile.fullNameArabic }}</h5>
     <p class="text-muted">{{ profile.role }}</p>
   </div>
 
-  <!-- بيانات أساسية -->
-  <div class="row mb-4">
-    <div class="col-md-6">
-      <div class="card shadow-sm p-3">
+
+  <div class="row mb-4 align-items-stretch">
+    <div class="col-md-6 d-flex">
+      <div class="card shadow-sm p-3 h-100 w-100">
         <h6 class="text-secondary fw-bold mb-3">البيانات الأساسية</h6>
-        <p><strong>الهاتف:</strong> {{ profile.phone }}</p>
-        <p><strong>البريد:</strong> {{ profile.email }}</p>
-        <p><strong>العنوان:</strong> {{ profile.address }}</p>
-        <p><strong>تاريخ الانضمام:</strong> {{ profile.joinDate }}</p>
+        <p *ngIf="profile.phone">
+          <strong>الهاتف:</strong> {{ profile.phone }}
+        </p>
+        <p *ngIf="profile.agecAccount">
+          <strong>البريد:</strong> {{ profile.agecAccount }}
+        </p>
+        <p *ngIf="profile.address">
+          <strong>العنوان:</strong> {{ profile.address }}
+        </p>
+        <p *ngIf="profile.nationalId">
+          <strong>الرقم القومى:</strong> {{ profile.nationalId }}
+        </p>
       </div>
     </div>
 
-    <!-- الحضور والانصراف -->
+    <div class="col-md-6 d-flex">
+      <div class="card shadow-sm p-3 h-100 w-100">
+        <h6 class="text-secondary fw-bold mb-3">بيانات العمل</h6>
+        <p><strong>اسم الادارة:</strong> {{ profile.departmentName }}</p>
+        <p><strong>الوظيفة:</strong> {{ profile.departmentRole }}</p>
+        <p><strong>درجة العلمية:</strong> {{ profile.educationLevel }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4 class="text-primary fw-bold">معلومات اضافية</h4>
+
+<div class="container mt-4" *ngIf="profile">
+  <div class="card shadow-sm p-3">
+
+    <div class="row">
+
+      <!-- العمود الأيسر -->
+      <div class="col-md-6">
+        <h5 class="fw-bold mb-2">معلومات الاتصال</h5>
+        <p *ngIf="profile.additionalPhone"><strong>الهاتف الإضافي:</strong> {{ profile.additionalPhone }}</p>
+        <p *ngIf="profile.facebookLink"><strong>فيسبوك:</strong> 
+          <a [href]="profile.facebookLink" target="_blank">{{ profile.facebookLink }}</a>
+        </p>
+
+        <h5 class="fw-bold mt-3 mb-2">الإجازات</h5>
+        <p *ngIf="profile.emergency_vacation_days"><strong>أيام إجازة الطوارئ:</strong> {{ profile.emergency_vacation_days }}</p>
+        <p *ngIf="profile.remaining_vacation_days"><strong>الأيام المتبقية من الإجازة:</strong> {{ profile.remaining_vacation_days }}</p>
+
+        <p *ngIf="profile.cvLink"><strong>السيرة الذاتية:</strong> 
+          <a [href]="profile.cvLink" target="_blank">عرض السيرة الذاتية</a>
+        </p>
+      </div>
+
+      <!-- العمود الأيمن -->
+      <div class="col-md-6">
+        <h5 class="fw-bold mb-2">الخبرة</h5>
+        <p *ngIf="profile.yearsOfExperience"><strong>سنوات الخبرة:</strong> {{ profile.yearsOfExperience }}</p>
+        <p *ngIf="profile.yearsInCompany"><strong>سنوات العمل بالشركة:</strong> {{ profile.yearsInCompany }}</p>
+        <p *ngIf="profile.hasCar"><strong>يمتلك سيارة:</strong> نعم</p>
+
+        <h5 class="fw-bold mt-3 mb-2">المهارات والمؤهلات</h5>
+        <p *ngIf="profile.languages?.length"><strong>اللغات:</strong> {{ profile.languages.join(', ') }}</p>
+        <!-- <p *ngIf="profile.computerSkills?.length"><strong>المهارات الحاسوبية:</strong> {{ profile.computerSkills.join(', ') }}</p> -->
+        <p *ngIf="profile.courses?.length"><strong>الدورات:</strong> {{ profile.courses.join(', ') }}</p>
+        <div *ngIf="profile.certifications?.length">
+          <h6 class="fw-bold">الشهادات:</h6>
+          <ul class="list-unstyled mb-0">
+            <li *ngFor="let cert of profile.certifications">
+              <strong>Title:</strong> {{ cert.title }} -
+              <strong>Date:</strong> {{ cert.date }}
+            </li>
+          </ul>
+        </div>        
+        <p *ngIf="profile.educations?.length"><strong>التعليم:</strong> 
+          <span *ngFor="let edu of profile.educations; let i = index">
+            {{ edu.degree }} - {{ edu.institute }} ({{ edu.year }})<span *ngIf="i < profile.educations.length - 1">, </span>
+          </span>
+        </p>
+
+        <h5 class="fw-bold mt-3 mb-2">الشركات السابقة والملاحظات</h5>
+        <p *ngIf="profile.lastCompanies?.length"><strong>الشركات السابقة:</strong> {{ profile.lastCompanies.join(', ') }}</p>
+        <p *ngIf="profile.notes"><strong>ملاحظات:</strong> {{ profile.notes }}</p>
+      </div>
+
+    </div>
+    
+  </div>
+</div>
+
+
+<br />
+<br />
+
+<div *ngIf="!emptyReport"  class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-between">
+  <h5 class="text-primary fw-bold mt-4 mb-3">تحديد المدة الزمنية</h5>
+  <mat-form-field appearance="fill" class="w-42">
+    <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+      <input matStartDate formControlName="start" placeholder="من تاريخ" />
+      <input matEndDate formControlName="end" placeholder="إلى تاريخ" />
+    </mat-date-range-input>
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker>
+      <mat-datepicker-actions>
+        <div class="d-flex justify-content-between mt-3 px-3 pb-2">
+          <button matDatepickerCancel class="btn btn-sm btn-outline-secondary">
+            إلغاء
+          </button>
+          <button matDatepickerApply class="btn btn-sm btn-primary" (click)="applyDateFilter()">
+            تطبيق
+          </button>
+        </div>
+      </mat-datepicker-actions>
+    </mat-date-range-picker>
+  </mat-form-field>
+</div>
+
+<div class="container mt-4" *ngIf="!emptyReport">
+
+  <!-- التأخير -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.cameLate?.length > 0">
     <div class="col-md-6">
-      <div class="card shadow-sm p-3">
-        <h6 class="text-secondary fw-bold mb-3">الحضور والانصراف</h6>
-        <p><strong>أيام الحضور:</strong> {{ profile.attendanceDays }}</p>
-        <p><strong>أيام الغياب:</strong> {{ profile.absenceDays }}</p>
-        <p><strong>أيام التأخير:</strong> {{ profile.delays }}</p>
-        <p><strong>ساعات العمل على النظام:</strong> {{ profile.totalWorkHours }} ساعة</p>
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white fw-bold">التأخير</div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0 text-center">
+            <thead class="table-light">
+              <tr>
+                <th>التاريخ</th>
+                <th>الدقائق</th>
+                <th>الساعات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of userReport?.cameLate">
+                <td>{{ item.date }}</td>
+                <td>{{ item.minutes }}</td>
+                <td>{{ item.formatted }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark fw-bold">الانصراف المبكر</div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0 text-center">
+            <thead class="table-light">
+              <tr>
+                <th>التاريخ</th>
+                <th>الدقائق</th>
+                <th>الساعات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of userReport?.leaveEarly">
+                <td>{{ item.date }}</td>
+                <td>{{ item.minutes }}</td>
+                <td>{{ item.formatted }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- الانصراف المبكر -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.leaveEarly?.length > 0">
+  </div>
+
+  <!-- أيام الغياب -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.absences?.length > 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-danger text-white fw-bold">أيام الغياب</div>
+        <div class="card-body">
+          <span class="badge bg-danger mx-1" *ngFor="let a of userReport?.absences">{{ a }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- العمل في العطلات -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.holidayWork?.length > 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white fw-bold">العمل في العطلات</div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0 text-center">
+            <thead class="table-light">
+              <tr>
+                <th>التاريخ</th>
+                <th>ساعات العمل</th>
+                <th>سعر الساعة</th>
+                <th>المُعامل</th>
+                <th>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of userReport?.holidayWork">
+                <td>{{ item.date }}</td>
+                <td>{{ item.workedHours }}</td>
+                <td>{{ item.hourRate }}</td>
+                <td>{{ item.payMultiplier }}</td>
+                <td>{{ item.totalPay }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- أيام المراجعة -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.reviewDays?.length > 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white fw-bold">أيام المراجعة</div>
+        <div class="card-body p-0">
+          <table class="table table-striped mb-0 text-center">
+            <thead class="table-light">
+              <tr>
+                <th>التاريخ</th>
+                <th>السبب</th>
+                <th>السجلات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of userReport?.reviewDays">
+                <td>{{ item.date }}</td>
+                <td>{{ item.reason }}</td>
+                <td>
+                  <div *ngFor="let log of item.rawLogs" class="small text-muted">
+                    <strong>{{ log.type }}:</strong> {{ log.timestamp }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- العمل الإضافي -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.overTime?.length > 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white fw-bold">العمل الإضافي</div>
+        <div class="card-body">
+          <div *ngFor="let ot of userReport?.overTime" class="mb-3">
+            <h6 class="fw-bold text-primary">التاريخ: {{ ot.date }}</h6>
+            <table class="table table-bordered text-center">
+              <thead>
+                <tr>
+                  <th>رقم الوردية</th>
+                  <th>الساعات</th>
+                  <th>الساعات الموزونة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let s of ot.shifts">
+                  <td>{{ s.shiftNum }}</td>
+                  <td>{{ s.hours }}</td>
+                  <td>{{ s.weightedHours }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="alert alert-info">إجمالي الأجر: {{ ot.totalPay }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- المجاميع -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.totals && (
+      userReport?.totals.cameLateHours ||
+      userReport?.totals.leaveEarlyHours ||
+      userReport?.totals.overTimeHours ||
+      userReport?.totals.overTimeWeightedHours ||
+      userReport?.totals.overTimePay ||
+      userReport?.totals.holidayWorkHours ||
+      userReport?.totals.holidayWorkPay
+    )">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white fw-bold">الإجماليات</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>ساعات التأخير:</span> <strong>{{ userReport?.totals.cameLateHours }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>ساعات الانصراف المبكر:</span> <strong>{{ userReport?.totals.leaveEarlyHours }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>ساعات الإضافي:</span> <strong>{{ userReport?.totals.overTimeHours }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>الساعات الموزونة:</span> <strong>{{ userReport?.totals.overTimeWeightedHours }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>أجر الإضافي:</span> <strong>{{ userReport?.totals.overTimePay }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>ساعات العمل في العطلات:</span> <strong>{{ userReport?.totals.holidayWorkHours }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>أجر العمل في العطلات:</span> <strong>{{ userReport?.totals.holidayWorkPay }}</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.kpis && userReport?.kpis.score !== 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white fw-bold">مؤشرات الأداء (KPI)</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between"><span>غياب:</span> <strong>{{ userReport?.kpis.absenceKpi }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>جزاءات:</span> <strong>{{ userReport?.kpis.penaltiesKpi }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>التأخير:</span> <strong>{{ userReport?.kpis.lateKpi }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>الانصراف المبكر:</span> <strong>{{ userReport?.kpis.earlyKpi }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>النتيجة النهائية:</span> 
+              <strong class="text-danger">{{ userReport?.kpis.score }}</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الأحداث -->
+  <div class="row g-3 mb-4" *ngIf="userReport?.events?.length > 0">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark fw-bold">الأحداث</div>
+        <div class="card-body">
+          <div *ngFor="let e of userReport?.events" class="alert alert-warning">
+            <strong>{{ e.type }} - {{ e.date }}</strong><br>
+            {{ e.description }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 
 
-  <h5 class="text-primary fw-bold mt-4 mb-3">المعلومات الإضافية</h5>
+<!-- <h5 class="text-primary fw-bold mt-4 mb-3">الاجازات</h5>
 <div class="row mb-4">
-
-  <!-- الحالة التأمينية والتعليم -->
   <div class="col-md-6">
     <div class="card shadow-sm p-3">
-      <h6 class="text-secondary fw-bold mb-3">البيانات المهنية</h6>
-      <p><strong>الحالة التأمينية:</strong> {{ profile.insuranceStatus }}</p>
-      <p><strong>الدرجة العلمية:</strong> {{ profile.educationLevel }}</p>
-
-      <div *ngIf="profile.certificates?.length">
-        <h6 class="text-muted small mt-3">الشهادات والدورات:</h6>
+      <h6 class="text-secondary fw-bold mb-3">الإجازات</h6>
+      <p><strong>رصيد الإجازات:</strong> {{ profile.leaveBalance }} يوم</p>
+      <div *ngIf="profile.upcomingLeaves.length">
+        <h6 class="text-muted small">إجازات قادمة:</h6>
         <ul class="list-unstyled">
-          <li *ngFor="let cert of profile.certificates">
-            📜 {{ cert.title }} - {{ cert.date }}
+          <li *ngFor="let leave of profile.upcomingLeaves">
+            📅 {{ leave.date }} - {{ leave.reason }}
           </li>
         </ul>
       </div>
-
-      <div *ngIf="profile.languages?.length">
-        <h6 class="text-muted small mt-3">اللغات المكتسبة:</h6>
-        <p>{{ profile.languages.join('، ') }}</p>
-      </div>
     </div>
   </div>
 
-  <!-- معلومات العائلة والعنوان -->
-  <div class="col-md-6">
+  <div class="col-md-3">
     <div class="card shadow-sm p-3">
-      <h6 class="text-secondary fw-bold mb-3">معلومات شخصية</h6>
-
-      <p><strong>الحالة الاجتماعية:</strong> {{ profile.familyInfo.maritalStatus }}</p>
-      <p><strong>عدد المعالين:</strong> {{ profile.familyInfo.dependents }}</p>
-
-      <div>
-        <h6 class="text-muted small">جهة الاتصال للطوارئ:</h6>
-        <p>
-          {{ profile.familyInfo.emergencyContact.name }} ({{ profile.familyInfo.emergencyContact.relation }})<br>
-          📞 {{ profile.familyInfo.emergencyContact.phone }}
-        </p>
-      </div>
-
-      <div>
-        <h6 class="text-muted small">عنوان السكن:</h6>
-        <p>
-          {{ profile.residence.governorate }} - {{ profile.residence.city }}<br>
-          {{ profile.residence.street }}
-        </p>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<br>
-<br>
-
-<div class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-between ">
-  <h5 class="text-primary fw-bold mt-4 mb-3">تقيم الاداء</h5>
-  <mat-form-field appearance="fill" class="w-full">
-          <mat-label>تحديد مدة زمنية</mat-label>
-          <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
-              <input matStartDate formControlName="start" placeholder="من تاريخ">
-              <input matEndDate formControlName="end" placeholder="إلى تاريخ">
-          </mat-date-range-input>
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker>
-              <mat-datepicker-actions>
-              <div class="d-flex justify-content-between mt-3 px-3 pb-2">
-                  <button matDatepickerCancel class="btn btn-sm btn-outline-secondary">إلغاء</button>
-                  <button matDatepickerApply class="btn btn-sm btn-primary" (click)="applyDateFilter()">تطبيق</button>
-              </div>
-              </mat-datepicker-actions>
-          </mat-date-range-picker>
-          </mat-form-field>
-</div>
-
-  <!-- الإحصاءات والرسوم -->
-  <div class="row mb-4">
-
-  <!-- Current Month Rating -->
-  <div class="col-md-6">
-    <div class="card shadow-sm p-3 text-center">
-      <h6 class="text-secondary mb-3">تقييم الشهر الحالي</h6>
-
-      <div class="bg-light rounded p-3">
-        <h4 class="text-success mb-3">
-          {{ profile.rating }}%
-        </h4>
-        <ul class="list-unstyled text-start text-muted">
-          <li>✔️ الحضور المنتظم: +5 نقاط</li>
-          <li>✔️ الالتزام بالمواعيد: +3 نقاط</li>
-          <li>✔️ الأداء الممتاز: +2 نقاط</li>
-          <li>❌ الغياب: -1 نقاط</li>
-          <li>❌ التاخير: -1 نقاط</li>
+      <h6 class="text-secondary fw-bold mb-3">الغيابات</h6>
+      <p><strong>عدد أيام الغياب:</strong> {{ profile.delays }} يوم</p>
+      <div *ngIf="profile.absentsDays.length">
+        <h6 class="text-muted small">إجازات قادمة:</h6>
+        <ul class="list-unstyled">
+          <li *ngFor="let leave of profile.absentsDays">
+            📅 {{ leave.date }} - {{ leave.reason }}
+          </li>
         </ul>
       </div>
-
-      <p class="text-muted mt-3">{{ profile.feedback }}</p>
     </div>
   </div>
 
-  <!-- Cumulative Rating -->
-  <div class="col-md-6">
+  <div class="col-md-3">
     <div class="card shadow-sm p-3">
-      <h6 class="text-secondary mb-3">التقييم التراكمي خلال الشهور</h6>
-
-      <div class="bg-light rounded p-3">
-        <h5 class="text-primary">إجمالي التقييم: {{ profile.rating - 33 }}%</h5>
-        <p class="text-muted mt-2">تراكم النقاط من بداية السنة حتى الآن</p>
-
-        <ul class="list-unstyled text-muted">
-          <li>يناير: 30 % </li>
-          <li>فبراير: 59 % </li>
-          <li>مارس:  60 % </li>
-          <li>أبريل: 88 % </li>
-          <li>مايو: 30 % </li>
-          <li>يونيو: 42 % </li>
+      <h6 class="text-secondary fw-bold mb-3">التأخيرات</h6>
+      <p><strong>عدد أيام التأخير:</strong> {{ profile.delays }} يوم</p>
+      <div *ngIf="profile.upcomingLeaves.length">
+        <h6 class="text-muted small">ايام التأخير:</h6>
+        <ul class="list-unstyled">
+          <li *ngFor="let leave of profile.delaysDays">
+            📅 {{ leave.date }} - {{ leave.reason }}
+          </li>
         </ul>
       </div>
-
     </div>
   </div>
-</div>
+</div> -->
 
+<!-- <h5 class="text-primary fw-bold mt-4 mb-3">الراتب والحوافز</h5> -->
 
-  <h5 class="text-primary fw-bold mt-4 mb-3">الاجازات</h5>
-  <div class="row mb-4">
-    
-    <!-- الإجازات -->
-    <div class="col-md-6">
-      <div class="card shadow-sm p-3">
-        <h6 class="text-secondary fw-bold mb-3">الإجازات</h6>
-        <p><strong>رصيد الإجازات:</strong> {{ profile.leaveBalance }} يوم</p>
-        <div *ngIf="profile.upcomingLeaves.length">
-          <h6 class="text-muted small">إجازات قادمة:</h6>
-          <ul class="list-unstyled">
-            <li *ngFor="let leave of profile.upcomingLeaves">
-              📅 {{ leave.date }} - {{ leave.reason }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- الغيابات -->
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h6 class="text-secondary fw-bold mb-3">الغيابات</h6>
-        <p><strong>عدد أيام الغياب:</strong> {{ profile.delays }} يوم</p>
-        <div *ngIf="profile.absentsDays.length">
-          <h6 class="text-muted small">إجازات قادمة:</h6>
-          <ul class="list-unstyled">
-            <li *ngFor="let leave of profile.absentsDays">
-              📅 {{ leave.date }} - {{ leave.reason }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- التأخيرات -->
-    <div class="col-md-3">
-      <div class="card shadow-sm p-3">
-        <h6 class="text-secondary fw-bold mb-3">التأخيرات</h6>
-        <p><strong>عدد أيام التأخير:</strong> {{ profile.delays }} يوم</p>
-        <div *ngIf="profile.upcomingLeaves.length">
-          <h6 class="text-muted small">ايام التأخير:</h6>
-          <ul class="list-unstyled">
-            <li *ngFor="let leave of profile.delaysDays">
-              📅 {{ leave.date }} - {{ leave.reason }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-
-    
-
-  </div>
-
-  <h5 class="text-primary fw-bold mt-4 mb-3"> الراتب والحوافز</h5>
-
-<div class="row">
-
-  <!-- السلف -->
+<!-- <div class="row">
   <div class="col-md-6 mb-4">
     <div class="card shadow-sm p-3 h-100">
       <h6 class="text-secondary fw-bold mb-3">السلف من الراتب</h6>
 
       <p><strong>الراتب الشهري:</strong> {{ profile.salary }} جنيه</p>
       <p><strong>إجمالي السلف:</strong> {{ getTotalLoans() }} جنيه</p>
-      <p><strong>المتبقي من الراتب:</strong> 
+      <p>
+        <strong>المتبقي من الراتب:</strong>
         {{ profile.salary - getTotalLoans() }} جنيه
       </p>
 
-      <!-- شريط يوضح المتبقي كنسبة -->
-      <div class="progress mb-3" style="height: 20px;">
-        <div class="progress-bar bg-success" 
-             role="progressbar" 
-             [style.width.%]="getRemainingSalaryPercentage()"
-             aria-valuemin="0" 
-             aria-valuemax="100">
+      <div class="progress mb-3" style="height: 20px">
+        <div class="progress-bar bg-success" role="progressbar" [style.width.%]="getRemainingSalaryPercentage()"
+          aria-valuemin="0" aria-valuemax="100">
           {{ getRemainingSalaryPercentage() }}%
         </div>
       </div>
 
-      <hr>
+      <hr />
 
-      <!-- جدول السلف -->
       <table class="table table-sm table-bordered">
         <thead class="table-light">
           <tr>
@@ -275,9 +492,9 @@
             <td>{{ loan.amount }} جنيه</td>
             <td>
               <span [ngClass]="{
-                'text-success': loan.status === 'مدفوعة',
-                'text-danger': loan.status !== 'مدفوعة'
-              }">{{ loan.status }}</span>
+                  'text-success': loan.status === 'مدفوعة',
+                  'text-danger': loan.status !== 'مدفوعة'
+                }">{{ loan.status }}</span>
             </td>
           </tr>
         </tbody>
@@ -285,15 +502,11 @@
     </div>
   </div>
 
-  <!-- الحوافز -->
   <div class="col-md-6 mb-4">
     <div class="card shadow-sm p-3 h-100">
       <h6 class="text-secondary fw-bold mb-3">سجل الحوافز والمكافآت</h6>
 
-      <!-- مجموع الحوافز -->
-      <p><strong>إجمالي الحوافز:</strong> 
-        {{ getTotalBonuses() }} جنيه
-      </p>
+      <p><strong>إجمالي الحوافز:</strong> {{ getTotalBonuses() }} جنيه</p>
 
       <table class="table table-sm table-striped">
         <thead class="table-light">
@@ -314,15 +527,11 @@
     </div>
   </div>
 
-  <!-- الخصومات والجزاءات -->
   <div class="col-md-6 mb-4">
     <div class="card shadow-sm p-3 h-100">
       <h6 class="text-secondary fw-bold mb-3">سجل الخصومات والجزاءات</h6>
 
-      <!-- مجموع الخصومات -->
-      <p><strong>إجمالي الخصومات:</strong> 
-        {{ getDeductionsTotal() }} جنيه
-      </p>
+      <p><strong>إجمالي الخصومات:</strong> {{ getDeductionsTotal() }} جنيه</p>
 
       <table class="table table-sm table-striped">
         <thead class="table-light">
@@ -343,47 +552,109 @@
     </div>
   </div>
 
-    <h5 class="text-primary fw-bold mt-4 mb-3"> الاحداث</h5>
+  <h5 class="text-primary fw-bold mt-4 mb-3">الاحداث</h5>
 
   <div class="col-md-6 mb-4">
-  <div class="card shadow-sm p-3 h-100">
-    <h6 class="text-secondary fw-bold mb-3">سجل الحضور والمأموريات</h6>
+    <div class="card shadow-sm p-3 h-100">
+      <h6 class="text-secondary fw-bold mb-3">سجل الحضور والمأموريات</h6>
 
-    <!-- عدد الأيام أو الأحداث -->
-    <p><strong>إجمالي الأحداث:</strong> 
-      {{ profile.events?.length || 0 }} حدث
-    </p>
+      <p>
+        <strong>إجمالي الأحداث:</strong> {{ profile.events?.length || 0 }} حدث
+      </p>
 
-    <table class="table table-sm table-striped">
-      <thead class="table-light">
-        <tr>
-          <th>التاريخ</th>
-          <th>النوع</th>
-          <th>التفاصيل</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let e of profile.events">
-          <td>{{ e.date }}</td>
-          <td>
-            <span [ngClass]="{
-              'text-success': e.type === 'حضور',
-              'text-primary': e.type === 'مأمورية',
-              'text-warning': e.type === 'انصراف مبكر'
-            }">
-              {{ e.type }}
-            </span>
-          </td>
-          <td>{{ e.details }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <h6 class="text-danger">ظهور في صفحة الاحداث عند التاخير او الرحيل مبكرا بعد الساعة 7:30 و الرحيل بعد الساعة 4</h6>
+      <table class="table table-sm table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>التاريخ</th>
+            <th>النوع</th>
+            <th>التفاصيل</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of profile.events">
+            <td>{{ e.date }}</td>
+            <td>
+              <span [ngClass]="{
+                  'text-success': e.type === 'حضور',
+                  'text-primary': e.type === 'مأمورية',
+                  'text-warning': e.type === 'انصراف مبكر'
+                }">
+                {{ e.type }}
+              </span>
+            </td>
+            <td>{{ e.details }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <h6 class="text-danger">
+        ظهور في صفحة الاحداث عند التاخير او الرحيل مبكرا بعد الساعة 7:30 و
+        الرحيل بعد الساعة 4
+      </h6>
+    </div>
   </div>
+</div> -->
+
+<!-- --------------- -->
+
+<!-- <h5 class="text-primary fw-bold mt-4 mb-3">المعلومات الإضافية</h5>
+<div class="row mb-4">
+
+  <div class="col-md-6">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-secondary fw-bold mb-3">معلومات شخصية</h6>
+
+      <p *ngIf="profile.maritalStatus"><strong>الحالة الاجتماعية:</strong> {{ profile?.maritalStatus }}</p>
+
+      <div *ngIf="profile.family?.length">
+        <h6 class="text-muted small my-2">👨‍👩‍👧‍👦 أفراد العائلة:</h6>
+        <div class="d-flex flex-wrap gap-3">
+          <span *ngFor="let member of profile.family" class="border rounded px-2 py-1 bg-light">
+            <strong>{{ member.name }}</strong>
+            <span *ngIf="member.relation || member.realtion">
+              ({{ member.relation || member.realtion }})
+            </span>
+            <span *ngIf="member.phone">
+              - 📞 {{ member.phone }}
+            </span>
+          </span>
+        </div>
+      </div>
+
+
+
+      <div *ngIf="profile.residence">
+        <h6 class="text-muted small">عنوان السكن:</h6>
+        <p>
+          {{ profile?.residence?.address }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6" *ngIf="profile.languages.length > 0 || profile.certifications.length > 0 ">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-secondary fw-bold mb-3">الشهادات و اللغات</h6>
+      <div *ngIf="profile.languages?.length">
+        <h6 class="text-muted small mt-3">اللغات المكتسبة:</h6>
+        <p>{{ profile.languages.join('، ') }}</p>
+      </div>
+      <div *ngIf="profile.certifications?.length">
+        <h6 class="text-muted small mt-3">الشهادات والدورات:</h6>
+        <ul class="list-unstyled">
+          <li *ngFor="let cert of profile.certifications">
+            📜 {{ cert.title }} - {{ cert.date }}
+          </li>
+        </ul>
+      </div>
+
+      
+    </div>
+  </div>
+
+  
+
 </div>
-
-
-</div>
-
-
-</div>
+<h6 class="text-secondary fw-bold mb-3">البيانات المهنية</h6>
+<p><strong>الحالة التأمينية:</strong> {{ profile.insuranceStatus }}</p>
+<p><strong>الدرجة العلمية:</strong> {{ profile.educationLevel }}</p>
+ -->

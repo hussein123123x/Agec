@@ -1,0 +1,8 @@
+.position-relative:hover .edit-icon {
+  display: block;
+}
+
+.edit-icon {
+  display: none; /* مخفية بشكل افتراضي */
+  cursor: pointer;
+}

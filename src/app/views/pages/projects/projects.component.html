@@ -4,36 +4,36 @@
       <h4 class="mb-0">المشاريع</h4>
     
       <div class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-end">
-        <input type="text" class="form-control" placeholder="بحث باسم المشروع أو المالك"
+        <input type="text" class="form-control" placeholder="بحث باسم المشروع أو العميل"
                [(ngModel)]="searchQuery" style="max-width: 250px;" />
     
         <!-- قائمة الفلترة -->
-            <select class="form-select" [(ngModel)]="statusFilter" style="max-width: 180px;">
+            <!-- <select class="form-select" [(ngModel)]="statusFilter" style="max-width: 180px;">
             <option value="">كل الحالات</option>
             <option value="جاري">جاري</option>
             <option value="مكتمل">مكتمل</option>
             <option value="متأخر">متأخر</option> 
-            </select>
+            </select> -->
     
     
-        <button class="btn btn-primary">
+        <!-- <button class="btn btn-primary">
           + مشروع جديد
-        </button>
+        </button> -->
       </div>
     </div>
     
     <div class="d-flex flex-wrap justify-content-between gap-3 mb-4 text-center">
       <c-widget-stat-c color="primary" [value]="projects.length" title="إجمالي المشاريع" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
-      <c-widget-stat-c color="info" [value]="activeProjects" title="جارية" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="info" [value]="activeProjects" title="تحت التصنيع" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
       <c-widget-stat-c color="success" [value]="completedProjects" title="مكتملة" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
-      <c-widget-stat-c color="warning" [value]="nearProjects" title="اقتربت على التسليم" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
+      <c-widget-stat-c color="warning" [value]="nearProjects" title="تم تسليمها" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
       <c-widget-stat-c color="danger" [value]="delayedProjects" title="متأخرة" inverse class="flex-fill" style="min-width: 180px;"></c-widget-stat-c>
     </div>
     
     <!-- عرض المشاريع -->
     <div class="row">
       <div class="col-md-6 mb-4" *ngFor="let project of filteredProjects">
-        <div class="card h-100 shadow-sm" [ngClass]="getCardBorderClass(project.dueDate, project.status)">
+        <div class="card h-100 shadow-sm" [ngClass]="getCardBorderClass(project?.dueDate, project?.status)">
           <div class="card-body">
             <h5 class="mb-3">
             📁 {{ project.name }}
@@ -56,7 +56,7 @@
                 {{ getProjectPerformance(project.progress, project.dueDate, project.startDate) }}
               </span>
             </p>
-            <p><strong>المالك:</strong> {{ project.owner }}</p>
+            <p><strong>العميل:</strong> {{ project.owner }}</p>
             <p><strong>تاريخ البداية:</strong> {{ project.startDate }}</p>
             <p><strong>تاريخ التسليم:</strong> {{ project.dueDate }}</p>
            <p *ngIf="project.status !== 'مكتمل'"><strong>عدد الأيام المتبقية:</strong> {{ getRemainingDays(project.dueDate) }} يوم</p>
@@ -112,9 +112,9 @@
         <p><strong>تقدم المشروع:</strong> 
           {{ getProjectPerformance(selectedProject.progress, selectedProject.dueDate, selectedProject.startDate) }}
         </p>
-        <p><strong>المالك:</strong> {{ selectedProject.owner }}</p>
-        <p><strong>الموقع:</strong> {{ selectedProject.location }}</p>
-        <p><strong>المهندس المسؤول:</strong> {{ selectedProject.engineerInCharge }}</p>
+        <p><strong>العميل:</strong> {{ selectedProject.owner }}</p>
+        <p><strong>مهندس الانتاج:</strong> {{ selectedProject.productEngineerName }}</p>
+
       </div>
 
       <!-- نسبة الإنجاز -->

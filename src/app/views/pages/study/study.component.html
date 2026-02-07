@@ -2,7 +2,7 @@
   <div
     class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3"
   >
-    <h4 class="mb-0">مشاريع تحت الدراسة</h4>
+    <h4 class="mb-0">الدراسات</h4>
 
     <div
       class="d-flex flex-wrap gap-2 align-items-center flex-grow-1 justify-content-end"
@@ -10,7 +10,7 @@
       <input
         type="text"
         class="form-control  py-3 mb-3"
-        placeholder="بحث باسم المشروع أو المالك"
+        placeholder=" بحث"
         [(ngModel)]="searchQuery"
         style="max-width: 250px"
       />
@@ -34,7 +34,7 @@
 
 
       <button class="btn btn-primary" (click)="showForm = !showForm">
-        {{ showForm ? "إغلاق النموذج" : "+ مشروع جديد" }}
+        {{ showForm ? "إغلاق النموذج" : "+ دراسة جديدة" }}
       </button>
     </div>
 
@@ -45,7 +45,7 @@
           <input
             type="text"
             class="form-control"
-            [(ngModel)]="newProject.name"
+            [(ngModel)]="newProject.projectName"
             name="name"
           />
         </div>
@@ -55,13 +55,13 @@
           <input
             type="number"
             class="form-control"
-            [(ngModel)]="newProject.cost"
+            [(ngModel)]="newProject.projectCost"
             name="cost"
           />
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">اسم العميل</label>
+          <label class="form-label">اسم المالك</label>
           <input
             type="text"
             class="form-control"
@@ -75,7 +75,8 @@
           <input
             type="text"
             class="form-control"
-            [value]="projects.length + 1"
+            dir="ltr"
+            [value]="projectNumber"
             disabled
           />
         </div>
@@ -100,9 +101,29 @@
           />
         </div>
 
+        <div  class="col-md-6">
+          <label class="form-label">اسم مهندس الدراسات</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.studyEngineerName"
+            name="studyEngineerName"
+          />
+        </div>
+
+        <div  class="col-md-6">
+          <label class="form-label">اسم مهندس المبيعات</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newProject.productEngineerName"
+            name="productEngineerName"
+          />
+        </div>
+
 
         <div class="col-md-12">
-            <label class="form-label">  موعد متوقع للتسليم <span class="text-danger">*</span></label>
+            <label class="form-label">  الموعد المطلوب لتسليم عرض الاسعار <span class="text-danger">*</span></label>
             <input type="date" class="form-control" [(ngModel)]="newProject.deliveryDate" name="deliveryDate" />
         </div>
 
@@ -128,12 +149,9 @@
             (change)="onFileSelected($event)"
           />
 
-          <p class="card-text mt-2" *ngIf="newProject.financialModelFile">
+          <p *ngIf="newProject.financialModelFile">
             <strong>عرض الملف:</strong>
-            <a
-              [href]="getFileUrl(newProject.financialModelFile)"
-              target="_blank"
-            >
+            <a [href]="newProject.financialModelFile.previewUrl" target="_blank">
               {{ newProject.financialModelFile.name }}
             </a>
           </p>
@@ -142,12 +160,7 @@
             class="mb-2"
             *ngIf="newProject.financialModelFile?.type?.startsWith('image/')"
           >
-            <img
-              [src]="getFileUrl(newProject.financialModelFile)"
-              alt="معاينة"
-              class="img-thumbnail"
-              style="max-width: 150px"
-            />
+            <img [src]="newProject.financialModelFile.previewUrl" class="img-thumbnail" style="max-width: 150px;" />
           </div>
         </div>
         
@@ -160,8 +173,10 @@
             accept=".pdf,.doc,.docx,.xls,.xlsx,image/*"
             (change)="onExtraFilesSelected($event)"
           />
-          <ul class="mt-2 small" *ngIf="newProject.extraFiles?.length">
-            <li *ngFor="let f of newProject.extraFiles">📎 {{ f.name }}</li>
+          <ul *ngIf="newProject.extraFiles?.length">
+            <li *ngFor="let file of newProject.extraFiles">
+              <a [href]="file.previewUrl" target="_blank">{{ file.name }}</a>
+            </li>
           </ul>
         </div>
 
@@ -180,78 +195,176 @@
     </form>
   </div>
 
-  <div class="row mt-4" >
-    <div class="col-md-6" *ngFor="let project of filteredProjects()">
-      <div class="card border shadow-sm mb-4" [ngClass]="{ 'bg-light border-success': suppliedProjects.has(project.offerNumber) }">
-        <div class="card-body">
-          <h5 class="card-title text-primary">{{ project.name }}</h5>
-          <p *ngIf="project.client" class="card-text mb-1">
-            <strong>العميل:</strong> {{ project.client }}
-          </p>
-          <p class="card-text mb-1">
-            <strong>التكلفة:</strong> {{ project.cost | currency : "EGP" }}
-          </p>
-          <p  class="card-text mb-1">
-            <strong>رقم العرض:</strong> {{ project.offerNumber }}
-          </p>
-          <p *ngIf="newProject.consultantName" class="card-text mb-1">
-            <strong>الاستشاري:</strong> {{ project.consultantName }} - 📞
-            {{ project.consultantPhone }}
-          </p>
-          <p class="card-text mb-1" *ngIf="project.createdAt">
-            <strong>تاريخ الإنشاء:</strong> {{ project.createdAt | date:'yyyy-MM-dd' }}
-            </p>
+  <div class="row mt-4">
+  <div class="col-md-6" *ngFor="let project of filteredProjects()">
+    <div
+      class="card border shadow-sm mb-4"
+      [ngClass]="{
+        'bg-light border-success': suppliedProjects.has(project.projectNumber)
+      }"
+    >
+      <div class="card-body">
+        <!-- Project Name -->
+        <h5 class="card-title text-primary">{{ project.projectName }} </h5>
 
-            <p class="card-text mb-1" *ngIf="project.supplyDate">
-            <strong>تاريخ التوريد:</strong>
-            {{ project.supplyDate | date:'yyyy-MM-dd – h:m' }}
-            </p>
-          <p  class="card-text mb-1" *ngIf="project.extraDetails">
-            <strong>تفاصيل إضافية:</strong> {{ project.extraDetails }}
-            </p>
+        <!-- Client -->
+        <p *ngIf="project.client" class="card-text mb-1">
+          <strong>العميل:</strong> {{ project.client }}
+        </p>
+
+        <!-- Cost -->
+        <p class="card-text mb-1">
+          <strong>التكلفة:</strong> {{ project.projectCost | currency : 'EGP' }}
+        </p>
+
+        <!-- Project Number -->
+        <p class="card-text mb-1">
+          <strong >رقم المشروع : </strong> <span dir="ltr">{{ project.projectNumber }}</span> 
+        </p>
+
+        <!-- Consultant -->
+        <p *ngIf="project.consultantName" class="card-text mb-1">
+          <strong>الاستشاري:</strong> {{ project.consultantName }} - 📞
+          {{ project.consultantPhone }}
+        </p>
+
+        <!-- Created At (Firestore Timestamp) -->
+        <p *ngIf="project.createdAt" class="card-text mb-1">
+          <strong>تاريخ الإنشاء:</strong>
+          {{ project.createdAt | date: 'yyyy-MM-dd hh:mm a' }}
+        </p>
+
+        <!-- Delivery Date -->
+        
+        <!-- Extra Details -->
+        <p *ngIf="project.extraDetails" class="card-text mb-1">
+          <strong>تفاصيل إضافية:</strong> {{ project.extraDetails }}
+        </p>
+        
+        <p *ngIf="project.deliveryDate" class="card-text mb-1">
+          <strong>تاريخ التسليم:</strong>
+          {{ project.deliveryDate | date:'yyyy-MM-dd' }}
+        </p>
+        <!-- Financial Model File -->
+        <p *ngIf="project.financialModelFile" class="card-text mb-1">
+          <strong>النموذج المالي:</strong>
+          <a [href]="getFileUrl(project.financialModelFile)" target="_blank">
+            عرض الملف ({{ project.financialModelFile.name }})
+          </a>
+        </p>
+
+        <!-- Preview Image if exists -->
+        <div
+          class="mb-2"
+          *ngIf="project.financialModelFile?.type?.startsWith('image/')"
+        >
+          <img
+            [src]="getFileUrl(project.financialModelFile)"
+            class="img-thumbnail"
+            style="max-width: 150px"
+          />
+        </div>
+
+        <!-- Extra Files -->
+        <div *ngIf="project.extraFiles?.length">
+          <p class="mb-1"><strong>ملفات إضافية:</strong></p>
+          <ul class="small">
+            <li *ngFor="let file of project.extraFiles">
+              <a [href]="getFileUrl(file)" target="_blank">📎 {{ file.name }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Action Button -->
+        <div class="text-end mt-3 d-flex justify-content-end gap-2">
+        
+        <!-- زر التعديل -->
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          (click)="editProject(project)"
+        >
+          تعديل
+        </button>
+        <!-- زر العرض -->
+        <button
+          class="btn btn-sm btn-outline-info"
+          (click)="openProject(project)"
+        >
+          عرض
+        </button>
+
+        <!-- أمر التوريد -->
+        <button
+          class="btn btn-sm"
+          [ngClass]="
+            suppliedProjects.has(project.projectNumber)
+              ? 'btn-success'
+              : 'btn-outline-primary'
+          "
+          [disabled]="suppliedProjects.has(project.projectNumber)"
+          (click)="convertToReady(project)"
+        >
+          {{
+            suppliedProjects.has(project.projectNumber)
+              ? 'تم التوريد'
+              : ' تحويل الى أمر توريد '
+          }}
+        </button>
+      </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
 
 
+<div *ngIf="selectedProject" class="popup-overlay">
+  <div class="popup-content">
+    <button class="btn btn-sm btn-outline-danger float-end" (click)="selectedProject = null">اغلاق</button>
 
+    <h4 class="mb-3">{{ selectedProject.projectName || 'تفاصيل المشروع' }}</h4>
 
-          <p class="card-text mb-1" *ngIf="project.financialModelFile">
-            <strong>النموذج المالي:</strong>
-            <a [href]="getFileUrl(project.financialModelFile)" target="_blank">
-              عرض الملف ({{ project.financialModelFile.name }})
-            </a>
-          </p>
+    <div class="project-details mb-3">
+      <p><strong>رقم المشروع:</strong> {{ selectedProject.projectNumber }}</p>
+      <p><strong>العميل:</strong> {{ selectedProject.client }}</p>
+      <p><strong>المستشار:</strong> {{ selectedProject.consultantName }} ({{ selectedProject.consultantPhone }})</p>
+      <p><strong>مهندس الدراسة:</strong> {{ selectedProject.studyEngineerName }}</p>
+      <p><strong>مهندس المنتج:</strong> {{ selectedProject.productEngineerName }}</p>
+      <p><strong>تاريخ التسليم:</strong> {{ selectedProject.deliveryDate }}</p>
+      <p><strong>تفاصيل إضافية:</strong> {{ selectedProject.extraDetails }}</p>
+    </div>
 
-          <!-- عرض معاينة إذا كان صورة -->
-          <div
-            class="mb-2"
-            *ngIf="project.financialModelFile?.type?.startsWith('image/')"
-          >
-            <img
-              [src]="getFileUrl(project.financialModelFile)"
-              class="img-thumbnail"
-              style="max-width: 150px"
-            />
-          </div>
+    <hr>
 
-          <div *ngIf="project.extraFiles?.length">
-            <p class="mb-1"><strong>ملفات إضافية:</strong></p>
-            <ul class="small">
-                <li *ngFor="let file of project.extraFiles">
-                <a [href]="getFileUrl(file)" target="_blank">📎 {{ file.name }}</a>
-                </li>
-            </ul>
-            </div>
+    <h5>الملفات المرفوعة</h5>
+    <ul>
+      <li *ngIf="selectedProject.financialModelFileUrl">
+        <a [href]="selectedProject.financialModelFileUrl" target="_blank">النموذج المالي</a>
+      </li>
+      <li *ngFor="let file of selectedProject.extraFilesUrls">
+        <a [href]="file" target="_blank">{{ file.split('/').pop() }}</a>
+      </li>
+    </ul>
+    <button *ngIf="selectedProject.folderUrl" class="btn btn-sm btn-primary mt-2" (click)="openFolder()">عرض جميع الملفات على Drive</button>
 
-          <div class="text-end mt-3">
-            <button class="btn btn-sm"
-                    [ngClass]="suppliedProjects.has(project.offerNumber) ? 'btn-success' : 'btn-outline-primary'"
-                    [disabled]="suppliedProjects.has(project.offerNumber)"
-                    (click)="viewProject(project)">
-                {{ suppliedProjects.has(project.offerNumber) ? 'تم التوريد' : 'أمر توريد' }}
-            </button>
+    <hr>
 
-          </div>
+    <h5>سجل التغييرات (History)</h5>
+    <div *ngIf="selectedProject.history?.length; else noHistory">
+      <div *ngFor="let h of selectedProject.history" class="history-item mb-2 p-2 border rounded">
+        <p><strong>العملية:</strong> {{ h.action }}</p>
+        <p><strong>المستخدم:</strong> {{ h.username }}</p>
+        <p><strong>تاريخ التحديث:</strong> {{ h.updatedAt }}</p>
+        <div *ngFor="let key of objectKeys(h.data)">
+          <strong>{{ key }}:</strong> 
+          from "{{ h.data[key]?.from }}" → to "{{ h.data[key]?.to }}"
         </div>
       </div>
     </div>
+    <ng-template #noHistory>
+      <p>لا توجد تغييرات مسجلة.</p>
+    </ng-template>
   </div>
 </div>

@@ -1,0 +1,54 @@
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  background-image: url('../../../../assets/images/company_view.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* blur layer */
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: inherit;      /* use same bg */
+  background-size: inherit;
+  background-position: inherit;
+  filter: blur(2px);            /* blur strength */
+  transform: scale(1.05);        /* avoid blur edges */
+  z-index: 0;
+}
+
+/* optional dark tint for readability */
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);  /* adjust */
+  z-index: 0;
+}
+
+/* keep content above blur layers */
+.login-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.661) !important;  /* opacity */
+  backdrop-filter: blur(6px);                        /* glass blur */
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+}
+
+/* right-side card also a bit transparent */
+.login-side {
+  background: rgba(255, 255, 255, 0.513) !important;
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+}

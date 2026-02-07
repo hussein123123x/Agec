@@ -31,7 +31,6 @@ export class LoginComponent implements OnInit {
   this.authService.login(this.email, this.password).subscribe({
     next: (res) => {
       console.log("🚀 ~ LoginComponent ~ login ~ res:", res);
-
       localStorage.setItem('access_token', res.access_token);
       localStorage.setItem('reset_password', res.isResetPassword);
       localStorage.setItem('email', this.email);

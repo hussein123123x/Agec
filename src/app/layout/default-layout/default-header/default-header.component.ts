@@ -42,7 +42,7 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   showPasswordDialog = false;
   showNotifications = false;
   passwordInput = '';
-
+  user:any
   notifications: any[] = []; // ✅ start empty
 
   // Count unread notifications
@@ -84,22 +84,23 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
     super();
   }
   async ngOnInit() {
-    const user = await this.userService.getUser(this.email).then((user) => {
+    this.user = await this.userService.getUser(this.email).then((user) => {
       console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ user:", user)
+      const isLocked = user ? user.isLocked : false;
+      this.notifications = Array.isArray(user?.notifications) ? user.notifications : [];
+      console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ this.notifications:", this.notifications)
+  
+      if (isLocked) {
+        this.showPasswordDialog = true;
+  
+        window.onbeforeunload = () => {
+          this.signOut(); // Force logout if trying to reload
+          return '';
+        };
+      }
       return user;
     }).catch((error) => console.error('Error fetching user:', error));
-    const isLocked = user ? user.isLocked : false;
-    this.notifications = Array.isArray(user?.notification) ? user.notification : [];
-    console.log("🚀 ~ DefaultHeaderComponent ~ ngOnInit ~ this.notifications:", this.notifications)
-
-    if (isLocked) {
-      this.showPasswordDialog = true;
-
-      window.onbeforeunload = () => {
-        this.signOut(); // Force logout if trying to reload
-        return '';
-      };
-    }
+    
   }
 
   sidebarId = input('sidebar1');

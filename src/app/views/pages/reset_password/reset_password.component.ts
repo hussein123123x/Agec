@@ -80,17 +80,17 @@ async resetPassword() {
   })
 
   // Add your API call here
-  // this.authService.updatePassword(email, this.newPassword).subscribe({
-  //   next: () => {
-  //     localStorage.setItem('reset_password', 'false');
-  //     this.toastr.success('تم تحديث كلمة المرور بنجاح');
-  //     this.router.navigate(['/dashboard']);
-  //   },
-  //   error: (err:any) => {
-  //     this.toastr.error('حدث خطأ أثناء تحديث كلمة المرور', 'خطأ');
-  //     console.error(err);
-  //   }
-  // });
+  this.authService.updatePassword(email, this.newPassword).subscribe({
+    next: () => {
+      localStorage.setItem('reset_password', 'false');
+      // this.toastr.success('تم تحديث كلمة المرور بنجاح');
+      this.router.navigate(['/dashboard']);
+    },
+    error: (err:any) => {
+      this.toastr.error('حدث خطأ أثناء تحديث كلمة المرور', 'خطأ');
+      console.error(err);
+    }
+  });
 }
 
 }

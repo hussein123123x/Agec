@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import {StudyService} from './study.service'
+import { UserService } from 'src/app/core/services/users.service';
 
 @Component({
   selector: 'app-study',
@@ -33,7 +35,7 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss',
 })
-export class StudyComponent {
+export class StudyComponent implements OnInit {
   searchQuery: string = '';
   statusFilter: string = '';
   showForm: boolean = false;
@@ -44,85 +46,183 @@ export class StudyComponent {
   customToDate: string = '';
   range: FormGroup;
   suppliedProjects: Set<number> = new Set();
+  selectedProject: any = null;
+  objectKeys = Object.keys;
 
-
-
+  editingProject: any = null;
   newProject: any = {
-    name: '',
-    cost: '',
+    projectName: '',
+    projectCost: '',
     client: '',
-    offerNumber: '',
+    projectNumber: '',
     consultantName: '',
     consultantPhone: '',
-    financialModel: '',
-    createdAt: new Date()
+    studyEngineerName: '',
+    productEngineerName: '',
+    deliveryDate: '',
+    extraDetails: '',
+    financialModelFile: null,
+    extraFiles: []
   };
 
-  projects: any[] = [
-  {
-    name: 'مشروع محطة معالجة المياه',
-    cost: 1500000,
-    client: 'شركة النيل للمقاولات',
-    offerNumber: '1',
-    consultantName: 'م. أحمد سالم',
-    consultantPhone: '01012345678',
-    financialModelFile: null, // أو يمكن إضافة ملف وهمي لاحقًا
-    extraDetails: 'المشروع يتضمن توسعة الشبكة وربط المحطة الجديدة بالشبكة القديمة.',
-    createdAt: new Date(),
-    extraFiles: [],
-  }
-];
+  savedProject:any
+  projects: any;
+  username: string = '';
+  userEmail: string = '';
+
+  projectNumber: string = '';
 
 
-  constructor(private fb: FormBuilder,private toastr: ToastrService){
+
+  constructor(private fb: FormBuilder,private toastr: ToastrService, private studyService: StudyService, private userService: UserService) {
     this.range = this.fb.group({
     start: [null],
     end: [null]
   });
   }
 
-  saveProject() {
-    const { name, cost, deliveryDate } = this.newProject;
+  ngOnInit(): void {
+    const profileString = localStorage.getItem('profile');
+    if (profileString) {
+      const profile = JSON.parse(profileString);
+      this.username = profile.fullNameArabic;
+      this.userEmail = profile.agecAccount;
+    }
 
-  if (!name ) {
+    this.loadProjects();
+  }
+
+  async loadProjects(){
+    this.projects = await this.studyService.getStudy()
+    this.generateProjectNumber();
+
+    console.log("🚀 ~ StudyComponent ~ loadProjects ~ this.projects:", this.projects)
+  }
+
+  generateProjectNumber() {
+    const year = new Date().getFullYear(); // 2025
+    const nextIndex = this.projects.length + 1; // رقم المشروع التالي
+
+    return this.projectNumber = `${year}-P-${nextIndex}`;
+  }
+  
+
+ async saveProject() {
+    console.log("🚀 ~ StudyComponent ~ saveProject ~ this.newProject:", this.newProject)
+
+  if (!this.newProject.projectName) {
     this.toastr.warning('يرجى إدخال اسم المشروع', 'تنبيه');
     return;
   }
 
-  if (!cost || cost <= 100) {
-    this.toastr.warning(' يرجى إدخال تكلفة المشروع صحيحة', 'تنبيه');
+  if (!this.newProject.projectCost || this.newProject.projectCost <= 100) {
+    this.toastr.warning('يرجى إدخال تكلفة المشروع صحيحة', 'تنبيه');
     return;
   }
 
-  if (!deliveryDate) {
+  if (!this.newProject.deliveryDate) {
     this.toastr.warning('يرجى إدخال تاريخ التسليم', 'تنبيه');
     return;
   }
-    this.newProject.createdAt = new Date();
-    this.newProject.offerNumber = (this.projects.length + 1).toString();
 
-    this.projects.push({ ...this.newProject });
-    this.toastr.success("تم انشاء دراسة مشروع بنجاح", 'دراسة مشروع ناجحة');
+  try {
+    let savedProject: any;
+
+    if (this.editingProject) {
+      // تعديل مشروع موجود
+      if (this.newProject.financialModelFile || this.newProject.extraFiles.length) {
+        // رفع الملفات + تعديل المشروع
+        const formData = this.buildFormData(this.newProject);
+        savedProject = await this.studyService.uploadStudyFiles(formData);
+
+      } else {
+        savedProject = await this.studyService.updateStudy(this.editingProject.id, this.newProject, this.username);
+      }
+
+      const index = this.projects.findIndex((p: any) => p.id === this.editingProject.id);
+      this.projects[index] = { ...savedProject };
+      this.toastr.success('تم تحديث المشروع بنجاح', 'تعديل ناجح');
+    } else {
+      // إنشاء مشروع جديد
+      this.newProject.createdAt = new Date();
+      this.newProject.projectNumber = this.generateProjectNumber();
+
+      if (this.newProject.financialModelFile || this.newProject.extraFiles.length) {
+        // رفع الملفات + إنشاء المشروع
+        console.log("🚀 ~ StudyComponent ~ saveProject ~ this.newProject:", this.newProject)
+        const formData:any = this.buildFormData(this.newProject);
+
+        savedProject = await this.studyService.uploadStudyFiles(formData);
+        console.log("🚀 ~ StudyComponent ~ saveProject ~ savedProject:", savedProject)
+
+      } else {
+        savedProject = await this.studyService.createStudy(this.newProject);
+      }
+
+      this.projects.push(savedProject);
+      this.toastr.success('تم انشاء دراسة مشروع بنجاح', 'دراسة مشروع ناجحة');
+    }
+
+    // إعادة ضبط الفورم
     this.newProject = {
-      name: '',
-      cost: '',
+      projectName: '',
+      projectCost: '',
       client: '',
-      offerNumber: '', // ← سيتم توليده تلقائيًا
+      projectNumber: '',
       consultantName: '',
       consultantPhone: '',
-      financialModelFile: null,
-      extraFiles: [],
+      studyEngineerName: '',
+      productEngineerName: '',
+      deliveryDate: '',
       extraDetails: '',
-      deliveryDate: '' 
+      financialModelFile: null,
+      extraFiles: []
     };
+    this.editingProject = null;
     this.showForm = false;
+  } catch (err) {
+    console.error(err);
+    this.toastr.error('حدث خطأ أثناء حفظ المشروع', 'خطأ');
   }
+}
+
+
+  buildFormData(data: any) {
+    const formData = new FormData();
+
+    formData.append('projectName', data.projectName);
+    formData.append('projectCost', data.projectCost);
+    formData.append('client', data.client);
+    formData.append('projectNumber', data.projectNumber);
+    formData.append('consultantName', data.consultantName);
+    formData.append('consultantPhone', data.consultantPhone);
+    formData.append('studyEngineerName', data.studyEngineerName);
+    formData.append('productEngineerName', data.productEngineerName);
+    formData.append('deliveryDate', data.deliveryDate);
+    formData.append('extraDetails', data.extraDetails);
+    formData.append('history', JSON.stringify(data.history || []));
+
+    if (data.financialModelFile) {
+      formData.append('financialModelFile', data.financialModelFile);
+    }
+
+    if (data.extraFiles?.length) {
+      data.extraFiles.forEach((file: File) => {
+        formData.append('extraFiles', file);
+      });
+    }
+
+    return formData;
+  }
+
+
+
 
   filteredProjects(): any[] {
   const query = this.searchQuery.toLowerCase().trim();
   const { start, end } = this.range.value;
 
-  return this.projects.filter(project => {
+  return this.projects?.filter((project:any) => {
     // فلترة حسب التاريخ
     const created = new Date(project.createdAt).getTime();
     const inDateRange =
@@ -143,8 +243,22 @@ export class StudyComponent {
 
     return inDateRange && matchesQuery && matchesStatus;
   });
-}
+} 
 
+  openFolder() {
+    if (this.selectedProject?.folderUrl) {
+      window.open(this.selectedProject.folderUrl, '_blank');
+    }
+  }
+
+  openProject(project:any){
+    this.selectedProject = project;
+  }
+  editProject(project:any){
+    this.editingProject = project;          // نحدد المشروع الجاري تعديله
+    this.newProject = { ...project };       // نملأ الفورم بالبيانات
+    this.showForm = true;                   
+  }
 
   applyDateFilter() {
     const { start, end } = this.range.value;
@@ -152,24 +266,44 @@ export class StudyComponent {
     this.filterToDate = end ? end.toISOString() : '';
   }
   onExtraFilesSelected(event: any) {
-    const files = Array.from(event.target.files);
+    const files: any = Array.from(event.target.files);
+    files.forEach((file:any) => {
+      file.previewUrl = URL.createObjectURL(file); // store blob URL
+    });
     this.newProject.extraFiles = files;
   }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      file.previewUrl = URL.createObjectURL(file); // store the blob URL
       this.newProject.financialModelFile = file;
     }
+  }
+
+  clearFiles() {
+    if (this.newProject.financialModelFile?.previewUrl) {
+      URL.revokeObjectURL(this.newProject.financialModelFile.previewUrl);
+    }
+    this.newProject.extraFiles.forEach((file:any) => URL.revokeObjectURL(file.previewUrl));
+    this.newProject.financialModelFile = null;
+    this.newProject.extraFiles = [];
   }
 
   getFileUrl(file: File): string {
     return URL.createObjectURL(file);
   }
 
-  viewProject(project: any) {
+  async convertToReady(project: any) {
+  console.log("🚀 ~ StudyComponent ~ convertToReady ~ project:", project)
+
     project.supplyDate = new Date();
     this.suppliedProjects.add(project.offerNumber); // or project.id if you have one
-    this.toastr.success(`تم انشاء امر التوريد لمشروع ${project.name} بنجاح`, 'أمر توريد ناجح');
+    
+    const notifyData:any = { email: this.userEmail, notifications: [{title: "أمر توريد جديد", message: "يوجد امر توريد جديد ", isRead: false, createdAt: new Date()}]}
+    await this.userService.updateUser(notifyData)
+
+    await this.studyService.createProject(project)
+    this.toastr.success(`تم انشاء امر التوريد لمشروع ${project.projectName} بنجاح`, 'أمر توريد ناجح');
   }
 }

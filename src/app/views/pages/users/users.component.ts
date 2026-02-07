@@ -31,7 +31,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { Router } from '@angular/router';
-import {UserService} from '../../../../../src/app/core/services/users.service'
+import {UserService} from '../../../core/services/users.service'
 
 
 
